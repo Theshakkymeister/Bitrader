@@ -55,31 +55,37 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        console.log("Attempting login for username:", username);
-        const user = await storage.getUserByUsername(username);
-        
-        if (!user) {
-          console.log("User not found:", username);
-          return done(null, false);
+    new LocalStrategy(
+      { usernameField: 'email' }, // Use email field instead of username
+      async (email, password, done) => {
+        try {
+          console.log("Attempting login for email:", email);
+          const user = await storage.getUserByEmail(email);
+          
+          if (!user) {
+            console.log("User not found for email:", email);
+            return done(null, false, { message: 'User not found' });
+          }
+          
+          console.log("User found:", user.email, "checking password...");
+          console.log("Stored password hash:", user.password.substring(0, 20) + "...");
+          
+          const passwordMatch = await comparePasswords(password, user.password);
+          console.log("Password match result:", passwordMatch);
+          
+          if (!passwordMatch) {
+            console.log("Password mismatch for user:", email);
+            return done(null, false, { message: 'Invalid password' });
+          }
+          
+          console.log("Login successful for user:", email);
+          return done(null, user);
+        } catch (error) {
+          console.error("Login error:", error);
+          return done(error);
         }
-        
-        console.log("User found, checking password...");
-        const passwordMatch = await comparePasswords(password, user.password);
-        
-        if (!passwordMatch) {
-          console.log("Password mismatch for user:", username);
-          return done(null, false);
-        }
-        
-        console.log("Login successful for user:", username);
-        return done(null, user);
-      } catch (error) {
-        console.error("Login error:", error);
-        return done(error);
       }
-    }),
+    )
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
@@ -151,7 +157,7 @@ export function setupAuth(app: Express) {
           return res.status(500).json({ message: "Login failed" });
         }
         
-        console.log("User logged in successfully:", user.username);
+        console.log("User logged in successfully:", user.email);
         res.status(200).json(user);
       });
     })(req, res, next);

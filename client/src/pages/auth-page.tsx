@@ -24,7 +24,7 @@ export default function AuthPage() {
 
   // Login form state
   const [loginData, setLoginData] = useState({
-    username: "",
+    email: "",
     password: ""
   });
 
@@ -38,7 +38,7 @@ export default function AuthPage() {
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: async (credentials: { username: string; password: string }) => {
+    mutationFn: async (credentials: { email: string; password: string }) => {
       const response = await fetch("/api/login", {
         method: "POST",
         headers: {
@@ -111,7 +111,7 @@ export default function AuthPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!loginData.username || !loginData.password) {
+    if (!loginData.email || !loginData.password) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -194,15 +194,15 @@ export default function AuthPage() {
                   <CardContent>
                     <form onSubmit={handleLogin} className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="login-username">Username</Label>
+                        <Label htmlFor="login-email">Email</Label>
                         <div className="relative">
-                          <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                           <Input
-                            id="login-username"
-                            type="text"
-                            value={loginData.username}
-                            onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
-                            placeholder="Enter your username"
+                            id="login-email"
+                            type="email"
+                            value={loginData.email}
+                            onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                            placeholder="Enter your email"
                             className="pl-10"
                             disabled={loginMutation.isPending}
                           />
