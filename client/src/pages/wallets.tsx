@@ -111,9 +111,20 @@ export default function Wallets() {
 
   const handleConnectWallet = async (walletType: string) => {
     try {
-      // Simulate wallet connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Show connecting state
+      toast({
+        title: "Connecting...",
+        description: `Connecting to ${walletType}`,
+        variant: "default"
+      });
+
+      // Simulate wallet connection process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update connected wallets state
       setConnectedWallets(prev => [...prev, walletType]);
+      
+      // Show success message
       toast({
         title: "Wallet Connected",
         description: `Successfully connected ${walletType}`,
@@ -122,7 +133,7 @@ export default function Wallets() {
     } catch (error) {
       toast({
         title: "Connection Failed",
-        description: `Failed to connect ${walletType}`,
+        description: `Failed to connect ${walletType}. Please try again.`,
         variant: "destructive"
       });
     }

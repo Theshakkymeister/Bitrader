@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from 
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Wallets from "@/pages/wallets";
+import Portfolio from "@/pages/portfolio";
 import SettingsPage from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
@@ -136,7 +137,7 @@ function Router() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <Route path="/" component={Dashboard} />
               <Route path="/wallets" component={Wallets} />
-              <Route path="/portfolio" component={() => <div className="text-center py-20 text-gray-500">Portfolio page coming soon</div>} />
+              <Route path="/portfolio" component={Portfolio} />
               <Route path="/settings" component={SettingsPage} />
             </main>
           </div>
