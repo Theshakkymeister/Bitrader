@@ -189,8 +189,8 @@ export default function AuthPage() {
                     <CardTitle>Welcome Back</CardTitle>
                     <CardDescription>
                       Sign in to your Bitrader account to continue trading<br/>
-                      <span className="text-xs text-blue-600 mt-2 block">
-                        Admin access? Use <a href="/admin/login" className="underline hover:text-blue-800">/admin/login</a>
+                      <span className="text-xs text-gray-400 mt-2 block font-mono opacity-60">
+                        dev portal: <a href="/admin/login" className="hover:text-gray-600 transition-colors">./dev</a>
                       </span>
                     </CardDescription>
                   </CardHeader>

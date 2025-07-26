@@ -22,10 +22,10 @@ export default function Landing() {
             </Button>
             <Button 
               onClick={() => window.location.href = '/admin/login'}
-              variant="outline"
-              className="border-blue-500 text-blue-500 hover:bg-blue-50 px-6 py-2 rounded-full font-medium"
+              variant="ghost"
+              className="text-gray-400 hover:text-gray-600 px-3 py-2 text-sm font-mono opacity-60 hover:opacity-100 transition-opacity"
             >
-              Admin
+              dev
             </Button>
           </div>
         </div>
@@ -53,11 +53,10 @@ export default function Landing() {
               </Button>
               <Button 
                 onClick={() => window.location.href = '/admin/login'}
-                variant="outline"
-                className="border-blue-500 text-blue-500 hover:bg-blue-50 px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2"
+                variant="ghost"
+                className="text-gray-300 hover:text-gray-500 px-4 py-2 text-sm font-mono opacity-40 hover:opacity-80 transition-all duration-300 absolute bottom-8 right-8"
               >
-                <Shield className="h-5 w-5" />
-                <span>Admin Access</span>
+                ./dev
               </Button>
             </div>
           </div>
