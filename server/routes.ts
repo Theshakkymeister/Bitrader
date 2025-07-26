@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { externalAPI } from "./externalAPI";
+import { z } from "zod";
 import { insertTradeSchema, insertPerformanceMetricSchema } from "@shared/schema";
 import { initializeUserPortfolio, runSeedOperations } from "./seedData";
 
@@ -17,6 +19,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
+      
+      // Auto-sync data if user has API credentials and last sync was more than 5 minutes ago
+      if (user?.apiKey && user?.externalUserId) {
+        const shouldSync = !user.lastSyncAt || 
+          (new Date().getTime() - new Date(user.lastSyncAt).getTime()) > 5 * 60 * 1000;
+        
+        if (shouldSync) {
+          // Sync in background
+          externalAPI.syncUserData(user).catch(console.error);
+        }
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -100,6 +114,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating performance metric:", error);
       res.status(500).json({ message: "Failed to create performance metric" });
+    }
+  });
+
+  // External API integration routes
+  app.post('/api/sync/connect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { apiKey, externalUserId } = req.body;
+      
+      if (!apiKey || !externalUserId) {
+        return res.status(400).json({ message: "API key and external user ID are required" });
+      }
+      
+      // Test connection to external API
+      const isValid = await externalAPI.testConnection(apiKey, externalUserId);
+      if (!isValid) {
+        return res.status(400).json({ message: "Invalid API credentials or connection failed" });
+      }
+      
+      // Update user with API credentials
+      const user = await storage.getUser(userId);
+      if (user) {
+        await storage.upsertUser({
+          ...user,
+          apiKey,
+          externalUserId,
+        });
+        
+        // Start initial sync
+        await externalAPI.syncUserData({ ...user, apiKey, externalUserId });
+        
+        res.json({ message: "Successfully connected to your trading account" });
+      } else {
+        res.status(404).json({ message: "User not found" });
+      }
+    } catch (error) {
+      console.error("Error connecting external API:", error);
+      res.status(500).json({ message: "Failed to connect external API" });
+    }
+  });
+  
+  app.post('/api/sync/manual', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.apiKey || !user?.externalUserId) {
+        return res.status(400).json({ message: "External API not configured" });
+      }
+      
+      await externalAPI.syncUserData(user);
+      res.json({ message: "Data synchronized successfully" });
+    } catch (error) {
+      console.error("Error syncing data:", error);
+      res.status(500).json({ message: "Failed to sync data" });
     }
   });
 

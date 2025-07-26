@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ConnectAccount } from "@/components/connect-account";
 import { 
   Wallet, 
   TrendingUp, 
@@ -22,7 +23,8 @@ import {
   ChartLine,
   Plus,
   Menu,
-  X
+  X,
+  HelpCircle
 } from "lucide-react";
 import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 
@@ -1498,13 +1500,20 @@ export default function Dashboard() {
 
   function renderSettings() {
     return (
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Settings</h2>
-        <Card className="bg-slate-900 border-slate-700">
-          <CardContent className="p-6">
-            <p className="text-slate-400">Settings panel coming soon...</p>
-          </CardContent>
-        </Card>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Account Settings</h2>
+        </div>
+        
+        <ConnectAccount 
+          user={user} 
+          onConnectionSuccess={() => {
+            toast({
+              title: "Success",
+              description: "Your account has been connected successfully!",
+            });
+          }}
+        />
       </div>
     );
   }

@@ -32,6 +32,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  // External website integration fields
+  externalUserId: varchar("external_user_id").unique(), // User ID from your main website
+  apiKey: varchar("api_key"), // API key for accessing your website's data
+  lastSyncAt: timestamp("last_sync_at"), // Last time data was synced from external API
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -68,7 +72,11 @@ export const trades = pgTable("trades", {
   entryPrice: decimal("entry_price", { precision: 15, scale: 5 }).notNull(),
   exitPrice: decimal("exit_price", { precision: 15, scale: 5 }),
   profitLoss: decimal("profit_loss", { precision: 15, scale: 2 }),
+  volume: decimal("volume", { precision: 15, scale: 5 }), // Trade size/volume
+  duration: integer("duration"), // Trade duration in minutes
   status: varchar("status").notNull().default('open'), // 'open', 'closed'
+  // External integration fields
+  externalTradeId: varchar("external_trade_id").unique(), // Trade ID from your website
   createdAt: timestamp("created_at").defaultNow(),
   closedAt: timestamp("closed_at"),
 });
