@@ -14,7 +14,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-// Session storage table (required for Replit Auth)
+// Session storage table (required for authentication)
 export const sessions = pgTable(
   "sessions",
   {
@@ -98,6 +98,38 @@ export const performanceMetrics = pgTable("performance_metrics", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User crypto wallets - individual user wallet addresses and balances
+export const userWallets = pgTable("user_wallets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  symbol: varchar("symbol").notNull(), // BTC, ETH, SOL, USDT, USDC
+  name: varchar("name").notNull(), // Bitcoin, Ethereum, etc.
+  balance: decimal("balance", { precision: 18, scale: 8 }).default('0'),
+  usdValue: decimal("usd_value", { precision: 15, scale: 2 }).default('0'),
+  walletAddress: varchar("wallet_address"), // User's external wallet address
+  isConnected: boolean("is_connected").default(false),
+  walletType: varchar("wallet_type"), // 'trust_wallet', 'coinbase', 'metamask'
+  lastSyncAt: timestamp("last_sync_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User stock holdings
+export const stockHoldings = pgTable("stock_holdings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  symbol: varchar("symbol").notNull(), // AAPL, TSLA, GOOGL, MSFT
+  name: varchar("name").notNull(), // Apple Inc., Tesla Inc.
+  shares: decimal("shares", { precision: 15, scale: 6 }).default('0'),
+  avgCostBasis: decimal("avg_cost_basis", { precision: 15, scale: 4 }).default('0'),
+  currentPrice: decimal("current_price", { precision: 15, scale: 4 }).default('0'),
+  marketValue: decimal("market_value", { precision: 15, scale: 2 }).default('0'),
+  totalReturn: decimal("total_return", { precision: 15, scale: 2 }).default('0'),
+  returnPercentage: decimal("return_percentage", { precision: 5, scale: 2 }).default('0'),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Admin users table
 export const adminUsers = pgTable("admin_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -124,13 +156,13 @@ export const websiteSettings = pgTable("website_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Crypto deposit addresses that admin can manage
+// Crypto addresses for deposits that admin manages
 export const cryptoAddresses = pgTable("crypto_addresses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  symbol: varchar("symbol").notNull(), // 'BTC', 'ETH', 'SOL', etc.
-  name: varchar("name").notNull(), // Full name like 'Bitcoin', 'Ethereum'
+  symbol: varchar("symbol").notNull(), // BTC, ETH, SOL, etc.
+  name: varchar("name").notNull(), // Bitcoin, Ethereum, Solana
   address: varchar("address").notNull(),
-  network: varchar("network"), // 'mainnet', 'testnet', etc.
+  network: varchar("network").notNull(), // mainnet, ethereum, solana
   isActive: boolean("is_active").default(true),
   createdBy: varchar("created_by").references(() => adminUsers.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -141,34 +173,44 @@ export const cryptoAddresses = pgTable("crypto_addresses", {
 export const adminLogs = pgTable("admin_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   adminId: varchar("admin_id").references(() => adminUsers.id).notNull(),
-  action: varchar("action").notNull(), // 'CREATE', 'UPDATE', 'DELETE', 'LOGIN'
-  resource: varchar("resource").notNull(), // 'USER', 'ALGORITHM', 'SETTINGS', etc.
+  action: varchar("action").notNull(), // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
+  resource: varchar("resource").notNull(), // CRYPTO_ADDRESS, WEBSITE_SETTING, USER
   resourceId: varchar("resource_id"),
-  details: jsonb("details"), // Additional context about the action
+  details: jsonb("details"),
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Relations
-export const userRelations = relations(users, ({ one, many }) => ({
-  portfolio: one(portfolios),
+export const usersRelations = relations(users, ({ one, many }) => ({
+  portfolio: one(portfolios, { fields: [users.id], references: [portfolios.userId] }),
   trades: many(trades),
+  wallets: many(userWallets),
+  stockHoldings: many(stockHoldings),
   performanceMetrics: many(performanceMetrics),
+}));
+
+export const portfoliosRelations = relations(portfolios, ({ one }) => ({
+  user: one(users, { fields: [portfolios.userId], references: [users.id] }),
+}));
+
+export const tradesRelations = relations(trades, ({ one }) => ({
+  user: one(users, { fields: [trades.userId], references: [users.id] }),
+  algorithm: one(algorithms, { fields: [trades.algorithmId], references: [algorithms.id] }),
+}));
+
+export const userWalletsRelations = relations(userWallets, ({ one }) => ({
+  user: one(users, { fields: [userWallets.userId], references: [users.id] }),
+}));
+
+export const stockHoldingsRelations = relations(stockHoldings, ({ one }) => ({
+  user: one(users, { fields: [stockHoldings.userId], references: [users.id] }),
 }));
 
 export const algorithmRelations = relations(algorithms, ({ many }) => ({
   trades: many(trades),
   performanceMetrics: many(performanceMetrics),
-}));
-
-export const portfolioRelations = relations(portfolios, ({ one }) => ({
-  user: one(users, { fields: [portfolios.userId], references: [users.id] }),
-}));
-
-export const tradeRelations = relations(trades, ({ one }) => ({
-  user: one(users, { fields: [trades.userId], references: [users.id] }),
-  algorithm: one(algorithms, { fields: [trades.algorithmId], references: [algorithms.id] }),
 }));
 
 export const performanceMetricRelations = relations(performanceMetrics, ({ one }) => ({
@@ -194,78 +236,50 @@ export const adminLogRelations = relations(adminLogs, ({ one }) => ({
   admin: one(adminUsers, { fields: [adminLogs.adminId], references: [adminUsers.id] }),
 }));
 
-// Schema types
+// Zod schemas for validation
+export const insertUserSchema = createInsertSchema(users);
+export const insertPortfolioSchema = createInsertSchema(portfolios);
+export const insertTradeSchema = createInsertSchema(trades);
+export const insertAlgorithmSchema = createInsertSchema(algorithms);
+export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics);
+export const insertUserWalletSchema = createInsertSchema(userWallets);
+export const insertStockHoldingSchema = createInsertSchema(stockHoldings);
+export const insertAdminUserSchema = createInsertSchema(adminUsers);
+export const insertWebsiteSettingSchema = createInsertSchema(websiteSettings);
+export const insertCryptoAddressSchema = createInsertSchema(cryptoAddresses);
+export const insertAdminLogSchema = createInsertSchema(adminLogs);
+
+// TypeScript types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 
-export type InsertAlgorithm = typeof algorithms.$inferInsert;
-export type Algorithm = typeof algorithms.$inferSelect;
-
-export type InsertPortfolio = typeof portfolios.$inferInsert;
 export type Portfolio = typeof portfolios.$inferSelect;
+export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
 
-export type InsertTrade = typeof trades.$inferInsert;
 export type Trade = typeof trades.$inferSelect;
+export type InsertTrade = z.infer<typeof insertTradeSchema>;
 
-export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
+export type Algorithm = typeof algorithms.$inferSelect;
+export type InsertAlgorithm = z.infer<typeof insertAlgorithmSchema>;
+
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
 
-export type InsertAdminUser = typeof adminUsers.$inferInsert;
+export type UserWallet = typeof userWallets.$inferSelect;
+export type InsertUserWallet = z.infer<typeof insertUserWalletSchema>;
+
+export type StockHolding = typeof stockHoldings.$inferSelect;
+export type InsertStockHolding = z.infer<typeof insertStockHoldingSchema>;
+
 export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 
-export type InsertWebsiteSetting = typeof websiteSettings.$inferInsert;
 export type WebsiteSetting = typeof websiteSettings.$inferSelect;
+export type InsertWebsiteSetting = z.infer<typeof insertWebsiteSettingSchema>;
 
-export type InsertCryptoAddress = typeof cryptoAddresses.$inferInsert;
 export type CryptoAddress = typeof cryptoAddresses.$inferSelect;
+export type InsertCryptoAddress = z.infer<typeof insertCryptoAddressSchema>;
 
-export type InsertAdminLog = typeof adminLogs.$inferInsert;
 export type AdminLog = typeof adminLogs.$inferSelect;
-
-// Zod schemas
-export const insertAlgorithmSchema = createInsertSchema(algorithms).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertPortfolioSchema = createInsertSchema(portfolios).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertTradeSchema = createInsertSchema(trades).omit({
-  id: true,
-  createdAt: true,
-  closedAt: true,
-});
-
-export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  lastLoginAt: true,
-});
-
-export const insertWebsiteSettingSchema = createInsertSchema(websiteSettings).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertCryptoAddressSchema = createInsertSchema(cryptoAddresses).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAdminLogSchema = createInsertSchema(adminLogs).omit({
-  id: true,
-  createdAt: true,
-});
+export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;

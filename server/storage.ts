@@ -4,6 +4,8 @@ import {
   trades,
   algorithms,
   performanceMetrics,
+  userWallets,
+  stockHoldings,
   adminUsers,
   websiteSettings,
   cryptoAddresses,
@@ -18,6 +20,10 @@ import {
   type InsertAlgorithm,
   type PerformanceMetric,
   type InsertPerformanceMetric,
+  type UserWallet,
+  type InsertUserWallet,
+  type StockHolding,
+  type InsertStockHolding,
   type AdminUser,
   type InsertAdminUser,
   type WebsiteSetting,
@@ -57,6 +63,18 @@ export interface IStorage {
   getPerformanceMetrics(userId: string, algorithmId?: string): Promise<PerformanceMetric[]>;
   createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric>;
   updatePerformanceMetric(id: string, updates: Partial<InsertPerformanceMetric>): Promise<PerformanceMetric>;
+  
+  // User wallet operations
+  getUserWallets(userId: string): Promise<UserWallet[]>;
+  getUserWallet(userId: string, symbol: string): Promise<UserWallet | undefined>;
+  createUserWallet(wallet: InsertUserWallet): Promise<UserWallet>;
+  updateUserWallet(id: string, updates: Partial<InsertUserWallet>): Promise<UserWallet>;
+  
+  // Stock holding operations
+  getStockHoldings(userId: string): Promise<StockHolding[]>;
+  getStockHolding(userId: string, symbol: string): Promise<StockHolding | undefined>;
+  createStockHolding(holding: InsertStockHolding): Promise<StockHolding>;
+  updateStockHolding(id: string, updates: Partial<InsertStockHolding>): Promise<StockHolding>;
   
   // Admin operations
   getAdminByEmail(email: string): Promise<AdminUser | undefined>;
@@ -146,6 +164,111 @@ export class DatabaseStorage implements IStorage {
   async getAlgorithm(id: string): Promise<Algorithm | undefined> {
     const [algorithm] = await db.select().from(algorithms).where(eq(algorithms.id, id));
     return algorithm;
+  }
+
+  async createAlgorithm(algorithm: InsertAlgorithm): Promise<Algorithm> {
+    const [newAlgorithm] = await db.insert(algorithms).values(algorithm).returning();
+    return newAlgorithm;
+  }
+
+  // Trade operations
+  async getTrades(userId: string, limit: number = 50): Promise<Trade[]> {
+    return await db.select()
+      .from(trades)
+      .where(eq(trades.userId, userId))
+      .orderBy(desc(trades.createdAt))
+      .limit(limit);
+  }
+
+  async createTrade(trade: InsertTrade): Promise<Trade> {
+    const [newTrade] = await db.insert(trades).values(trade).returning();
+    return newTrade;
+  }
+
+  async updateTrade(id: string, updates: Partial<InsertTrade>): Promise<Trade> {
+    const [updatedTrade] = await db
+      .update(trades)
+      .set(updates)
+      .where(eq(trades.id, id))
+      .returning();
+    return updatedTrade;
+  }
+
+  // Performance metrics operations
+  async getPerformanceMetrics(userId: string, algorithmId?: string): Promise<PerformanceMetric[]> {
+    let query = db.select().from(performanceMetrics).where(eq(performanceMetrics.userId, userId));
+    
+    if (algorithmId) {
+      query = query.where(and(eq(performanceMetrics.userId, userId), eq(performanceMetrics.algorithmId, algorithmId)));
+    }
+    
+    return await query;
+  }
+
+  async createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric> {
+    const [newMetric] = await db.insert(performanceMetrics).values(metric).returning();
+    return newMetric;
+  }
+
+  async updatePerformanceMetric(id: string, updates: Partial<InsertPerformanceMetric>): Promise<PerformanceMetric> {
+    const [updatedMetric] = await db
+      .update(performanceMetrics)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(performanceMetrics.id, id))
+      .returning();
+    return updatedMetric;
+  }
+
+  // User wallet operations
+  async getUserWallets(userId: string): Promise<UserWallet[]> {
+    return await db.select().from(userWallets).where(eq(userWallets.userId, userId));
+  }
+
+  async getUserWallet(userId: string, symbol: string): Promise<UserWallet | undefined> {
+    const [wallet] = await db.select()
+      .from(userWallets)
+      .where(and(eq(userWallets.userId, userId), eq(userWallets.symbol, symbol)));
+    return wallet;
+  }
+
+  async createUserWallet(wallet: InsertUserWallet): Promise<UserWallet> {
+    const [newWallet] = await db.insert(userWallets).values(wallet).returning();
+    return newWallet;
+  }
+
+  async updateUserWallet(id: string, updates: Partial<InsertUserWallet>): Promise<UserWallet> {
+    const [updatedWallet] = await db
+      .update(userWallets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userWallets.id, id))
+      .returning();
+    return updatedWallet;
+  }
+
+  // Stock holding operations
+  async getStockHoldings(userId: string): Promise<StockHolding[]> {
+    return await db.select().from(stockHoldings).where(eq(stockHoldings.userId, userId));
+  }
+
+  async getStockHolding(userId: string, symbol: string): Promise<StockHolding | undefined> {
+    const [holding] = await db.select()
+      .from(stockHoldings)
+      .where(and(eq(stockHoldings.userId, userId), eq(stockHoldings.symbol, symbol)));
+    return holding;
+  }
+
+  async createStockHolding(holding: InsertStockHolding): Promise<StockHolding> {
+    const [newHolding] = await db.insert(stockHoldings).values(holding).returning();
+    return newHolding;
+  }
+
+  async updateStockHolding(id: string, updates: Partial<InsertStockHolding>): Promise<StockHolding> {
+    const [updatedHolding] = await db
+      .update(stockHoldings)
+      .set(updates)
+      .where(eq(stockHoldings.id, id))
+      .returning();
+    return updatedHolding;
   }
 
   async createAlgorithm(algorithm: InsertAlgorithm): Promise<Algorithm> {

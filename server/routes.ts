@@ -28,15 +28,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // User routes (handled by auth.ts)
 
-  // Portfolio routes
+  // Portfolio routes - REAL USER DATA for live cryptocurrency trading
   app.get('/api/portfolio', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       let portfolio = await storage.getPortfolio(userId);
       
       if (!portfolio) {
-        // Initialize portfolio with demo data for new user
-        portfolio = await initializeUserPortfolio(userId);
+        // Create real portfolio for new user (no demo data)
+        portfolio = await storage.createPortfolio({
+          userId,
+          totalBalance: '0.00',
+          todayPL: '0.00',
+          winRate: '0.00',
+          activeAlgorithms: 0
+        });
       }
       
       res.json(portfolio);
@@ -46,7 +52,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Algorithm routes
+  // User crypto wallets - REAL CRYPTOCURRENCY BALANCES
+  app.get('/api/wallets', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      let wallets = await storage.getUserWallets(userId);
+      
+      // Initialize empty crypto wallets for new user (real accounts)
+      if (wallets.length === 0) {
+        const cryptoWallets = [
+          { symbol: 'BTC', name: 'Bitcoin' },
+          { symbol: 'ETH', name: 'Ethereum' },
+          { symbol: 'SOL', name: 'Solana' },
+          { symbol: 'USDT', name: 'Tether' },
+          { symbol: 'USDC', name: 'USD Coin' }
+        ];
+        
+        for (const crypto of cryptoWallets) {
+          await storage.createUserWallet({
+            userId,
+            symbol: crypto.symbol,
+            name: crypto.name,
+            balance: '0.00000000',
+            usdValue: '0.00',
+            isConnected: false
+          });
+        }
+        
+        wallets = await storage.getUserWallets(userId);
+      }
+      
+      res.json(wallets);
+    } catch (error) {
+      console.error("Error fetching wallets:", error);
+      res.status(500).json({ message: "Failed to fetch wallets" });
+    }
+  });
+
+  // Connect external wallet (Trust Wallet, Coinbase)
+  app.post('/api/wallets/:symbol/connect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { symbol } = req.params;
+      const { walletType, walletAddress } = req.body;
+      
+      const wallet = await storage.getUserWallet(userId, symbol);
+      if (!wallet) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+      
+      const updatedWallet = await storage.updateUserWallet(wallet.id, {
+        walletType,
+        walletAddress,
+        isConnected: true,
+        lastSyncAt: new Date()
+      });
+      
+      res.json(updatedWallet);
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+      res.status(500).json({ message: "Failed to connect wallet" });
+    }
+  });
+
+  // Stock holdings - REAL STOCK POSITIONS
+  app.get('/api/stocks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      let holdings = await storage.getStockHoldings(userId);
+      
+      // Initialize empty stock positions for new user
+      if (holdings.length === 0) {
+        const stocks = [
+          { symbol: 'AAPL', name: 'Apple Inc.' },
+          { symbol: 'TSLA', name: 'Tesla Inc.' },
+          { symbol: 'GOOGL', name: 'Alphabet Inc.' },
+          { symbol: 'MSFT', name: 'Microsoft Corp.' }
+        ];
+        
+        for (const stock of stocks) {
+          await storage.createStockHolding({
+            userId,
+            symbol: stock.symbol,
+            name: stock.name,
+            shares: '0.000000',
+            avgCostBasis: '0.0000',
+            currentPrice: '0.0000',
+            marketValue: '0.00',
+            totalReturn: '0.00',
+            returnPercentage: '0.00'
+          });
+        }
+        
+        holdings = await storage.getStockHoldings(userId);
+      }
+      
+      res.json(holdings);
+    } catch (error) {
+      console.error("Error fetching stock holdings:", error);
+      res.status(500).json({ message: "Failed to fetch stock holdings" });
+    }
+  });
+
+  // Trading algorithms
   app.get('/api/algorithms', isAuthenticated, async (req, res) => {
     try {
       const algorithms = await storage.getAlgorithms();
@@ -57,11 +165,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Trade routes
+  // User trades - REAL TRADING HISTORY
   app.get('/api/trades', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit as string) || 50;
       const trades = await storage.getTrades(userId, limit);
       res.json(trades);
     } catch (error) {
@@ -70,22 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/trades', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const validatedData = insertTradeSchema.parse({ ...req.body, userId });
-      const trade = await storage.createTrade(validatedData);
-      res.json(trade);
-    } catch (error) {
-      console.error("Error creating trade:", error);
-      res.status(500).json({ message: "Failed to create trade" });
-    }
-  });
-
-  // Performance metrics routes
+  // Performance metrics - REAL ANALYTICS
   app.get('/api/performance', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const algorithmId = req.query.algorithmId as string;
       const metrics = await storage.getPerformanceMetrics(userId, algorithmId);
       res.json(metrics);
@@ -95,9 +191,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new trade (for live trading)
+  app.post('/api/trades', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const validatedData = insertTradeSchema.parse({ ...req.body, userId });
+      const trade = await storage.createTrade(validatedData);
+      res.json(trade);
+    } catch (error) {
+      console.error("Error creating trade:", error);
+      res.status(500).json({ message: "Failed to create trade" });
+    }
+  });
+
+  // Create performance metric
   app.post('/api/performance', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validatedData = insertPerformanceMetricSchema.parse({ ...req.body, userId });
       const metric = await storage.createPerformanceMetric(validatedData);
       res.json(metric);
