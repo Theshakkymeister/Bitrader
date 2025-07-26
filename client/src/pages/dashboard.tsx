@@ -74,7 +74,7 @@ export default function Dashboard() {
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Mobile-Optimized Portfolio Header */}
       <div className="bg-white p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
