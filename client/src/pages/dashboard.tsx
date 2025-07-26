@@ -688,15 +688,23 @@ export default function Dashboard() {
               <div className="text-xs text-gray-300">Next update: {new Date(Date.now() + 5000).toLocaleTimeString()}</div>
             </div>
           </div>
+          
+          {/* Buying Power Display - Robinhood Style */}
+          <div className="mt-3 px-4 py-2 bg-gray-50/50 rounded-lg border border-gray-100">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Buying Power</span>
+              <span className="text-sm font-semibold text-gray-900">
+                ${(50000 - portfolioValue).toLocaleString('en-US', {minimumFractionDigits: 2})}
+              </span>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              Available to invest • Cash: ${((50000 - portfolioValue) * 0.6).toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </div>
+          </div>
         </div>
 
         {/* Key Portfolio Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Buying Power</div>
-            <div className="text-xl font-bold text-black">$15,420.00</div>
-            <div className="text-xs text-gray-500 mt-1">Available Cash</div>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Positions</div>
             <div className="text-xl font-bold text-black">{holdings.length}</div>
