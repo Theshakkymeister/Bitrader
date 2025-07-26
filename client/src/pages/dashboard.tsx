@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -20,13 +20,17 @@ import {
   Settings,
   History,
   ChartLine,
-  Plus
+  Plus,
+  Menu,
+  X
 } from "lucide-react";
 import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeView, setActiveView] = useState('dashboard');
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -104,15 +108,43 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-700 px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-slate-800"
+            >
+              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
               Bitrader
             </h1>
             <nav className="hidden md:flex space-x-6">
-              <a href="#" className="text-white hover:text-blue-400 transition-colors">Dashboard</a>
-              <a href="#" className="text-slate-400 hover:text-blue-400 transition-colors">Portfolio</a>
-              <a href="#" className="text-slate-400 hover:text-blue-400 transition-colors">Trade History</a>
-              <a href="#" className="text-slate-400 hover:text-blue-400 transition-colors">Analytics</a>
+              <button 
+                onClick={() => setActiveView('dashboard')}
+                className={`transition-colors ${activeView === 'dashboard' ? 'text-white' : 'text-slate-400 hover:text-blue-400'}`}
+              >
+                Dashboard
+              </button>
+              <button 
+                onClick={() => setActiveView('portfolio')}
+                className={`transition-colors ${activeView === 'portfolio' ? 'text-white' : 'text-slate-400 hover:text-blue-400'}`}
+              >
+                Portfolio
+              </button>
+              <button 
+                onClick={() => setActiveView('trades')}
+                className={`transition-colors ${activeView === 'trades' ? 'text-white' : 'text-slate-400 hover:text-blue-400'}`}
+              >
+                Trade History
+              </button>
+              <button 
+                onClick={() => setActiveView('analytics')}
+                className={`transition-colors ${activeView === 'analytics' ? 'text-white' : 'text-slate-400 hover:text-blue-400'}`}
+              >
+                Analytics
+              </button>
             </nav>
           </div>
           <div className="flex items-center space-x-4">
@@ -140,63 +172,133 @@ export default function Dashboard() {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-slate-900 h-screen border-r border-slate-700 p-6">
+        <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-slate-900 h-screen border-r border-slate-700 p-6 transition-all duration-300 ease-in-out overflow-hidden`}>
           <div className="space-y-6">
             <div>
-              <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Account</h3>
+              {sidebarOpen && <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Account</h3>}
               <nav className="space-y-2">
-                <a href="#" className="flex items-center space-x-3 text-white bg-blue-600/20 px-3 py-2 rounded-lg">
-                  <ChartLine className="h-4 w-4 text-blue-500" />
-                  <span>Dashboard</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <Wallet className="h-4 w-4" />
-                  <span>Portfolio</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <History className="h-4 w-4" />
-                  <span>Trade History</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Analytics</span>
-                </a>
+                <button 
+                  onClick={() => setActiveView('dashboard')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'dashboard' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <ChartLine className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                  {sidebarOpen && <span>Dashboard</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('portfolio')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'portfolio' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <Wallet className="h-4 w-4 flex-shrink-0" />
+                  {sidebarOpen && <span>Portfolio</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('trades')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'trades' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <History className="h-4 w-4 flex-shrink-0" />
+                  {sidebarOpen && <span>Trade History</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('analytics')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'analytics' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <BarChart3 className="h-4 w-4 flex-shrink-0" />
+                  {sidebarOpen && <span>Analytics</span>}
+                </button>
               </nav>
             </div>
             
             <div>
-              <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Algorithms</h3>
+              {sidebarOpen && <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Algorithms</h3>}
               <nav className="space-y-2">
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <Coins className="h-4 w-4 text-yellow-500" />
-                  <span>Forex</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <Gem className="h-4 w-4 text-yellow-400" />
-                  <span>Gold</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <BarChart3 className="h-4 w-4 text-green-500" />
-                  <span>Stocks</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <Bitcoin className="h-4 w-4 text-orange-500" />
-                  <span>Crypto</span>
-                </a>
+                <button 
+                  onClick={() => setActiveView('forex')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'forex' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <Coins className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+                  {sidebarOpen && <span>Forex</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('gold')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'gold' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <Gem className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+                  {sidebarOpen && <span>Gold</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('stocks')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'stocks' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <BarChart3 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  {sidebarOpen && <span>Stocks</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('crypto')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'crypto' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <Bitcoin className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                  {sidebarOpen && <span>Crypto</span>}
+                </button>
               </nav>
             </div>
 
             <div>
-              <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Support</h3>
+              {sidebarOpen && <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Support</h3>}
               <nav className="space-y-2">
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <Headphones className="h-4 w-4" />
-                  <span>Help Center</span>
-                </a>
-                <a href="#" className="flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-700 px-3 py-2 rounded-lg transition-colors">
-                  <Settings className="h-4 w-4" />
-                  <span>Settings</span>
-                </a>
+                <button 
+                  onClick={() => setActiveView('help')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'help' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <Headphones className="h-4 w-4 flex-shrink-0" />
+                  {sidebarOpen && <span>Help Center</span>}
+                </button>
+                <button 
+                  onClick={() => setActiveView('settings')}
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeView === 'settings' 
+                      ? 'text-white bg-blue-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <Settings className="h-4 w-4 flex-shrink-0" />
+                  {sidebarOpen && <span>Settings</span>}
+                </button>
               </nav>
             </div>
           </div>
@@ -204,6 +306,45 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-y-auto">
+          {portfolioLoading || tradesLoading || algorithmsLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            renderActiveView()
+          )}
+        </main>
+      </div>
+    </div>
+  );
+
+  function renderActiveView() {
+    switch (activeView) {
+      case 'dashboard':
+        return renderDashboard();
+      case 'portfolio':
+        return renderPortfolio();
+      case 'trades':
+        return renderTrades();
+      case 'analytics':
+        return renderAnalytics();
+      case 'forex':
+      case 'gold':
+      case 'stocks':
+      case 'crypto':
+        return renderAlgorithm(activeView);
+      case 'help':
+        return renderHelp();
+      case 'settings':
+        return renderSettings();
+      default:
+        return renderDashboard();
+    }
+  }
+
+  function renderDashboard() {
+    return (
+      <div>
           {/* Portfolio Overview */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
@@ -428,7 +569,7 @@ export default function Dashboard() {
                               ) : '-'}
                             </td>
                             <td className="py-3 text-right text-slate-400">
-                              {new Date(trade.createdAt).toLocaleDateString()}
+                              {trade.createdAt ? new Date(trade.createdAt).toLocaleDateString() : '-'}
                             </td>
                           </tr>
                         ))}
@@ -556,8 +697,92 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-        </main>
       </div>
-    </div>
-  );
+    );
+  }
+
+  function renderPortfolio() {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Portfolio Details</h2>
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="p-6">
+            <p className="text-slate-400">Detailed portfolio view coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderTrades() {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Trade History</h2>
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="p-6">
+            <p className="text-slate-400">Comprehensive trade history view coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderAnalytics() {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Analytics</h2>
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="p-6">
+            <p className="text-slate-400">Advanced analytics dashboard coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderAlgorithm(algorithmType: string) {
+    const algorithmNames = {
+      forex: 'Forex',
+      gold: 'Gold',
+      stocks: 'Stocks',
+      crypto: 'Crypto'
+    };
+
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">{algorithmNames[algorithmType as keyof typeof algorithmNames]} Algorithm</h2>
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="p-6">
+            <p className="text-slate-400">{algorithmNames[algorithmType as keyof typeof algorithmNames]} algorithm performance details coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderHelp() {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Help Center</h2>
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="p-6">
+            <p className="text-slate-400">Help documentation and support coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderSettings() {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Settings</h2>
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="p-6">
+            <p className="text-slate-400">Settings panel coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 }
