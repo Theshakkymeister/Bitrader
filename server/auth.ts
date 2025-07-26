@@ -23,14 +23,23 @@ async function hashPassword(password: string) {
 
 async function comparePasswords(supplied: string, stored: string) {
   try {
+    console.log("Comparing password for supplied:", supplied.length, "chars");
+    console.log("Stored password format:", stored.substring(0, 20) + "...");
+    
     const [hashed, salt] = stored.split(".");
     if (!hashed || !salt) {
-      console.error("Invalid password hash format");
+      console.error("Invalid password hash format - no salt/hash separation");
       return false;
     }
+    
+    console.log("Hash length:", hashed.length, "Salt length:", salt.length);
+    
     const hashedBuf = Buffer.from(hashed, "hex");
     const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-    return timingSafeEqual(hashedBuf, suppliedBuf);
+    const result = timingSafeEqual(hashedBuf, suppliedBuf);
+    
+    console.log("Password comparison result:", result);
+    return result;
   } catch (error) {
     console.error("Password comparison error:", error);
     return false;
@@ -65,37 +74,38 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(
-      { usernameField: 'email' }, // Use email field instead of username
-      async (email, password, done) => {
-        try {
-          console.log("Attempting login for email:", email);
-          const user = await storage.getUserByEmail(email);
-          
-          if (!user) {
-            console.log("User not found for email:", email);
-            return done(null, false, { message: 'User not found' });
-          }
-          
-          console.log("User found:", user.email, "checking password...");
-          console.log("Stored password hash:", user.password.substring(0, 20) + "...");
-          
-          const passwordMatch = await comparePasswords(password, user.password);
-          console.log("Password match result:", passwordMatch);
-          
-          if (!passwordMatch) {
-            console.log("Password mismatch for user:", email);
-            return done(null, false, { message: 'Invalid password' });
-          }
-          
-          console.log("Login successful for user:", email);
-          return done(null, user);
-        } catch (error) {
-          console.error("Login error:", error);
-          return done(error);
+    new LocalStrategy(async (username, password, done) => {
+      try {
+        console.log("Attempting login for username/email:", username);
+        
+        // Try to find user by username first, then by email
+        let user = await storage.getUserByUsername(username);
+        if (!user) {
+          user = await storage.getUserByEmail(username);
         }
+        
+        if (!user) {
+          console.log("User not found for:", username);
+          return done(null, false, { message: 'User not found' });
+        }
+        
+        console.log("User found:", user.username, "checking password...");
+        
+        const passwordMatch = await comparePasswords(password, user.password);
+        console.log("Password match result:", passwordMatch);
+        
+        if (!passwordMatch) {
+          console.log("Password mismatch for user:", username);
+          return done(null, false, { message: 'Invalid password' });
+        }
+        
+        console.log("Login successful for user:", user.username);
+        return done(null, user);
+      } catch (error) {
+        console.error("Login error:", error);
+        return done(error);
       }
-    )
+    })
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
@@ -181,7 +191,17 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    console.log("GET /api/user - Session ID:", req.sessionID);
+    console.log("GET /api/user - Is authenticated:", req.isAuthenticated());
+    console.log("GET /api/user - User:", req.user ? req.user.username : "none");
+    console.log("GET /api/user - Session data:", req.session);
+    
+    if (!req.isAuthenticated()) {
+      console.log("User not authenticated, returning 401");
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    console.log("Returning user data:", req.user?.username);
     res.json(req.user);
   });
 }

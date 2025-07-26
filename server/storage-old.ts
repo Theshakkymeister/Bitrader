@@ -1,8 +1,8 @@
 import {
   users,
   portfolios,
-  algorithms,
   trades,
+  algorithms,
   performanceMetrics,
   userWallets,
   stockHoldings,
@@ -14,10 +14,10 @@ import {
   type UpsertUser,
   type Portfolio,
   type InsertPortfolio,
-  type Algorithm,
-  type InsertAlgorithm,
   type Trade,
   type InsertTrade,
+  type Algorithm,
+  type InsertAlgorithm,
   type PerformanceMetric,
   type InsertPerformanceMetric,
   type UserWallet,
@@ -34,24 +34,15 @@ import {
   type InsertAdminLog,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
-import session from "express-session";
-import connectPg from "connect-pg-simple";
-import { pool } from "./db";
+import { eq, desc, and } from "drizzle-orm";
 
-const PostgresStore = connectPg(session);
-
-// Interface for all storage operations
 export interface IStorage {
-  // Session store
-  sessionStore: session.SessionStore;
-  
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(userData: Omit<UpsertUser, 'id'>): Promise<User>;
-  upsertUser(userData: UpsertUser): Promise<User>;
+  createUser(user: Omit<UpsertUser, 'id'>): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
   // Portfolio operations
   getPortfolio(userId: string): Promise<Portfolio | undefined>;
@@ -108,18 +99,7 @@ export interface IStorage {
   getAdminLogs(adminId?: string, limit?: number): Promise<AdminLog[]>;
 }
 
-
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
-  
-  constructor() {
-    this.sessionStore = new PostgresStore({
-      pool,
-      createTableIfMissing: false, // Prevent duplicate table creation
-      tableName: "sessions", // Use correct table name from schema
-    });
-  }
-
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -192,9 +172,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Trade operations
-  async getTrades(userId: string, limit = 50): Promise<Trade[]> {
-    return await db
-      .select()
+  async getTrades(userId: string, limit: number = 50): Promise<Trade[]> {
+    return await db.select()
       .from(trades)
       .where(eq(trades.userId, userId))
       .orderBy(desc(trades.createdAt))
@@ -217,16 +196,13 @@ export class DatabaseStorage implements IStorage {
 
   // Performance metrics operations
   async getPerformanceMetrics(userId: string, algorithmId?: string): Promise<PerformanceMetric[]> {
-    const conditions = [eq(performanceMetrics.userId, userId)];
+    let query = db.select().from(performanceMetrics).where(eq(performanceMetrics.userId, userId));
+    
     if (algorithmId) {
-      conditions.push(eq(performanceMetrics.algorithmId, algorithmId));
+      query = query.where(and(eq(performanceMetrics.userId, userId), eq(performanceMetrics.algorithmId, algorithmId)));
     }
     
-    return await db
-      .select()
-      .from(performanceMetrics)
-      .where(and(...conditions))
-      .orderBy(desc(performanceMetrics.updatedAt));
+    return await query;
   }
 
   async createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric> {
@@ -295,6 +271,63 @@ export class DatabaseStorage implements IStorage {
     return updatedHolding;
   }
 
+  async createAlgorithm(algorithm: InsertAlgorithm): Promise<Algorithm> {
+    const [newAlgorithm] = await db.insert(algorithms).values(algorithm).returning();
+    return newAlgorithm;
+  }
+
+  // Trade operations
+  async getTrades(userId: string, limit = 50): Promise<Trade[]> {
+    return await db
+      .select()
+      .from(trades)
+      .where(eq(trades.userId, userId))
+      .orderBy(desc(trades.createdAt))
+      .limit(limit);
+  }
+
+  async createTrade(trade: InsertTrade): Promise<Trade> {
+    const [newTrade] = await db.insert(trades).values(trade).returning();
+    return newTrade;
+  }
+
+  async updateTrade(id: string, updates: Partial<InsertTrade>): Promise<Trade> {
+    const [updatedTrade] = await db
+      .update(trades)
+      .set(updates)
+      .where(eq(trades.id, id))
+      .returning();
+    return updatedTrade;
+  }
+
+  // Performance metrics operations
+  async getPerformanceMetrics(userId: string, algorithmId?: string): Promise<PerformanceMetric[]> {
+    const conditions = [eq(performanceMetrics.userId, userId)];
+    if (algorithmId) {
+      conditions.push(eq(performanceMetrics.algorithmId, algorithmId));
+    }
+    
+    return await db
+      .select()
+      .from(performanceMetrics)
+      .where(and(...conditions))
+      .orderBy(desc(performanceMetrics.updatedAt));
+  }
+
+  async createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric> {
+    const [newMetric] = await db.insert(performanceMetrics).values(metric).returning();
+    return newMetric;
+  }
+
+  async updatePerformanceMetric(id: string, updates: Partial<InsertPerformanceMetric>): Promise<PerformanceMetric> {
+    const [updatedMetric] = await db
+      .update(performanceMetrics)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(performanceMetrics.id, id))
+      .returning();
+    return updatedMetric;
+  }
+
   // Admin operations - PRODUCTION READY
   async getAdminByEmail(email: string): Promise<AdminUser | undefined> {
     const normalizedEmail = email.toLowerCase().trim();
@@ -324,10 +357,11 @@ export class DatabaseStorage implements IStorage {
 
   // Website settings operations
   async getWebsiteSettings(category?: string): Promise<WebsiteSetting[]> {
+    const query = db.select().from(websiteSettings);
     if (category) {
-      return await db.select().from(websiteSettings).where(eq(websiteSettings.category, category));
+      return await query.where(eq(websiteSettings.category, category));
     }
-    return await db.select().from(websiteSettings);
+    return await query;
   }
 
   async getWebsiteSetting(key: string): Promise<WebsiteSetting | undefined> {
@@ -351,11 +385,14 @@ export class DatabaseStorage implements IStorage {
 
   // Crypto addresses operations
   async getCryptoAddresses(): Promise<CryptoAddress[]> {
-    return await db.select().from(cryptoAddresses);
+    return await db.select().from(cryptoAddresses).where(eq(cryptoAddresses.isActive, true));
   }
 
   async getCryptoAddress(symbol: string): Promise<CryptoAddress | undefined> {
-    const [address] = await db.select().from(cryptoAddresses).where(eq(cryptoAddresses.symbol, symbol));
+    const [address] = await db
+      .select()
+      .from(cryptoAddresses)
+      .where(and(eq(cryptoAddresses.symbol, symbol), eq(cryptoAddresses.isActive, true)));
     return address;
   }
 
@@ -374,7 +411,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCryptoAddress(id: string): Promise<void> {
-    await db.delete(cryptoAddresses).where(eq(cryptoAddresses.id, id));
+    await db
+      .update(cryptoAddresses)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(cryptoAddresses.id, id));
   }
 
   // Admin logs operations
@@ -384,16 +424,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminLogs(adminId?: string, limit = 100): Promise<AdminLog[]> {
-    let query = db.select().from(adminLogs).orderBy(desc(adminLogs.createdAt)).limit(limit);
-    
+    const query = db.select().from(adminLogs);
     if (adminId) {
-      query = db.select().from(adminLogs)
-        .where(eq(adminLogs.adminId, adminId))
-        .orderBy(desc(adminLogs.createdAt))
-        .limit(limit);
+      return await query.where(eq(adminLogs.adminId, adminId)).orderBy(desc(adminLogs.createdAt)).limit(limit);
     }
-    
-    return await query;
+    return await query.orderBy(desc(adminLogs.createdAt)).limit(limit);
   }
 }
 

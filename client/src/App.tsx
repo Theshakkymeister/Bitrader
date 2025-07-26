@@ -147,7 +147,9 @@ function AppHeader() {
 }
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  console.log("Router state:", { user, isAuthenticated, isLoading });
 
   return (
     <Switch>
@@ -155,12 +157,26 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       
-      {/* Auth route */}
-      <Route path="/auth" component={AuthPage} />
+      {/* User authentication routes */}
+      <Route path="/auth">
+        {isAuthenticated ? (
+          <Route path="/" component={Dashboard} />
+        ) : (
+          <AuthPage />
+        )}
+      </Route>
       
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
+      {/* Protected user routes */}
+      {isLoading ? (
+        <Route path="/">
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </Route>
+      ) : isAuthenticated ? (
         <>
           <div className="min-h-screen bg-gray-50">
             <AppHeader />
@@ -172,6 +188,8 @@ function Router() {
             </main>
           </div>
         </>
+      ) : (
+        <Route path="/" component={Landing} />
       )}
       <Route component={NotFound} />
     </Switch>
