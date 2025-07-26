@@ -75,6 +75,11 @@ export default function Dashboard() {
   const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   
+  // Calculate available buying power (cash balance - total holdings value)
+  // Since users start with $0 deposits, buying power should be 0 until funds are deposited
+  const totalDeposits = 0; // This would come from wallet deposits approved by admin
+  const buyingPower = totalDeposits - (totalStocks + totalCrypto);
+  
   return (
     <div className="space-y-6 fade-in">
       {/* Main Portfolio Header */}
@@ -146,38 +151,57 @@ export default function Dashboard() {
             </filter>
           </defs>
           
-          {/* Portfolio trend line with smooth curve */}
-          <path 
-            d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65" 
-            stroke="#059669" 
-            strokeWidth="2" 
-            fill="none"
-            filter="url(#glow)"
-            className="chart-line"
-            strokeDasharray="1000"
-            strokeDashoffset="0"
-            opacity="0.8"
-          />
-          
-          {/* Filled area under curve */}
-          <path 
-            d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65 L 800,200 L 0,200 Z" 
-            fill="url(#portfolioGradient)"
-            className="chart-fill"
-            style={{ opacity: 1 }}
-          />
-          
-          {/* Live indicator */}
-          <g className="live-dot" opacity="0.6">
-            <circle cx="800" cy="65" r="6" fill="#059669" opacity="0.1">
-              <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" values="0.1;0;0.1" dur="3s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="800" cy="65" r="2" fill="#059669" opacity="0.8">
-              <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="800" cy="65" r="1.5" fill="#ffffff"/>
-          </g>
+          {portfolioValue > 0 ? (
+            <>
+              {/* Portfolio trend line with smooth curve */}
+              <path 
+                d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65" 
+                stroke="#059669" 
+                strokeWidth="2" 
+                fill="none"
+                filter="url(#glow)"
+                className="chart-line"
+                strokeDasharray="1000"
+                strokeDashoffset="0"
+                opacity="0.8"
+              />
+              
+              {/* Filled area under curve */}
+              <path 
+                d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65 L 800,200 L 0,200 Z" 
+                fill="url(#portfolioGradient)"
+                className="chart-fill"
+                style={{ opacity: 1 }}
+              />
+              
+              {/* Live indicator */}
+              <g className="live-dot" opacity="0.6">
+                <circle cx="800" cy="65" r="6" fill="#059669" opacity="0.1">
+                  <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.1;0;0.1" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="800" cy="65" r="2" fill="#059669" opacity="0.8">
+                  <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="800" cy="65" r="1.5" fill="#ffffff"/>
+              </g>
+            </>
+          ) : (
+            <>
+              {/* Flat line for empty portfolio */}
+              <path 
+                d="M 0,100 L 800,100" 
+                stroke="#9CA3AF" 
+                strokeWidth="2" 
+                fill="none"
+                opacity="0.5"
+                strokeDasharray="5,5"
+              />
+              <text x="400" y="120" textAnchor="middle" className="fill-gray-400 text-sm">
+                Portfolio chart will appear after your first deposit
+              </text>
+            </>
+          )}
         </svg>
       </div>
 
@@ -185,10 +209,15 @@ export default function Dashboard() {
       <div className="px-4 py-2 bg-gray-50/30">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">Buying Power</span>
-          <span className="text-sm font-semibold text-green-600 glow-green">
-            ${(50000 - portfolioValue).toLocaleString('en-US', {minimumFractionDigits: 2})}
+          <span className={`text-sm font-semibold ${buyingPower > 0 ? 'text-green-600 glow-green' : 'text-gray-600'}`}>
+            ${buyingPower.toLocaleString('en-US', {minimumFractionDigits: 2})}
           </span>
         </div>
+        {buyingPower === 0 && (
+          <div className="mt-2 text-xs text-gray-500">
+            💰 Deposit funds via Wallets to increase buying power
+          </div>
+        )}
       </div>
 
       {/* Wallet Overview */}
