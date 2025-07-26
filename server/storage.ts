@@ -4,6 +4,10 @@ import {
   trades,
   algorithms,
   performanceMetrics,
+  adminUsers,
+  websiteSettings,
+  cryptoAddresses,
+  adminLogs,
   type User,
   type UpsertUser,
   type Portfolio,
@@ -14,6 +18,14 @@ import {
   type InsertAlgorithm,
   type PerformanceMetric,
   type InsertPerformanceMetric,
+  type AdminUser,
+  type InsertAdminUser,
+  type WebsiteSetting,
+  type InsertWebsiteSetting,
+  type CryptoAddress,
+  type InsertCryptoAddress,
+  type AdminLog,
+  type InsertAdminLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -42,6 +54,28 @@ export interface IStorage {
   getPerformanceMetrics(userId: string, algorithmId?: string): Promise<PerformanceMetric[]>;
   createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric>;
   updatePerformanceMetric(id: string, updates: Partial<InsertPerformanceMetric>): Promise<PerformanceMetric>;
+  
+  // Admin operations
+  getAdminByEmail(email: string): Promise<AdminUser | undefined>;
+  createAdmin(admin: InsertAdminUser): Promise<AdminUser>;
+  updateAdminLastLogin(id: string): Promise<AdminUser>;
+  
+  // Website settings operations
+  getWebsiteSettings(category?: string): Promise<WebsiteSetting[]>;
+  getWebsiteSetting(key: string): Promise<WebsiteSetting | undefined>;
+  createWebsiteSetting(setting: InsertWebsiteSetting): Promise<WebsiteSetting>;
+  updateWebsiteSetting(key: string, updates: Partial<InsertWebsiteSetting>): Promise<WebsiteSetting>;
+  
+  // Crypto addresses operations
+  getCryptoAddresses(): Promise<CryptoAddress[]>;
+  getCryptoAddress(symbol: string): Promise<CryptoAddress | undefined>;
+  createCryptoAddress(address: InsertCryptoAddress): Promise<CryptoAddress>;
+  updateCryptoAddress(id: string, updates: Partial<InsertCryptoAddress>): Promise<CryptoAddress>;
+  deleteCryptoAddress(id: string): Promise<void>;
+  
+  // Admin logs operations
+  createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
+  getAdminLogs(adminId?: string, limit?: number): Promise<AdminLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -151,6 +185,102 @@ export class DatabaseStorage implements IStorage {
       .where(eq(performanceMetrics.id, id))
       .returning();
     return updatedMetric;
+  }
+
+  // Admin operations
+  async getAdminByEmail(email: string): Promise<AdminUser | undefined> {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, email));
+    return admin;
+  }
+
+  async createAdmin(admin: InsertAdminUser): Promise<AdminUser> {
+    const [newAdmin] = await db.insert(adminUsers).values(admin).returning();
+    return newAdmin;
+  }
+
+  async updateAdminLastLogin(id: string): Promise<AdminUser> {
+    const [updatedAdmin] = await db
+      .update(adminUsers)
+      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+      .where(eq(adminUsers.id, id))
+      .returning();
+    return updatedAdmin;
+  }
+
+  // Website settings operations
+  async getWebsiteSettings(category?: string): Promise<WebsiteSetting[]> {
+    const query = db.select().from(websiteSettings);
+    if (category) {
+      return await query.where(eq(websiteSettings.category, category));
+    }
+    return await query;
+  }
+
+  async getWebsiteSetting(key: string): Promise<WebsiteSetting | undefined> {
+    const [setting] = await db.select().from(websiteSettings).where(eq(websiteSettings.key, key));
+    return setting;
+  }
+
+  async createWebsiteSetting(setting: InsertWebsiteSetting): Promise<WebsiteSetting> {
+    const [newSetting] = await db.insert(websiteSettings).values(setting).returning();
+    return newSetting;
+  }
+
+  async updateWebsiteSetting(key: string, updates: Partial<InsertWebsiteSetting>): Promise<WebsiteSetting> {
+    const [updatedSetting] = await db
+      .update(websiteSettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(websiteSettings.key, key))
+      .returning();
+    return updatedSetting;
+  }
+
+  // Crypto addresses operations
+  async getCryptoAddresses(): Promise<CryptoAddress[]> {
+    return await db.select().from(cryptoAddresses).where(eq(cryptoAddresses.isActive, true));
+  }
+
+  async getCryptoAddress(symbol: string): Promise<CryptoAddress | undefined> {
+    const [address] = await db
+      .select()
+      .from(cryptoAddresses)
+      .where(and(eq(cryptoAddresses.symbol, symbol), eq(cryptoAddresses.isActive, true)));
+    return address;
+  }
+
+  async createCryptoAddress(address: InsertCryptoAddress): Promise<CryptoAddress> {
+    const [newAddress] = await db.insert(cryptoAddresses).values(address).returning();
+    return newAddress;
+  }
+
+  async updateCryptoAddress(id: string, updates: Partial<InsertCryptoAddress>): Promise<CryptoAddress> {
+    const [updatedAddress] = await db
+      .update(cryptoAddresses)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(cryptoAddresses.id, id))
+      .returning();
+    return updatedAddress;
+  }
+
+  async deleteCryptoAddress(id: string): Promise<void> {
+    await db
+      .update(cryptoAddresses)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(cryptoAddresses.id, id));
+  }
+
+  // Admin logs operations
+  async createAdminLog(log: InsertAdminLog): Promise<AdminLog> {
+    const [newLog] = await db.insert(adminLogs).values(log).returning();
+    return newLog;
+  }
+
+  async getAdminLogs(adminId?: string, limit = 100): Promise<AdminLog[]> {
+    const query = db.select().from(adminLogs);
+    if (adminId) {
+      return await query.where(eq(adminLogs.adminId, adminId)).orderBy(desc(adminLogs.createdAt)).limit(limit);
+    }
+    return await query.orderBy(desc(adminLogs.createdAt)).limit(limit);
   }
 }
 

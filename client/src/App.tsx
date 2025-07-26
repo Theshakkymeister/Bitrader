@@ -13,6 +13,8 @@ import Dashboard from "@/pages/dashboard";
 import Wallets from "@/pages/wallets";
 import Portfolio from "@/pages/portfolio";
 import SettingsPage from "@/pages/settings";
+import AdminLogin from "@/pages/admin-login";
+import AdminDashboard from "@/pages/admin-dashboard";
 import NotFound from "@/pages/not-found";
 
 function MobileNav() {
@@ -148,6 +150,10 @@ function Router() {
 
   return (
     <Switch>
+      {/* Admin routes - always accessible */}
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (

@@ -4,6 +4,8 @@
 
 This is a full-stack AI-powered trading platform built with modern web technologies. The application provides users with automated trading algorithms for various financial markets including forex, gold, stocks, and cryptocurrencies. The platform features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and Replit's authentication system for user management.
 
+**Recent Update (January 2025)**: Added comprehensive admin backend system with Ken.attwood@yahoo.com as super admin. Admin can manage crypto deposit addresses, website settings, user accounts, and monitor all platform activities.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -36,15 +38,30 @@ Preferred communication style: Simple, everyday language.
   - `trades` - Trading history and transaction records
   - `performance_metrics` - Algorithm performance data
   - `sessions` - User session storage
+  - `admin_users` - Admin user accounts with roles and permissions
+  - `website_settings` - Configurable platform settings
+  - `crypto_addresses` - Cryptocurrency deposit addresses managed by admin
+  - `admin_logs` - Complete audit trail of admin activities
 
 ## Key Components
 
 ### Authentication System
-The application uses Replit's authentication system which provides:
-- OAuth integration with automatic user provisioning
+The application uses dual authentication systems:
+- **User Authentication**: Replit's OAuth system for regular users
+- **Admin Authentication**: Separate bcrypt-based system for administrators
 - Session management with PostgreSQL persistence
-- Middleware for protecting authenticated routes
-- User profile management
+- Middleware for protecting both user and admin routes
+- Role-based access control for admin functions
+
+### Admin System (Ken.attwood@yahoo.com)
+Complete backend control system with:
+- **Login**: `/admin/login` - Secure admin authentication
+- **Dashboard**: `/admin/dashboard` - Full system management interface
+- **Crypto Address Management**: Add/edit/delete deposit addresses for all cryptocurrencies
+- **Website Settings**: Configure global platform parameters
+- **User Management**: View and manage user accounts
+- **Activity Logging**: Complete audit trail of all admin actions
+- **Default Password**: `AdminPass2025!` (should be changed immediately)
 
 ### Trading Dashboard
 The main dashboard provides:
