@@ -233,7 +233,7 @@ export default function Portfolio() {
       </div>
 
       {/* Animated Portfolio Chart */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden border border-gray-200">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -254,8 +254,8 @@ export default function Portfolio() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="h-64 relative bg-gradient-to-br from-slate-50 via-white to-slate-50">
+        <CardContent className="p-2">
+          <div className="h-64 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border border-gray-100 rounded-lg">
             <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">

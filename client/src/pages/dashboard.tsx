@@ -384,33 +384,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Button className="h-16 bg-green-600 hover:bg-green-700 text-white">
-          <div className="text-center">
-            <TrendingUp className="h-5 w-5 mx-auto mb-1" />
-            <div className="text-sm">Buy</div>
-          </div>
-        </Button>
-        <Button variant="outline" className="h-16">
-          <div className="text-center">
-            <TrendingDown className="h-5 w-5 mx-auto mb-1" />
-            <div className="text-sm">Sell</div>
-          </div>
-        </Button>
-        <Button variant="outline" className="h-16">
-          <div className="text-center">
-            <DollarSign className="h-5 w-5 mx-auto mb-1" />
-            <div className="text-sm">Transfer</div>
-          </div>
-        </Button>
-        <Button variant="outline" className="h-16">
-          <div className="text-center">
-            <Activity className="h-5 w-5 mx-auto mb-1" />
-            <div className="text-sm">Analytics</div>
-          </div>
-        </Button>
-      </div>
+
     </div>
   );
 }
