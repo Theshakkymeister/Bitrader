@@ -270,10 +270,16 @@ export default function Dashboard() {
             {todayPL >= 0 ? '+' : ''}{todayPLPercent}%
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 relative">
           <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Total Return</div>
           <div className="text-xl font-bold text-green-600">+$4,123.45</div>
           <div className="text-xs text-green-500 mt-1">+20.17%</div>
+          <div className="absolute bottom-2 right-2 text-xs text-gray-500">
+            <div className="text-right">
+              <div className="font-medium">All Time</div>
+              <div className="text-green-600 font-semibold">+$4,123.45 (+20.17%)</div>
+            </div>
+          </div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Diversity Score</div>

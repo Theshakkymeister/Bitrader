@@ -373,11 +373,7 @@ export default function Portfolio() {
                     <span className="text-sm font-medium">(+1.48%) Today</span>
                   </div>
                   
-                  {/* All Time Performance */}
-                  <div className="pt-2 border-t border-gray-200">
-                    <div className="text-xs text-gray-500 mb-1">All Time</div>
-                    <div className="text-green-600 font-semibold">+$4,123.45 (+20.17%)</div>
-                  </div>
+
                 </div>
               </div>
               {/* Connecting line to chart */}
