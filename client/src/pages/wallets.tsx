@@ -111,25 +111,78 @@ export default function Wallets() {
 
   const handleConnectWallet = async (walletType: string) => {
     try {
-      // Show connecting state
-      toast({
-        title: "Connecting...",
-        description: `Connecting to ${walletType}`,
-        variant: "default"
-      });
-
-      // Simulate wallet connection process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (walletType === "Trust Wallet") {
+        // Check if on mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // Try to open Trust Wallet app directly
+          const trustWalletDeepLink = "trust://";
+          const trustWalletAppStore = "https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409";
+          const trustWalletPlayStore = "https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp";
+          
+          // Try to open the app
+          window.location.href = trustWalletDeepLink;
+          
+          // Fallback to app store after a short delay if app doesn't open
+          setTimeout(() => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const storeUrl = isIOS ? trustWalletAppStore : trustWalletPlayStore;
+            window.open(storeUrl, '_blank');
+          }, 2500);
+          
+          toast({
+            title: "Opening Trust Wallet",
+            description: "If Trust Wallet doesn't open, you'll be redirected to download it",
+            variant: "default"
+          });
+        } else {
+          // On desktop, show download link
+          toast({
+            title: "Trust Wallet Mobile Required",
+            description: "Trust Wallet is a mobile app. Please use your phone or download the mobile app",
+            variant: "default"
+          });
+          
+          // Open Trust Wallet website for desktop users
+          window.open("https://trustwallet.com/download", '_blank');
+        }
+      } else if (walletType === "Coinbase Wallet") {
+        // Handle Coinbase Wallet connection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          const coinbaseDeepLink = "cbwallet://";
+          const coinbaseAppStore = "https://apps.apple.com/app/coinbase-wallet/id1278383455";
+          const coinbasePlayStore = "https://play.google.com/store/apps/details?id=org.toshi";
+          
+          window.location.href = coinbaseDeepLink;
+          
+          setTimeout(() => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const storeUrl = isIOS ? coinbaseAppStore : coinbasePlayStore;
+            window.open(storeUrl, '_blank');
+          }, 2500);
+          
+          toast({
+            title: "Opening Coinbase Wallet",
+            description: "If Coinbase Wallet doesn't open, you'll be redirected to download it",
+            variant: "default"
+          });
+        } else {
+          window.open("https://www.coinbase.com/wallet/downloads", '_blank');
+          toast({
+            title: "Coinbase Wallet Mobile Required",
+            description: "Coinbase Wallet is a mobile app. Please use your phone or download the mobile app",
+            variant: "default"
+          });
+        }
+      }
       
-      // Update connected wallets state
+      // Simulate connection process and mark as connected
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setConnectedWallets(prev => [...prev, walletType]);
       
-      // Show success message
-      toast({
-        title: "Wallet Connected",
-        description: `Successfully connected ${walletType}`,
-        variant: "default"
-      });
     } catch (error) {
       toast({
         title: "Connection Failed",

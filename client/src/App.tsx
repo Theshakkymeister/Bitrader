@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Home, TrendingUp, PieChart, Settings, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { useState } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Wallets from "@/pages/wallets";
@@ -16,6 +17,7 @@ import NotFound from "@/pages/not-found";
 
 function MobileNav() {
   const [location] = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
   
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
@@ -24,9 +26,13 @@ function MobileNav() {
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
+  const handleNavClick = () => {
+    setIsOpen(false);
+  };
+
   return (
     <div className="lg:hidden">
-      <Sheet>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="sm" className="bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200">
             <Menu className="h-5 w-5" />
@@ -37,7 +43,7 @@ function MobileNav() {
           <SheetDescription className="sr-only">Navigate to different sections of the app</SheetDescription>
           <div className="flex flex-col space-y-4 mt-8">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={item.href} onClick={handleNavClick}>
                 <div className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                   location === item.href ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
                 }`}>
