@@ -84,6 +84,94 @@ export const stockAssets: MarketAsset[] = [
   { symbol: 'EEM', name: 'iShares MSCI Emerging Markets ETF', price: generatePrice(42.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
   { symbol: 'AGG', name: 'iShares Core U.S. Aggregate Bond ETF', price: generatePrice(105.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
   
+  // Additional Major ETFs
+  { symbol: 'RSP', name: 'Invesco S&P 500 Equal Weight ETF', price: generatePrice(162.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://s3.amazonaws.com/logos.brandlogos.org/invesco-qqq-etf/invesco-qqq-logo.png' },
+  { symbol: 'SCHD', name: 'Schwab US Dividend Equity ETF', price: generatePrice(78.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.schwab.com/favicon.ico' },
+  { symbol: 'JEPI', name: 'JPMorgan Equity Premium Income ETF', price: generatePrice(58.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://logo.clearbit.com/jpmorgan.com' },
+  { symbol: 'JEPQ', name: 'JPMorgan Nasdaq Equity Premium Income ETF', price: generatePrice(54.20), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://logo.clearbit.com/jpmorgan.com' },
+  { symbol: 'VGT', name: 'Vanguard Information Technology ETF', price: generatePrice(485.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VUG', name: 'Vanguard Growth ETF', price: generatePrice(295.80), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VTV', name: 'Vanguard Value ETF', price: generatePrice(148.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VB', name: 'Vanguard Small-Cap ETF', price: generatePrice(215.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VO', name: 'Vanguard Mid-Cap ETF', price: generatePrice(245.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VYM', name: 'Vanguard High Dividend Yield ETF', price: generatePrice(108.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', price: generatePrice(58.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', price: generatePrice(78.95), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VTEB', name: 'Vanguard Tax-Exempt Bond ETF', price: generatePrice(51.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VNQ', name: 'Vanguard Real Estate ETF', price: generatePrice(92.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  
+  // iShares ETFs
+  { symbol: 'IVV', name: 'iShares Core S&P 500 ETF', price: generatePrice(458.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IJH', name: 'iShares Core S&P Mid-Cap ETF', price: generatePrice(285.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IJR', name: 'iShares Core S&P Small-Cap ETF', price: generatePrice(108.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IEFA', name: 'iShares Core MSCI EAFE ETF', price: generatePrice(72.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IEMG', name: 'iShares Core MSCI Emerging Markets ETF', price: generatePrice(51.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IWF', name: 'iShares Russell 1000 Growth ETF', price: generatePrice(295.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IWD', name: 'iShares Russell 1000 Value ETF', price: generatePrice(165.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IWV', name: 'iShares Russell 3000 ETF', price: generatePrice(265.80), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'ITOT', name: 'iShares Core S&P Total US Stock Market ETF', price: generatePrice(105.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IUSG', name: 'iShares Core S&P U.S. Growth ETF', price: generatePrice(115.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IUSV', name: 'iShares Core S&P U.S. Value ETF', price: generatePrice(78.25), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  
+  // Technology & Innovation ETFs
+  { symbol: 'ARKK', name: 'ARK Innovation ETF', price: generatePrice(48.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://ark-invest.com/favicon.ico' },
+  { symbol: 'ARKQ', name: 'ARK Autonomous Technology & Robotics ETF', price: generatePrice(58.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://ark-invest.com/favicon.ico' },
+  { symbol: 'ARKW', name: 'ARK Next Generation Internet ETF', price: generatePrice(82.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://ark-invest.com/favicon.ico' },
+  { symbol: 'ARKG', name: 'ARK Genomics Revolution ETF', price: generatePrice(28.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://ark-invest.com/favicon.ico' },
+  { symbol: 'ARKF', name: 'ARK Fintech Innovation ETF', price: generatePrice(18.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://ark-invest.com/favicon.ico' },
+  { symbol: 'IGV', name: 'iShares Expanded Tech-Software Sector ETF', price: generatePrice(385.20), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'SOXX', name: 'iShares Semiconductor ETF', price: generatePrice(228.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'ICLN', name: 'iShares Global Clean Energy ETF', price: generatePrice(18.65), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'LIT', name: 'Global X Lithium & Battery Tech ETF', price: generatePrice(48.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.globalxetfs.com/favicon.ico' },
+  { symbol: 'CLOU', name: 'Global X Cloud Computing ETF', price: generatePrice(18.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.globalxetfs.com/favicon.ico' },
+  
+  // Financial & Banking ETFs
+  { symbol: 'KRE', name: 'SPDR S&P Regional Banking ETF', price: generatePrice(48.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/kre-500x500.png' },
+  { symbol: 'KBE', name: 'SPDR S&P Bank ETF', price: generatePrice(45.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/kbe-500x500.png' },
+  { symbol: 'IYF', name: 'iShares U.S. Financials ETF', price: generatePrice(85.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'VFH', name: 'Vanguard Financials ETF', price: generatePrice(98.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  
+  // Healthcare ETFs
+  { symbol: 'IBB', name: 'iShares Biotechnology ETF', price: generatePrice(125.80), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IHI', name: 'iShares U.S. Medical Devices ETF', price: generatePrice(325.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IXJ', name: 'iShares Global Healthcare ETF', price: generatePrice(85.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'VHT', name: 'Vanguard Health Care ETF', price: generatePrice(248.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  
+  // International & Emerging Markets
+  { symbol: 'VGK', name: 'Vanguard FTSE Europe ETF', price: generatePrice(65.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VPL', name: 'Vanguard FTSE Pacific ETF', price: generatePrice(78.25), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'IEUR', name: 'iShares Core MSCI Europe ETF', price: generatePrice(58.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'FXI', name: 'iShares China Large-Cap ETF', price: generatePrice(28.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'EWJ', name: 'iShares MSCI Japan ETF', price: generatePrice(65.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'INDA', name: 'iShares MSCI India ETF', price: generatePrice(45.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'EWZ', name: 'iShares MSCI Brazil ETF', price: generatePrice(32.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  
+  // Bond & Fixed Income ETFs
+  { symbol: 'HYG', name: 'iShares iBoxx $ High Yield Corporate Bond ETF', price: generatePrice(78.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'LQD', name: 'iShares iBoxx $ Investment Grade Corporate Bond ETF', price: generatePrice(115.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'TIP', name: 'iShares TIPS Bond ETF', price: generatePrice(108.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IEF', name: 'iShares 7-10 Year Treasury Bond ETF', price: generatePrice(98.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'SHY', name: 'iShares 1-3 Year Treasury Bond ETF', price: generatePrice(82.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'IEI', name: 'iShares 3-7 Year Treasury Bond ETF', price: generatePrice(118.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'EMB', name: 'iShares J.P. Morgan USD Emerging Markets Bond ETF', price: generatePrice(95.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  
+  // Commodity & Resources ETFs
+  { symbol: 'USO', name: 'United States Oil Fund', price: generatePrice(68.25), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.uscfinvestments.com/favicon.ico' },
+  { symbol: 'UNG', name: 'United States Natural Gas Fund', price: generatePrice(12.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.uscfinvestments.com/favicon.ico' },
+  { symbol: 'PDBC', name: 'Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF', price: generatePrice(16.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://s3.amazonaws.com/logos.brandlogos.org/invesco-qqq-etf/invesco-qqq-logo.png' },
+  { symbol: 'DBA', name: 'Invesco DB Agriculture Fund', price: generatePrice(18.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://s3.amazonaws.com/logos.brandlogos.org/invesco-qqq-etf/invesco-qqq-logo.png' },
+  { symbol: 'COPX', name: 'Global X Copper Miners ETF', price: generatePrice(38.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.globalxetfs.com/favicon.ico' },
+  { symbol: 'SILJ', name: 'ETFMG Prime Junior Silver Miners ETF', price: generatePrice(12.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://etfmg.com/favicon.ico' },
+  { symbol: 'GDXJ', name: 'VanEck Junior Gold Miners ETF', price: generatePrice(35.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.vaneck.com/favicon.ico' },
+  { symbol: 'GDX', name: 'VanEck Gold Miners ETF', price: generatePrice(28.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.vaneck.com/favicon.ico' },
+  
+  // Dividend & Income ETFs
+  { symbol: 'DVY', name: 'iShares Select Dividend ETF', price: generatePrice(125.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'HDV', name: 'iShares Core High Dividend ETF', price: generatePrice(108.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'NOBL', name: 'ProShares S&P 500 Dividend Aristocrats ETF', price: generatePrice(92.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.proshares.com/favicon.ico' },
+  { symbol: 'DGRO', name: 'iShares Core Dividend Growth ETF', price: generatePrice(55.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'SPHD', name: 'Invesco S&P 500 High Dividend Low Volatility ETF', price: generatePrice(42.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://s3.amazonaws.com/logos.brandlogos.org/invesco-qqq-etf/invesco-qqq-logo.png' },
+  
   // Technology sector
   { symbol: 'AAPL', name: 'Apple Inc.', price: generatePrice(185.60), change: generateChange(), type: 'stock', sector: 'Technology', logo: 'https://logo.clearbit.com/apple.com' },
   { symbol: 'MSFT', name: 'Microsoft Corporation', price: generatePrice(378.85), change: generateChange(), type: 'stock', sector: 'Technology', logo: 'https://logo.clearbit.com/microsoft.com' },
