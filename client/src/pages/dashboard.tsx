@@ -565,31 +565,127 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* Portfolio Performance Chart */}
-          <div className="h-40 bg-white rounded-lg flex items-center justify-center relative overflow-hidden border">
-            <svg className="w-full h-full" viewBox="0 0 500 120">
-              <path 
-                d="M 0,90 Q 125,75 250,60 T 500,30" 
-                stroke="#10b981" 
-                strokeWidth="2" 
-                fill="none"
-              />
+          {/* Portfolio Performance Chart - Robinhood Style */}
+          <div className="h-64 bg-white rounded-lg relative overflow-hidden border group">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 pointer-events-none"></div>
+            <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.25"/>
+                  <stop offset="50%" stopColor="#10b981" stopOpacity="0.1"/>
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
                 </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
               </defs>
+              
+              {/* Grid lines */}
+              <g stroke="#f3f4f6" strokeWidth="0.5" opacity="0.6">
+                <line x1="0" y1="40" x2="800" y2="40" />
+                <line x1="0" y1="80" x2="800" y2="80" />
+                <line x1="0" y1="120" x2="800" y2="120" />
+                <line x1="0" y1="160" x2="800" y2="160" />
+                <line x1="200" y1="0" x2="200" y2="200" />
+                <line x1="400" y1="0" x2="400" y2="200" />
+                <line x1="600" y1="0" x2="600" y2="200" />
+              </g>
+              
+              {/* Portfolio trend line with smooth curve */}
               <path 
-                d="M 0,90 Q 125,75 250,60 T 500,30 L 500,120 L 0,120 Z" 
-                fill="url(#portfolioGradient)"
+                d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65" 
+                stroke="#10b981" 
+                strokeWidth="3" 
+                fill="none"
+                filter="url(#glow)"
+                className="chart-line"
+                strokeDasharray="1000"
+                strokeDashoffset="0"
               />
-              {/* Price points */}
-              <circle cx="125" cy="75" r="3" fill="#10b981" />
-              <circle cx="250" cy="60" r="3" fill="#10b981" />
-              <circle cx="375" cy="45" r="3" fill="#10b981" />
-              <circle cx="500" cy="30" r="3" fill="#10b981" />
+              
+              {/* Filled area under curve */}
+              <path 
+                d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65 L 800,200 L 0,200 Z" 
+                fill="url(#portfolioGradient)"
+                className="chart-fill"
+                style={{ opacity: 1 }}
+              />
+              
+              {/* Interactive data points */}
+              <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <circle cx="0" cy="150" r="4" fill="#10b981" stroke="white" strokeWidth="2">
+                  <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="200" cy="125" r="4" fill="#10b981" stroke="white" strokeWidth="2">
+                  <animate attributeName="r" values="4;6;4" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="400" cy="105" r="4" fill="#10b981" stroke="white" strokeWidth="2">
+                  <animate attributeName="r" values="4;6;4" dur="2s" begin="1s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="600" cy="85" r="4" fill="#10b981" stroke="white" strokeWidth="2">
+                  <animate attributeName="r" values="4;6;4" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="800" cy="65" r="4" fill="#10b981" stroke="white" strokeWidth="2">
+                  <animate attributeName="r" values="4;6;4" dur="2s" begin="2s" repeatCount="indefinite"/>
+                </circle>
+              </g>
+              
+              {/* Live indicator */}
+              <g className="live-dot">
+                <circle cx="800" cy="65" r="8" fill="#10b981" opacity="0.2">
+                  <animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.2;0;0.2" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="800" cy="65" r="4" fill="#10b981" opacity="0.6">
+                  <animate attributeName="r" values="4;8;4" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="800" cy="65" r="2" fill="#ffffff" stroke="#10b981" strokeWidth="1"/>
+              </g>
             </svg>
+            
+            {/* Time labels overlay */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4 text-xs text-gray-500">
+              <span>9:30 AM</span>
+              <span>11:00 AM</span>
+              <span>12:30 PM</span>
+              <span>2:00 PM</span>
+              <span className="text-green-600 font-medium">Live</span>
+            </div>
+            
+            {/* Value labels overlay */}
+            <div className="absolute top-2 left-4 right-4 flex justify-between text-xs text-gray-500">
+              <span>${(portfolioValue * 1.1).toFixed(0)}</span>
+              <span>${portfolioValue.toFixed(0)}</span>
+              <span>${(portfolioValue * 0.95).toFixed(0)}</span>
+            </div>
+            
+            {/* Live Performance Stats Overlay */}
+            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg px-4 py-3 shadow-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium text-gray-600">LIVE</span>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold text-black">${portfolioValue.toLocaleString()}</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-green-600">+${((portfolioValue * todayPLPercent) / 100).toFixed(2)}</span>
+                  <span className="text-sm text-green-600">(+{todayPLPercent}%)</span>
+                </div>
+                <div className="text-xs text-gray-500">Today's Return</div>
+              </div>
+            </div>
+            
+            {/* Hover tooltip */}
+            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/90 text-white px-3 py-2 rounded-lg text-sm backdrop-blur-sm">
+              <div className="font-medium">Portfolio Details</div>
+              <div className="text-xs text-green-400">Market open: 9:30 AM EST</div>
+              <div className="text-xs text-gray-300">Last sync: {new Date().toLocaleTimeString()}</div>
+              <div className="text-xs text-gray-300">Next update: {new Date(Date.now() + 5000).toLocaleTimeString()}</div>
+            </div>
           </div>
         </div>
 

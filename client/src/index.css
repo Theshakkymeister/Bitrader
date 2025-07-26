@@ -2,6 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Robinhood-style chart animations */
+@keyframes chartLine {
+  from {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chartFill {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.chart-line {
+  animation: chartLine 2s ease-out forwards;
+}
+
+.chart-fill {
+  animation: chartFill 1.5s ease-out 0.5s forwards;
+  transform-origin: bottom;
+}
+
+.live-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
 /* Smooth transitions and animations */
 * {
   transition: all 0.2s ease-in-out;
