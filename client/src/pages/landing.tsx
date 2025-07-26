@@ -27,18 +27,18 @@ export default function Landing() {
         <div className="pt-16 pb-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-6xl font-bold text-black mb-6 leading-tight">
-              Investing for
-              <span className="text-green-500 block">Everyone</span>
+              Professional Trading
+              <span className="text-green-500 block">Made Simple</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Commission-free trading of stocks, crypto, and more. 
-              Build your portfolio with our advanced algorithms.
+              Join thousands of traders using our advanced AI algorithms for forex, crypto, stocks, and gold trading. 
+              Start your journey to financial freedom today.
             </p>
             <Button 
               onClick={() => window.location.href = '/api/login'}
               className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2 smooth-enter"
             >
-              <span>Get Started</span>
+              <span>Start Trading Free</span>
               <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
@@ -125,28 +125,28 @@ export default function Landing() {
         {/* Features Section */}
         <div className="py-20 border-t border-gray-100">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black mb-4">Built for the way you invest</h2>
-            <p className="text-xl text-gray-600">Simple, commission-free, and powerful.</p>
+            <h2 className="text-4xl font-bold text-black mb-4">Advanced Trading Technology</h2>
+            <p className="text-xl text-gray-600">AI-powered algorithms that work 24/7 for maximum returns.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Star className="h-8 w-8 text-green-500" />
+                <Shield className="h-8 w-8 text-green-500" />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-4">Commission-Free</h3>
+              <h3 className="text-2xl font-bold text-black mb-4">Secure Trading</h3>
               <p className="text-gray-600 leading-relaxed">
-                Trade stocks, crypto, and more without paying fees that eat into your returns.
+                Bank-level security with advanced encryption to protect your investments and trading data.
               </p>
             </div>
 
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-8 w-8 text-green-500" />
+                <Star className="h-8 w-8 text-green-500" />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-4">Secure & Trusted</h3>
+              <h3 className="text-2xl font-bold text-black mb-4">AI-Powered Algorithms</h3>
               <p className="text-gray-600 leading-relaxed">
-                Your investments are protected with bank-level security and SIPC insurance.
+                Advanced trading algorithms that analyze markets 24/7 to maximize your trading returns.
               </p>
             </div>
 
@@ -154,9 +154,9 @@ export default function Landing() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Smartphone className="h-8 w-8 text-green-500" />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-4">Mobile First</h3>
+              <h3 className="text-2xl font-bold text-black mb-4">Real-Time Analytics</h3>
               <p className="text-gray-600 leading-relaxed">
-                Manage your portfolio anywhere with our award-winning mobile experience.
+                Live market data and performance tracking across forex, crypto, stocks, and gold markets.
               </p>
             </div>
           </div>
@@ -166,16 +166,16 @@ export default function Landing() {
         <div className="py-20 text-center">
           <div className="bg-gray-50 rounded-3xl p-16">
             <h2 className="text-4xl font-bold text-black mb-6">
-              Ready to start investing?
+              Ready to Start Trading?
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join millions of people using Bitrader to build their portfolios.
+              Join Bitrader today and take control of your financial future with our advanced trading algorithms.
             </p>
             <Button 
               onClick={() => window.location.href = '/api/login'}
               className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2"
             >
-              <span>Get Started</span>
+              <span>Create Your Account</span>
               <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
@@ -192,7 +192,7 @@ export default function Landing() {
             <span className="text-lg font-semibold text-black">Bitrader</span>
           </div>
           <p className="text-gray-600">
-            Investing made simple for everyone.
+            AI-powered trading algorithms for the modern trader.
           </p>
         </div>
       </footer>
