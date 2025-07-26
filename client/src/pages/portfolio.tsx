@@ -325,6 +325,11 @@ export default function Portfolio() {
                 <circle cx="740" cy="95" r="2.5" fill="#ffffff"/>
               </g>
               
+              {/* Value indicator line connecting to centered display */}
+              <line x1="740" y1="95" x2="400" y2="50" stroke="#059669" strokeWidth="2" opacity="0.4" strokeDasharray="4,4">
+                <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
+              </line>
+              
               {/* Data points */}
               {[
                 {x: 200, y: 180}, {x: 360, y: 155}, {x: 520, y: 130}, {x: 680, y: 110}
@@ -354,14 +359,19 @@ export default function Portfolio() {
               </div>
             </div>
             
-            {/* Chart value display */}
-            <div className="absolute top-6 right-6 text-sm text-gray-600">
-              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-5 py-3 shadow-md border-2 border-green-100">
-                <div className="text-right">
-                  <div className="text-xl font-bold text-green-600">{formatCurrency(totalPortfolioValue)}</div>
-                  <div className="text-sm text-gray-500 font-medium">Portfolio Value</div>
+            {/* Chart value display - centered with the green line */}
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 text-center">
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg border-2 border-green-200">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">{formatCurrency(totalPortfolioValue)}</div>
+                  <div className="text-sm text-gray-500 font-medium">Current Portfolio Value</div>
+                  <div className={`text-sm font-semibold mt-1 ${totalGainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {totalGainLoss >= 0 ? '+' : ''}{formatCurrency(totalGainLoss).replace('$', '$')} ({totalGainLossPercent.toFixed(2)}%)
+                  </div>
                 </div>
               </div>
+              {/* Connecting line to chart */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-green-300 opacity-60"></div>
             </div>
           </div>
         </CardContent>
