@@ -50,11 +50,37 @@ export default function Dashboard() {
   const [selectedCrypto, setSelectedCrypto] = useState('');
   const [liveTrading, setLiveTrading] = useState(false);
   const [marketData, setMarketData] = useState({
-    BTC: { price: 43250.75, change: 2.45 },
-    ETH: { price: 2580.40, change: 1.82 },
-    AAPL: { price: 185.60, change: -0.75 },
-    TSLA: { price: 248.90, change: 3.20 },
-    GOLD: { price: 2024.50, change: 0.85 }
+    // Crypto
+    BTC: { price: 43250.75, change: 2.45, type: 'crypto' },
+    ETH: { price: 2580.40, change: 1.82, type: 'crypto' },
+    BNB: { price: 315.80, change: 1.25, type: 'crypto' },
+    SOL: { price: 98.45, change: 4.12, type: 'crypto' },
+    ADA: { price: 0.385, change: -1.85, type: 'crypto' },
+    XRP: { price: 0.525, change: 2.18, type: 'crypto' },
+    DOGE: { price: 0.085, change: 3.45, type: 'crypto' },
+    AVAX: { price: 35.60, change: -0.92, type: 'crypto' },
+    DOT: { price: 7.85, change: 1.65, type: 'crypto' },
+    MATIC: { price: 0.895, change: -2.15, type: 'crypto' },
+    
+    // Major Stocks
+    AAPL: { price: 185.60, change: -0.75, type: 'stock' },
+    MSFT: { price: 378.85, change: 1.25, type: 'stock' },
+    GOOGL: { price: 142.65, change: 0.85, type: 'stock' },
+    AMZN: { price: 153.75, change: 2.15, type: 'stock' },
+    TSLA: { price: 248.90, change: 3.20, type: 'stock' },
+    META: { price: 355.20, change: 1.85, type: 'stock' },
+    NFLX: { price: 485.30, change: -1.25, type: 'stock' },
+    NVDA: { price: 875.40, change: 4.85, type: 'stock' },
+    AMD: { price: 148.25, change: 2.65, type: 'stock' },
+    BABA: { price: 78.95, change: -0.85, type: 'stock' },
+    
+    // Forex & Commodities
+    EURUSD: { price: 1.0845, change: 0.25, type: 'forex' },
+    GBPUSD: { price: 1.2635, change: -0.15, type: 'forex' },
+    USDJPY: { price: 148.75, change: 0.85, type: 'forex' },
+    GOLD: { price: 2024.50, change: 0.85, type: 'commodity' },
+    SILVER: { price: 23.45, change: 1.25, type: 'commodity' },
+    OIL: { price: 78.65, change: -1.85, type: 'commodity' }
   });
   
   const queryClient = useQueryClient();
@@ -120,28 +146,18 @@ export default function Dashboard() {
   useEffect(() => {
     if (liveTrading) {
       const interval = setInterval(() => {
-        setMarketData(prev => ({
-          BTC: { 
-            price: prev.BTC.price + (Math.random() - 0.5) * 100, 
-            change: (Math.random() - 0.5) * 5 
-          },
-          ETH: { 
-            price: prev.ETH.price + (Math.random() - 0.5) * 50, 
-            change: (Math.random() - 0.5) * 3 
-          },
-          AAPL: { 
-            price: prev.AAPL.price + (Math.random() - 0.5) * 5, 
-            change: (Math.random() - 0.5) * 2 
-          },
-          TSLA: { 
-            price: prev.TSLA.price + (Math.random() - 0.5) * 10, 
-            change: (Math.random() - 0.5) * 4 
-          },
-          GOLD: { 
-            price: prev.GOLD.price + (Math.random() - 0.5) * 10, 
-            change: (Math.random() - 0.5) * 2 
-          }
-        }));
+        setMarketData(prev => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach(symbol => {
+            const variance = updated[symbol].price * 0.002; // 0.2% max variance
+            updated[symbol] = {
+              ...updated[symbol],
+              price: Math.max(0.001, updated[symbol].price + (Math.random() - 0.5) * variance),
+              change: updated[symbol].change + (Math.random() - 0.5) * 0.5
+            };
+          });
+          return updated;
+        });
       }, 1000);
       
       return () => clearInterval(interval);
@@ -223,36 +239,20 @@ export default function Dashboard() {
                 Dashboard
               </button>
               <button 
-                onClick={() => setActiveView('stocks')}
-                className={`text-sm font-medium transition-colors ${
-                  activeView === 'stocks' ? 'text-black' : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Stocks
-              </button>
-              <button 
-                onClick={() => setActiveView('crypto')}
-                className={`text-sm font-medium transition-colors ${
-                  activeView === 'crypto' ? 'text-black' : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Crypto
-              </button>
-              <button 
-                onClick={() => setActiveView('live-trading')}
-                className={`text-sm font-medium transition-colors ${
-                  activeView === 'live-trading' ? 'text-black' : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Live Trading
-              </button>
-              <button 
                 onClick={() => setActiveView('wallet')}
                 className={`text-sm font-medium transition-colors ${
                   activeView === 'wallet' ? 'text-black' : 'text-gray-600 hover:text-black'
                 }`}
               >
                 Wallet
+              </button>
+              <button 
+                onClick={() => setActiveView('trade')}
+                className={`text-sm font-medium transition-colors ${
+                  activeView === 'trade' ? 'text-black' : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Trade
               </button>
             </nav>
           </div>
@@ -439,18 +439,14 @@ export default function Dashboard() {
     switch (activeView) {
       case 'dashboard':
         return renderDashboard();
-      case 'stocks':
-        return renderStocks();
-      case 'crypto':
-        return renderCrypto();
       case 'wallet':
         return renderWallet();
+      case 'trade':
+        return renderTrade();
       case 'trades':
         return renderTrades();
       case 'settings':
         return renderSettings();
-      case 'live-trading':
-        return renderLiveTrading();
       default:
         return renderDashboard();
     }
@@ -1002,10 +998,30 @@ export default function Dashboard() {
     );
   }
 
-  function renderLiveTrading() {
+  function renderTrade() {
+    // Check if user is on iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
     return (
       <div className="space-y-6 fade-in">
-        {/* Live Trading Header */}
+        {/* iOS Warning */}
+        {isIOS && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-white text-sm font-bold">!</span>
+              </div>
+              <div>
+                <div className="font-medium text-orange-800">iOS Users Notice</div>
+                <div className="text-sm text-orange-700 mt-1">
+                  Live trading is only available on the web app. Please use a desktop browser or our web app for full trading functionality.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Trading Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-black slide-in-left">Live Trading</h2>
           <div className="flex items-center space-x-4">
@@ -1016,6 +1032,7 @@ export default function Dashboard() {
             <Button
               onClick={() => setLiveTrading(!liveTrading)}
               className={`${liveTrading ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white hover-scale transition-all duration-300`}
+              disabled={isIOS}
             >
               {liveTrading ? <Square className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
               {liveTrading ? 'Stop Trading' : 'Start Trading'}
@@ -1023,64 +1040,213 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Market Data Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(marketData).map(([symbol, data]) => (
-            <div key={symbol} className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <div className="font-bold text-lg text-black">{symbol}</div>
-                  <div className="text-2xl font-bold text-black">${data.price.toFixed(2)}</div>
+        {/* Market Categories */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div className="text-sm text-gray-600">Crypto Markets</div>
+            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'crypto').length}</div>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div className="text-sm text-gray-600">Stock Markets</div>
+            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'stock').length}</div>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div className="text-sm text-gray-600">Forex Pairs</div>
+            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'forex').length}</div>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <div className="text-sm text-gray-600">Commodities</div>
+            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'commodity').length}</div>
+          </div>
+        </div>
+
+        {/* Crypto Markets */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Cryptocurrency Markets</div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(marketData).filter(([_, data]) => data.type === 'crypto').map(([symbol, data]) => (
+                <div key={symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold text-lg text-black">{symbol}</div>
+                      <div className="text-2xl font-bold text-black">${data.price.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : 3)}</div>
+                    </div>
+                    <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
+                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      onClick={() => {
+                        placeTradeMutation.mutate({
+                          symbol,
+                          type: 'buy',
+                          quantity: 1,
+                          price: data.price,
+                          amount: data.price.toString()
+                        });
+                      }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      Buy
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      onClick={() => {
+                        placeTradeMutation.mutate({
+                          symbol,
+                          type: 'sell',
+                          quantity: 1,
+                          price: data.price,
+                          amount: data.price.toString()
+                        });
+                      }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1 rotate-180" />
+                      Sell
+                    </Button>
+                  </div>
                 </div>
-                <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                  {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  size="sm"
-                  className="flex-1 bg-green-500 hover:bg-green-600"
-                  disabled={!liveTrading || placeTradeMutation.isPending}
-                  onClick={() => {
-                    placeTradeMutation.mutate({
-                      symbol,
-                      type: 'buy',
-                      quantity: 1,
-                      price: data.price,
-                      amount: data.price.toString()
-                    });
-                  }}
-                >
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  Buy
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-                  disabled={!liveTrading || placeTradeMutation.isPending}
-                  onClick={() => {
-                    placeTradeMutation.mutate({
-                      symbol,
-                      type: 'sell',
-                      quantity: 1,
-                      price: data.price,
-                      amount: data.price.toString()
-                    });
-                  }}
-                >
-                  <TrendingUp className="h-4 w-4 mr-1 rotate-180" />
-                  Sell
-                </Button>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* Stock Markets */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Stock Markets</div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(marketData).filter(([_, data]) => data.type === 'stock').map(([symbol, data]) => (
+                <div key={symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold text-lg text-black">{symbol}</div>
+                      <div className="text-2xl font-bold text-black">${data.price.toFixed(2)}</div>
+                    </div>
+                    <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
+                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      onClick={() => {
+                        placeTradeMutation.mutate({
+                          symbol,
+                          type: 'buy',
+                          quantity: 1,
+                          price: data.price,
+                          amount: data.price.toString()
+                        });
+                      }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      Buy
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      onClick={() => {
+                        placeTradeMutation.mutate({
+                          symbol,
+                          type: 'sell',
+                          quantity: 1,
+                          price: data.price,
+                          amount: data.price.toString()
+                        });
+                      }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1 rotate-180" />
+                      Sell
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Forex & Commodities */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Forex & Commodities</div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(marketData).filter(([_, data]) => data.type === 'forex' || data.type === 'commodity').map(([symbol, data]) => (
+                <div key={symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold text-lg text-black">{symbol}</div>
+                      <div className="text-2xl font-bold text-black">${data.price.toFixed(data.type === 'forex' ? 4 : 2)}</div>
+                    </div>
+                    <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
+                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      onClick={() => {
+                        placeTradeMutation.mutate({
+                          symbol,
+                          type: 'buy',
+                          quantity: 1,
+                          price: data.price,
+                          amount: data.price.toString()
+                        });
+                      }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      Buy
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      onClick={() => {
+                        placeTradeMutation.mutate({
+                          symbol,
+                          type: 'sell',
+                          quantity: 1,
+                          price: data.price,
+                          amount: data.price.toString()
+                        });
+                      }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-1 rotate-180" />
+                      Sell
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Recent Live Trades */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Live Trading Activity</div>
+            <div className="text-lg font-medium text-black">Recent Trading Activity</div>
           </div>
           <div className="p-4">
             {trades && trades.length > 0 ? (
@@ -1106,7 +1272,7 @@ export default function Dashboard() {
             ) : (
               <div className="text-center text-gray-600 py-8">
                 <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <div>No live trades yet</div>
+                <div>No trades yet</div>
                 <div className="text-sm">Start live trading to see activity here</div>
               </div>
             )}
