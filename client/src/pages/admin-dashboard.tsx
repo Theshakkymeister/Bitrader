@@ -398,6 +398,404 @@ export default function AdminDashboard() {
     </motion.div>
   );
 
+  const renderUserManagement = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900">User Management</h2>
+        <p className="text-gray-600 mt-2">Monitor and manage platform users</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-600 text-sm font-medium">Total Users</p>
+                  <p className="text-2xl font-bold text-green-900">1,247</p>
+                  <p className="text-xs text-green-600 mt-1">+23 this week</p>
+                </div>
+                <Users className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-600 text-sm font-medium">Active Today</p>
+                  <p className="text-2xl font-bold text-blue-900">342</p>
+                  <p className="text-xs text-blue-600 mt-1">27% of total</p>
+                </div>
+                <Activity className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-600 text-sm font-medium">New Signups</p>
+                  <p className="text-2xl font-bold text-purple-900">89</p>
+                  <p className="text-xs text-purple-600 mt-1">Last 7 days</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      <Card className="shadow-lg border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-blue-600" />
+            <span>Recent User Activity</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[
+              { name: "Sarah Johnson", email: "sarah.j@email.com", action: "Logged in", time: "2 min ago", status: "online" },
+              { name: "Mike Chen", email: "mike.chen@email.com", action: "Updated portfolio", time: "5 min ago", status: "online" },
+              { name: "Emma Wilson", email: "emma.w@email.com", action: "Made deposit", time: "12 min ago", status: "offline" },
+              { name: "David Lee", email: "david.lee@email.com", action: "Registered", time: "1 hour ago", status: "offline" },
+              { name: "Lisa Rodriguez", email: "lisa.r@email.com", action: "Changed password", time: "2 hours ago", status: "offline" }
+            ].map((user, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">{user.name.split(' ').map(n => n[0]).join('')}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{user.name}</p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                  </div>
+                </div>
+                <div className="text-right flex items-center space-x-3">
+                  <div>
+                    <p className="text-sm text-gray-900">{user.action}</p>
+                    <p className="text-xs text-gray-500">{user.time}</p>
+                  </div>
+                  <div className={`w-3 h-3 rounded-full ${user.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+
+  const renderAnalytics = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h2>
+        <p className="text-gray-600 mt-2">Platform performance and usage metrics</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-600 text-sm font-medium">Total Trades</p>
+                  <p className="text-2xl font-bold text-blue-900">12,847</p>
+                  <p className="text-xs text-blue-600 mt-1">+8.2% from last month</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-600 text-sm font-medium">Revenue</p>
+                  <p className="text-2xl font-bold text-green-900">$284K</p>
+                  <p className="text-xs text-green-600 mt-1">+12.5% from last month</p>
+                </div>
+                <BarChart3 className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-600 text-sm font-medium">API Calls</p>
+                  <p className="text-2xl font-bold text-purple-900">1.2M</p>
+                  <p className="text-xs text-purple-600 mt-1">+15.3% from last month</p>
+                </div>
+                <Database className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-orange-50 to-orange-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-600 text-sm font-medium">Avg Response</p>
+                  <p className="text-2xl font-bold text-orange-900">145ms</p>
+                  <p className="text-xs text-orange-600 mt-1">-5.2% from last month</p>
+                </div>
+                <Activity className="h-8 w-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-lg border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <span>Trading Volume (7 days)</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { day: 'Monday', volume: '$45,230', growth: '+12%' },
+                { day: 'Tuesday', volume: '$52,840', growth: '+18%' },
+                { day: 'Wednesday', volume: '$38,920', growth: '-8%' },
+                { day: 'Thursday', volume: '$61,340', growth: '+25%' },
+                { day: 'Friday', volume: '$72,580', growth: '+35%' },
+                { day: 'Saturday', volume: '$41,260', growth: '+5%' },
+                { day: 'Sunday', volume: '$33,150', growth: '-12%' }
+              ].map((day, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{day.day}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium">{day.volume}</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      day.growth.startsWith('+') ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                    }`}>
+                      {day.growth}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-green-600" />
+              <span>Top Performing Assets</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { asset: 'Bitcoin (BTC)', price: '$43,250', change: '+5.2%', volume: '$2.4M' },
+                { asset: 'Ethereum (ETH)', price: '$2,840', change: '+3.8%', volume: '$1.8M' },
+                { asset: 'Solana (SOL)', price: '$98.50', change: '+12.4%', volume: '$890K' },
+                { asset: 'Apple (AAPL)', price: '$182.40', change: '+2.1%', volume: '$1.2M' },
+                { asset: 'Tesla (TSLA)', price: '$248.80', change: '-1.5%', volume: '$950K' }
+              ].map((asset, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">{asset.asset}</p>
+                    <p className="text-sm text-gray-500">Vol: {asset.volume}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{asset.price}</p>
+                    <p className={`text-sm ${
+                      asset.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {asset.change}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </motion.div>
+  );
+
+  const renderSystemStatus = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900">System Status</h2>
+        <p className="text-gray-600 mt-2">Real-time system monitoring and health</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-600 text-sm font-medium">Server Uptime</p>
+                  <p className="text-2xl font-bold text-green-900">99.9%</p>
+                  <p className="text-xs text-green-600 mt-1">15 days 4 hours</p>
+                </div>
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-600 text-sm font-medium">Database</p>
+                  <p className="text-2xl font-bold text-blue-900">Healthy</p>
+                  <p className="text-xs text-blue-600 mt-1">45ms avg query time</p>
+                </div>
+                <Database className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-600 text-sm font-medium">Memory Usage</p>
+                  <p className="text-2xl font-bold text-purple-900">64%</p>
+                  <p className="text-xs text-purple-600 mt-1">2.1GB / 3.3GB</p>
+                </div>
+                <Monitor className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+          <Card className="border-0 shadow-md bg-gradient-to-r from-orange-50 to-orange-100">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-600 text-sm font-medium">CPU Load</p>
+                  <p className="text-2xl font-bold text-orange-900">23%</p>
+                  <p className="text-xs text-orange-600 mt-1">Normal range</p>
+                </div>
+                <Activity className="h-8 w-8 text-orange-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="shadow-lg border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="h-5 w-5 text-blue-600" />
+              <span>Service Status</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { service: 'Authentication API', status: 'operational', uptime: '99.9%' },
+                { service: 'Trading Engine', status: 'operational', uptime: '99.8%' },
+                { service: 'Database Cluster', status: 'operational', uptime: '100%' },
+                { service: 'Payment Gateway', status: 'operational', uptime: '99.7%' },
+                { service: 'WebSocket Server', status: 'operational', uptime: '99.9%' },
+                { service: 'Email Service', status: 'maintenance', uptime: '98.5%' }
+              ].map((service, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      service.status === 'operational' ? 'bg-green-500' : 
+                      service.status === 'maintenance' ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}></div>
+                    <span className="font-medium">{service.service}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm text-gray-600">{service.uptime}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Monitor className="h-5 w-5 text-green-600" />
+              <span>Recent System Events</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { event: 'Database backup completed', time: '2 min ago', type: 'success' },
+                { event: 'Security scan passed', time: '15 min ago', type: 'success' },
+                { event: 'Email service maintenance started', time: '1 hour ago', type: 'warning' },
+                { event: 'SSL certificate renewed', time: '2 hours ago', type: 'success' },
+                { event: 'Server restart completed', time: '6 hours ago', type: 'info' },
+                { event: 'Daily backup scheduled', time: '1 day ago', type: 'info' }
+              ].map((event, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    event.type === 'success' ? 'bg-green-500' :
+                    event.type === 'warning' ? 'bg-yellow-500' :
+                    event.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-900">{event.event}</p>
+                    <p className="text-xs text-gray-500">{event.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </motion.div>
+  );
+
   const renderWebsiteSettings = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -496,44 +894,11 @@ export default function AdminDashboard() {
       case 'settings':
         return renderWebsiteSettings();
       case 'users':
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center py-12"
-          >
-            <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600">User Management</h3>
-            <p className="text-gray-500 mt-2">Coming soon - Advanced user management tools</p>
-          </motion.div>
-        );
+        return renderUserManagement();
       case 'analytics':
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center py-12"
-          >
-            <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600">Analytics Dashboard</h3>
-            <p className="text-gray-500 mt-2">Coming soon - Detailed analytics and reporting</p>
-          </motion.div>
-        );
+        return renderAnalytics();
       case 'system':
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center py-12"
-          >
-            <Monitor className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600">System Status</h3>
-            <p className="text-gray-500 mt-2">Coming soon - Real-time system monitoring</p>
-          </motion.div>
-        );
+        return renderSystemStatus();
       default:
         return renderOverview();
     }
