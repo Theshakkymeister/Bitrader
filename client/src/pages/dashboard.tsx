@@ -179,47 +179,47 @@ export default function Dashboard() {
               <nav className="space-y-2">
                 <button 
                   onClick={() => setActiveView('dashboard')}
-                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-all duration-300 hover-lift scale-hover ${
                     activeView === 'dashboard' 
-                      ? 'text-white bg-blue-600/20' 
+                      ? 'text-white bg-blue-600/20 shadow-lg' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-700'
                   }`}
                 >
-                  <ChartLine className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  {sidebarOpen && <span>Dashboard</span>}
+                  <ChartLine className={`h-4 w-4 text-blue-500 flex-shrink-0 ${activeView === 'dashboard' ? 'pulse-subtle' : ''}`} />
+                  {sidebarOpen && <span className="slide-in-right">Dashboard</span>}
                 </button>
                 <button 
                   onClick={() => setActiveView('portfolio')}
-                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-all duration-300 hover-lift scale-hover ${
                     activeView === 'portfolio' 
-                      ? 'text-white bg-blue-600/20' 
+                      ? 'text-white bg-blue-600/20 shadow-lg' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-700'
                   }`}
                 >
-                  <Wallet className="h-4 w-4 flex-shrink-0" />
-                  {sidebarOpen && <span>Portfolio</span>}
+                  <Wallet className={`h-4 w-4 flex-shrink-0 ${activeView === 'portfolio' ? 'pulse-subtle' : ''}`} />
+                  {sidebarOpen && <span className="slide-in-right">Portfolio</span>}
                 </button>
                 <button 
                   onClick={() => setActiveView('trades')}
-                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-all duration-300 hover-lift scale-hover ${
                     activeView === 'trades' 
-                      ? 'text-white bg-blue-600/20' 
+                      ? 'text-white bg-blue-600/20 shadow-lg' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-700'
                   }`}
                 >
-                  <History className="h-4 w-4 flex-shrink-0" />
-                  {sidebarOpen && <span>Trade History</span>}
+                  <History className={`h-4 w-4 flex-shrink-0 ${activeView === 'trades' ? 'pulse-subtle' : ''}`} />
+                  {sidebarOpen && <span className="slide-in-right">Trade History</span>}
                 </button>
                 <button 
                   onClick={() => setActiveView('analytics')}
-                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-3 w-full text-left px-3 py-2 rounded-lg transition-all duration-300 hover-lift scale-hover ${
                     activeView === 'analytics' 
-                      ? 'text-white bg-blue-600/20' 
+                      ? 'text-white bg-blue-600/20 shadow-lg' 
                       : 'text-slate-400 hover:text-white hover:bg-slate-700'
                   }`}
                 >
-                  <BarChart3 className="h-4 w-4 flex-shrink-0" />
-                  {sidebarOpen && <span>Analytics</span>}
+                  <BarChart3 className={`h-4 w-4 flex-shrink-0 ${activeView === 'analytics' ? 'pulse-subtle' : ''}`} />
+                  {sidebarOpen && <span className="slide-in-right">Analytics</span>}
                 </button>
               </nav>
             </div>
@@ -369,55 +369,55 @@ export default function Dashboard() {
 
             {/* Portfolio Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-slate-900 border-slate-700">
+              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-1 cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-slate-400 text-sm">Total Balance</span>
-                    <Wallet className="h-5 w-5 text-blue-500" />
+                    <Wallet className="h-5 w-5 text-blue-500 pulse-subtle" />
                   </div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold count-up gradient-animate bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
                     ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
                   </div>
-                  <div className="text-sm text-green-500">+12.5% this month</div>
+                  <div className="text-sm text-green-500 slide-in-right">+12.5% this month</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-700">
+              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-2 cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-slate-400 text-sm">Today's P&L</span>
-                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    <TrendingUp className="h-5 w-5 text-green-500 heartbeat" />
                   </div>
-                  <div className="text-2xl font-bold text-green-500">
+                  <div className="text-2xl font-bold text-green-500 count-up">
                     +${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
                   </div>
-                  <div className="text-sm text-slate-400">+1.97% today</div>
+                  <div className="text-sm text-slate-400 slide-in-right">+1.97% today</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-700">
+              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-3 cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-slate-400 text-sm">Win Rate</span>
-                    <Target className="h-5 w-5 text-blue-500" />
+                    <Target className="h-5 w-5 text-blue-500 pulse-subtle" />
                   </div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold count-up">
                     {portfolio?.winRate ? parseFloat(portfolio.winRate).toFixed(1) : '0.0'}%
                   </div>
-                  <div className="text-sm text-green-500">+2.1% vs last month</div>
+                  <div className="text-sm text-green-500 slide-in-right">+2.1% vs last month</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-700">
+              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-4 cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-slate-400 text-sm">Active Algorithms</span>
-                    <Bot className="h-5 w-5 text-blue-400" />
+                    <Bot className="h-5 w-5 text-blue-400 heartbeat" />
                   </div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold count-up">
                     {portfolio?.activeAlgorithms || 0}
                   </div>
-                  <div className="text-sm text-slate-400">All performing well</div>
+                  <div className="text-sm text-slate-400 slide-in-right">All performing well</div>
                 </CardContent>
               </Card>
             </div>
@@ -455,44 +455,44 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg hover-lift scale-hover cursor-pointer slide-in-left stagger-1">
                     <div className="flex items-center space-x-3">
-                      <Coins className="h-5 w-5 text-yellow-500" />
+                      <Coins className="h-5 w-5 text-yellow-500 pulse-subtle" />
                       <div>
                         <div className="font-medium">Forex Algorithm</div>
                         <div className="text-sm text-slate-400">EUR/USD, GBP/USD, USD/JPY</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium text-green-500">+$8,945.20</div>
+                      <div className="font-medium text-green-500 count-up">+$8,945.20</div>
                       <div className="text-sm text-slate-400">82.1% win rate</div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg hover-lift scale-hover cursor-pointer slide-in-left stagger-2">
                     <div className="flex items-center space-x-3">
-                      <Gem className="h-5 w-5 text-yellow-400" />
+                      <Gem className="h-5 w-5 text-yellow-400 heartbeat" />
                       <div>
                         <div className="font-medium">Gold Algorithm</div>
                         <div className="text-sm text-slate-400">XAU/USD</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium text-green-500">+$3,124.85</div>
+                      <div className="font-medium text-green-500 count-up">+$3,124.85</div>
                       <div className="text-sm text-slate-400">75.3% win rate</div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg hover-lift scale-hover cursor-pointer slide-in-left stagger-3">
                     <div className="flex items-center space-x-3">
-                      <BarChart3 className="h-5 w-5 text-green-500" />
+                      <BarChart3 className="h-5 w-5 text-green-500 pulse-subtle" />
                       <div>
                         <div className="font-medium">Stocks Algorithm</div>
                         <div className="text-sm text-slate-400">SPY, QQQ, AAPL</div>
                       </div>
-                    </div>
+                    </div>     
                     <div className="text-right">
-                      <div className="font-medium text-green-500">+$2,687.40</div>
+                      <div className="font-medium text-green-500 count-up">+$2,687.40</div>
                       <div className="text-sm text-slate-400">79.6% win rate</div>
                     </div>
                   </div>
