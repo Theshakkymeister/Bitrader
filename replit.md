@@ -49,17 +49,34 @@ The application uses Replit's authentication system which provides:
 ### Trading Dashboard
 The main dashboard provides:
 - Portfolio overview with balance and P&L information
-- Active algorithm management
-- Trading history visualization
+- Crypto Holdings section (Bitcoin, Ethereum, Solana)
+- Stock Portfolio section (Apple, Tesla, Google, Microsoft)
+- Robinhood-style live charts with real-time updates
 - Performance metrics display
-- Algorithm selection and configuration
+- Buying power display with green glow effect
 
-### Algorithm Management
-The platform offers four main algorithm types:
-- **Forex Algorithm**: Major currency pair trading
-- **Gold Algorithm**: Precious metals (XAU/USD) trading
-- **Stocks Algorithm**: Equity and index trading
-- **Crypto Algorithm**: Bitcoin, Ethereum, and altcoin trading
+### Wallets System
+The wallets page includes:
+- 5 cryptocurrency wallets (BTC, USDT, ETH, SOL, USDC)
+- Real-time balance and USD value calculations
+- Wallet connection features for Trust Wallet and Coinbase
+- Individual wallet addresses with show/hide functionality
+- Send, Receive, and QR code generation features
+- Total portfolio value aggregation
+
+### Settings & Account Management
+The settings page provides:
+- **Bitraders.net Account Connection**: API key and secret integration
+- **Notification Preferences**: Trade alerts, portfolio updates, security notifications
+- **App Preferences**: Currency selection, timezone settings
+- **Wallet Management**: External wallet connection setup
+
+### Navigation Structure
+The application uses a clean navigation with:
+- **Dashboard**: Main portfolio overview with crypto and stock holdings
+- **Wallets**: Individual cryptocurrency wallet management
+- **Portfolio**: Dedicated portfolio analysis (coming soon)
+- **Settings**: Account connection and preferences management
 
 ## Data Flow
 
