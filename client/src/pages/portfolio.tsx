@@ -360,18 +360,28 @@ export default function Portfolio() {
             </div>
             
             {/* Chart value display - centered with the green line */}
-            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 text-center">
-              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-6 py-4 shadow-lg border-2 border-green-200">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-1">{formatCurrency(totalPortfolioValue)}</div>
-                  <div className="text-sm text-gray-500 font-medium">Current Portfolio Value</div>
-                  <div className={`text-sm font-semibold mt-1 ${totalGainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {totalGainLoss >= 0 ? '+' : ''}{formatCurrency(totalGainLoss).replace('$', '$')} ({totalGainLossPercent.toFixed(2)}%)
+            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 text-center">
+              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-6 shadow-lg border-2 border-green-200">
+                <div className="text-center space-y-2">
+                  {/* Total Portfolio Value */}
+                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Portfolio Value</div>
+                  <div className="text-3xl font-bold text-green-600">$25,235.99</div>
+                  
+                  {/* Today's Performance */}
+                  <div className="flex items-center justify-center space-x-2 text-green-600">
+                    <span className="text-lg font-semibold">+$373.49</span>
+                    <span className="text-sm font-medium">(+1.48%) Today</span>
+                  </div>
+                  
+                  {/* All Time Performance */}
+                  <div className="pt-2 border-t border-gray-200">
+                    <div className="text-xs text-gray-500 mb-1">All Time</div>
+                    <div className="text-green-600 font-semibold">+$4,123.45 (+20.17%)</div>
                   </div>
                 </div>
               </div>
               {/* Connecting line to chart */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-green-300 opacity-60"></div>
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0.5 h-6 bg-green-300 opacity-60"></div>
             </div>
           </div>
         </CardContent>
