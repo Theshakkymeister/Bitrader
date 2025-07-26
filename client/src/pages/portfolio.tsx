@@ -12,8 +12,10 @@ import {
   Eye,
   EyeOff,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Search
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { SiApple, SiBitcoin, SiTesla, SiGoogle, SiEthereum } from "react-icons/si";
 import { allAssets } from "@/lib/marketData";
 
@@ -35,6 +37,7 @@ export default function Portfolio() {
   const [showValues, setShowValues] = useState(true);
   const [timeframe, setTimeframe] = useState("1d");
   const [portfolioValue, setPortfolioValue] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
@@ -148,6 +151,19 @@ export default function Portfolio() {
 
   const stockHoldings = holdings.filter(h => h.type === 'stock');
   const cryptoHoldings = holdings.filter(h => h.type === 'crypto');
+  
+  // Filter holdings based on search query
+  const filterHoldings = (holdingsArray: Holding[]) => {
+    if (!searchQuery.trim()) return holdingsArray;
+    return holdingsArray.filter(holding => 
+      holding.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      holding.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+  
+  const filteredHoldings = filterHoldings(holdings);
+  const filteredStockHoldings = filterHoldings(stockHoldings);
+  const filteredCryptoHoldings = filterHoldings(cryptoHoldings);
   
   const totalStockValue = stockHoldings.reduce((sum, h) => sum + h.value, 0);
   const totalCryptoValue = cryptoHoldings.reduce((sum, h) => sum + h.value, 0);
@@ -394,12 +410,25 @@ export default function Portfolio() {
         <TabsContent value="all" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>All Holdings</CardTitle>
-              <CardDescription>Complete overview of your stock and cryptocurrency investments</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>All Holdings</CardTitle>
+                  <CardDescription>Complete overview of your stock and cryptocurrency investments</CardDescription>
+                </div>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search holdings..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {holdings.map((holding) => (
+                {filteredHoldings.length > 0 ? filteredHoldings.map((holding) => (
                   <div key={holding.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
                     <div className="flex items-center space-x-4">
                       <holding.icon className={`h-10 w-10 ${holding.color}`} />
@@ -421,7 +450,13 @@ export default function Portfolio() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No holdings found matching "{searchQuery}"</p>
+                    <p className="text-sm mt-2">Try searching by symbol or company name</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -430,12 +465,25 @@ export default function Portfolio() {
         <TabsContent value="stocks" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Stock Holdings</CardTitle>
-              <CardDescription>Your equity investments and their performance</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Stock Holdings</CardTitle>
+                  <CardDescription>Your equity investments and their performance</CardDescription>
+                </div>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search stocks..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stockHoldings.map((holding) => (
+                {filteredStockHoldings.length > 0 ? filteredStockHoldings.map((holding) => (
                   <div key={holding.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
                     <div className="flex items-center space-x-4">
                       <holding.icon className={`h-10 w-10 ${holding.color}`} />
@@ -457,7 +505,13 @@ export default function Portfolio() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No stocks found matching "{searchQuery}"</p>
+                    <p className="text-sm mt-2">Try searching by symbol or company name</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -466,12 +520,25 @@ export default function Portfolio() {
         <TabsContent value="crypto" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Crypto Holdings</CardTitle>
-              <CardDescription>Your cryptocurrency investments and their performance</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Crypto Holdings</CardTitle>
+                  <CardDescription>Your cryptocurrency investments and their performance</CardDescription>
+                </div>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search crypto..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {cryptoHoldings.map((holding) => (
+                {filteredCryptoHoldings.length > 0 ? filteredCryptoHoldings.map((holding) => (
                   <div key={holding.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
                     <div className="flex items-center space-x-4">
                       <holding.icon className={`h-10 w-10 ${holding.color}`} />
@@ -493,7 +560,13 @@ export default function Portfolio() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No crypto found matching "{searchQuery}"</p>
+                    <p className="text-sm mt-2">Try searching by symbol or cryptocurrency name</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
