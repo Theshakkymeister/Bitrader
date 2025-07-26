@@ -57,6 +57,33 @@ export const cryptoAssets: MarketAsset[] = [
 
 // Top stocks from major indices with realistic data
 export const stockAssets: MarketAsset[] = [
+  // Major ETFs
+  { symbol: 'SPY', name: 'SPDR S&P 500 ETF Trust', price: generatePrice(458.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/spy-500x500.png' },
+  { symbol: 'QQQ', name: 'Invesco QQQ Trust', price: generatePrice(385.20), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://s3.amazonaws.com/logos.brandlogos.org/invesco-qqq-etf/invesco-qqq-logo.png' },
+  { symbol: 'IWM', name: 'iShares Russell 2000 ETF', price: generatePrice(195.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'EFA', name: 'iShares MSCI EAFE ETF', price: generatePrice(72.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', price: generatePrice(235.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VEA', name: 'Vanguard FTSE Developed Markets ETF', price: generatePrice(48.25), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VOO', name: 'Vanguard S&P 500 ETF', price: generatePrice(415.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'VWO', name: 'Vanguard Emerging Markets ETF', price: generatePrice(42.15), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://personal.vanguard.com/etc/designs/pv/images/vanguard_v_favicon.ico' },
+  { symbol: 'GLD', name: 'SPDR Gold Trust', price: generatePrice(185.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/gld-500x500.png' },
+  { symbol: 'SLV', name: 'iShares Silver Trust', price: generatePrice(23.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'TLT', name: 'iShares 20+ Year Treasury Bond ETF', price: generatePrice(95.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'XLF', name: 'Financial Select Sector SPDR Fund', price: generatePrice(38.95), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlf-500x500.png' },
+  { symbol: 'XLK', name: 'Technology Select Sector SPDR Fund', price: generatePrice(198.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlk-500x500.png' },
+  { symbol: 'XLE', name: 'Energy Select Sector SPDR Fund', price: generatePrice(82.40), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xle-500x500.png' },
+  { symbol: 'XLV', name: 'Health Care Select Sector SPDR Fund', price: generatePrice(128.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlv-500x500.png' },
+  { symbol: 'XLI', name: 'Industrial Select Sector SPDR Fund', price: generatePrice(118.45), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xli-500x500.png' },
+  { symbol: 'XLP', name: 'Consumer Staples Select Sector SPDR Fund', price: generatePrice(78.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlp-500x500.png' },
+  { symbol: 'XLY', name: 'Consumer Discretionary Select Sector SPDR Fund', price: generatePrice(165.80), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xly-500x500.png' },
+  { symbol: 'XLU', name: 'Utilities Select Sector SPDR Fund', price: generatePrice(68.25), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlu-500x500.png' },
+  { symbol: 'XLB', name: 'Materials Select Sector SPDR Fund', price: generatePrice(88.90), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlb-500x500.png' },
+  { symbol: 'XLRE', name: 'Real Estate Select Sector SPDR Fund', price: generatePrice(42.75), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/xlre-500x500.png' },
+  { symbol: 'DIA', name: 'SPDR Dow Jones Industrial Average ETF Trust', price: generatePrice(348.20), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/dia-500x500.png' },
+  { symbol: 'MDY', name: 'SPDR S&P MidCap 400 ETF Trust', price: generatePrice(485.60), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://content.spglobal.com/content/uploads/sites/3/2015/03/mdy-500x500.png' },
+  { symbol: 'EEM', name: 'iShares MSCI Emerging Markets ETF', price: generatePrice(42.85), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  { symbol: 'AGG', name: 'iShares Core U.S. Aggregate Bond ETF', price: generatePrice(105.30), change: generateChange(), type: 'stock', sector: 'ETF', logo: 'https://www.ishares.com/etc/designs/ishares/favicon.ico' },
+  
   // Technology sector
   { symbol: 'AAPL', name: 'Apple Inc.', price: generatePrice(185.60), change: generateChange(), type: 'stock', sector: 'Technology', logo: 'https://logo.clearbit.com/apple.com' },
   { symbol: 'MSFT', name: 'Microsoft Corporation', price: generatePrice(378.85), change: generateChange(), type: 'stock', sector: 'Technology', logo: 'https://logo.clearbit.com/microsoft.com' },
