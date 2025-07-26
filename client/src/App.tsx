@@ -28,7 +28,7 @@ function MobileNav() {
     <div className="lg:hidden">
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
@@ -106,12 +106,26 @@ function AppHeader() {
           
           <div className="flex items-center space-x-4">
             <MobileNav />
-            <div className="hidden sm:flex items-center space-x-3">
-              <div className="text-sm text-gray-600">
-                Welcome, Trader
+            <div className="hidden sm:flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+                    T
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Trader</div>
+                  <div className="text-xs text-green-600 flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
+                    Online
+                  </div>
+                </div>
               </div>
               <a href="/api/logout">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
                   Logout
                 </Button>
               </a>
