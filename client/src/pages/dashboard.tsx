@@ -22,6 +22,7 @@ import {
   ChartLine,
   Plus
 } from "lucide-react";
+import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -42,25 +43,25 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: portfolio, isLoading: portfolioLoading } = useQuery({
+  const { data: portfolio, isLoading: portfolioLoading } = useQuery<Portfolio>({
     queryKey: ["/api/portfolio"],
     enabled: isAuthenticated,
     retry: false,
   });
 
-  const { data: trades, isLoading: tradesLoading } = useQuery({
+  const { data: trades = [], isLoading: tradesLoading } = useQuery<Trade[]>({
     queryKey: ["/api/trades"],
     enabled: isAuthenticated,
     retry: false,
   });
 
-  const { data: algorithms, isLoading: algorithmsLoading } = useQuery({
+  const { data: algorithms = [], isLoading: algorithmsLoading } = useQuery({
     queryKey: ["/api/algorithms"],
     enabled: isAuthenticated,
     retry: false,
   });
 
-  const { data: performance } = useQuery({
+  const { data: performance = [] } = useQuery<PerformanceMetric[]>({
     queryKey: ["/api/performance"],
     enabled: isAuthenticated,
     retry: false,
@@ -234,7 +235,7 @@ export default function Dashboard() {
                     <Wallet className="h-5 w-5 text-blue-500" />
                   </div>
                   <div className="text-2xl font-bold">
-                    ${portfolio ? parseFloat(portfolio.totalBalance || '0').toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
+                    ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
                   </div>
                   <div className="text-sm text-green-500">+12.5% this month</div>
                 </CardContent>
@@ -247,7 +248,7 @@ export default function Dashboard() {
                     <TrendingUp className="h-5 w-5 text-green-500" />
                   </div>
                   <div className="text-2xl font-bold text-green-500">
-                    +${portfolio ? parseFloat(portfolio.todayPL || '0').toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
+                    +${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
                   </div>
                   <div className="text-sm text-slate-400">+1.97% today</div>
                 </CardContent>
@@ -260,7 +261,7 @@ export default function Dashboard() {
                     <Target className="h-5 w-5 text-blue-500" />
                   </div>
                   <div className="text-2xl font-bold">
-                    {portfolio ? parseFloat(portfolio.winRate || '0').toFixed(1) : '0.0'}%
+                    {portfolio?.winRate ? parseFloat(portfolio.winRate).toFixed(1) : '0.0'}%
                   </div>
                   <div className="text-sm text-green-500">+2.1% vs last month</div>
                 </CardContent>
@@ -460,31 +461,31 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-sm">Sharpe Ratio</span>
                     <span className="font-medium">
-                      {performance && performance[0] ? parseFloat(performance[0].sharpeRatio || '0').toFixed(2) : '0.00'}
+                      {performance && performance.length > 0 && performance[0]?.sharpeRatio ? parseFloat(performance[0].sharpeRatio).toFixed(2) : '0.00'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-sm">Max Drawdown</span>
                     <span className="font-medium text-red-500">
-                      {performance && performance[0] ? parseFloat(performance[0].maxDrawdown || '0').toFixed(1) : '0.0'}%
+                      {performance && performance.length > 0 && performance[0]?.maxDrawdown ? parseFloat(performance[0].maxDrawdown).toFixed(1) : '0.0'}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-sm">Avg. Trade Duration</span>
                     <span className="font-medium">
-                      {performance && performance[0] ? parseFloat(performance[0].avgTradeDuration || '0').toFixed(1) : '0.0'}h
+                      {performance && performance.length > 0 && performance[0]?.avgTradeDuration ? parseFloat(performance[0].avgTradeDuration).toFixed(1) : '0.0'}h
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-sm">Profit Factor</span>
                     <span className="font-medium text-green-500">
-                      {performance && performance[0] ? parseFloat(performance[0].profitFactor || '0').toFixed(2) : '0.00'}
+                      {performance && performance.length > 0 && performance[0]?.profitFactor ? parseFloat(performance[0].profitFactor).toFixed(2) : '0.00'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-sm">Total Trades</span>
                     <span className="font-medium">
-                      {performance && performance[0] ? performance[0].totalTrades : 0}
+                      {performance && performance.length > 0 && performance[0]?.totalTrades ? performance[0].totalTrades : 0}
                     </span>
                   </div>
                 </div>

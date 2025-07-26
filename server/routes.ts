@@ -3,8 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertTradeSchema, insertPerformanceMetricSchema } from "@shared/schema";
+import { initializeUserPortfolio, runSeedOperations } from "./seedData";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize seed data
+  await runSeedOperations();
+  
   // Auth middleware
   await setupAuth(app);
 
@@ -27,14 +31,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let portfolio = await storage.getPortfolio(userId);
       
       if (!portfolio) {
-        // Create initial portfolio for new user
-        portfolio = await storage.createPortfolio({
-          userId,
-          totalBalance: '0',
-          todayPL: '0',
-          winRate: '0',
-          activeAlgorithms: 0,
-        });
+        // Initialize portfolio with demo data for new user
+        portfolio = await initializeUserPortfolio(userId);
       }
       
       res.json(portfolio);
