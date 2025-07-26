@@ -87,7 +87,11 @@ export default function AdminLogin() {
           </div>
           <CardTitle className="text-2xl font-bold text-white">Admin Access</CardTitle>
           <CardDescription className="text-gray-300">
-            Secure login for Bitrader system administrators
+            Secure login for Bitrader system administrators<br/>
+            <span className="text-xs text-gray-400 mt-2 block">
+              Email: Ken.attwood@yahoo.com<br/>
+              Password: AdminPass2025!
+            </span>
           </CardDescription>
         </CardHeader>
 
