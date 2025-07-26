@@ -149,6 +149,82 @@ export default function Dashboard() {
 
       <div className="px-4 space-y-6">
 
+      {/* Wallet Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Crypto Holdings */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <SiBitcoin className="h-5 w-5 text-orange-500" />
+              <h3 className="text-lg font-semibold text-black">Crypto Holdings</h3>
+            </div>
+            <div className="text-sm font-medium text-green-600">
+              ${totalCrypto.toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </div>
+          </div>
+          <div className="space-y-3">
+            {holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol || '')).map((holding) => (
+              <div key={holding.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  {holding.symbol === 'BTC' && <SiBitcoin className="h-6 w-6 text-orange-500" />}
+                  {holding.symbol === 'ETH' && <SiEthereum className="h-6 w-6 text-blue-500" />}
+                  {holding.symbol === 'SOL' && <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">S</div>}
+                  <div>
+                    <div className="font-medium text-black">{holding.symbol}</div>
+                    <div className="text-xs text-gray-500">{holding.shares} coins</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-black">
+                    ${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                  </div>
+                  <div className={`text-xs ${(holding.change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {(holding.change || 0) >= 0 ? '+' : ''}{holding.change?.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stock Holdings */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="h-5 w-5 text-blue-500" />
+              <h3 className="text-lg font-semibold text-black">Stock Holdings</h3>
+            </div>
+            <div className="text-sm font-medium text-green-600">
+              ${totalStocks.toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </div>
+          </div>
+          <div className="space-y-3">
+            {holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol || '')).map((holding) => (
+              <div key={holding.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  {holding.symbol === 'AAPL' && <SiApple className="h-6 w-6 text-gray-600" />}
+                  {holding.symbol === 'TSLA' && <SiTesla className="h-6 w-6 text-red-500" />}
+                  {holding.symbol === 'GOOGL' && <SiGoogle className="h-6 w-6 text-blue-500" />}
+                  {holding.symbol === 'MSFT' && <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">MS</div>}
+                  <div>
+                    <div className="font-medium text-black">{holding.symbol}</div>
+                    <div className="text-xs text-gray-500">{holding.shares} shares</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-black">
+                    ${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                  </div>
+                  <div className={`text-xs ${(holding.change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {(holding.change || 0) >= 0 ? '+' : ''}{holding.change?.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Key Portfolio Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
