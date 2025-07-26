@@ -367,7 +367,7 @@ export default function Portfolio() {
                   <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Portfolio Value</div>
                   
                   {/* Current Value */}
-                  <div className="text-3xl font-bold text-green-600">$25,235.99</div>
+                  <div className="text-4xl font-bold text-green-600">$25,235.99</div>
                   
                   {/* Today's Performance */}
                   <div className="flex items-center justify-center space-x-2 text-green-600">
