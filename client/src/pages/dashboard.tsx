@@ -32,9 +32,6 @@ export default function Dashboard() {
   const [portfolioValue, setPortfolioValue] = useState(25234);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  // Debug log to ensure component is rendering
-  console.log('Dashboard component rendering at:', new Date().toISOString());
-
   // Real-time portfolio simulation
   useEffect(() => {
     const interval = setInterval(() => {

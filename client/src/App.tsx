@@ -15,9 +15,9 @@ function MobileNav() {
   const [location] = useLocation();
   
   const navItems = [
-    { href: "/", icon: Home, label: "Portfolio" },
-    { href: "/trading", icon: TrendingUp, label: "Trading" },
-    { href: "/analytics", icon: PieChart, label: "Analytics" },
+    { href: "/", icon: Home, label: "Dashboard" },
+    { href: "/wallets", icon: TrendingUp, label: "Wallets" },
+    { href: "/portfolio", icon: PieChart, label: "Portfolio" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
@@ -60,9 +60,9 @@ function DesktopNav() {
   const [location] = useLocation();
   
   const navItems = [
-    { href: "/", icon: Home, label: "Portfolio" },
-    { href: "/trading", icon: TrendingUp, label: "Trading" },
-    { href: "/analytics", icon: PieChart, label: "Analytics" },
+    { href: "/", icon: Home, label: "Dashboard" },
+    { href: "/wallets", icon: TrendingUp, label: "Wallets" },
+    { href: "/portfolio", icon: PieChart, label: "Portfolio" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
@@ -133,8 +133,8 @@ function Router() {
             <AppHeader />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <Route path="/" component={Dashboard} />
-              <Route path="/trading" component={() => <div className="text-center py-20 text-gray-500">Trading page coming soon</div>} />
-              <Route path="/analytics" component={() => <div className="text-center py-20 text-gray-500">Analytics page coming soon</div>} />
+              <Route path="/wallets" component={() => <div className="text-center py-20 text-gray-500">Wallets page coming soon</div>} />
+              <Route path="/portfolio" component={() => <div className="text-center py-20 text-gray-500">Portfolio page coming soon</div>} />
               <Route path="/settings" component={() => <div className="text-center py-20 text-gray-500">Settings page coming soon</div>} />
             </main>
           </div>
