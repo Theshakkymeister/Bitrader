@@ -360,7 +360,7 @@ export default function Portfolio() {
             </div>
             
             {/* Chart value display - centered with the green line */}
-            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 text-center">
+            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 translate-x-8 text-center">
               <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-6 shadow-lg border-2 border-green-200">
                 <div className="text-center space-y-2">
                   {/* Total Portfolio Value */}
