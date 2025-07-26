@@ -14,7 +14,7 @@ export default function Landing() {
             <span className="text-xl font-semibold text-black">Bitrader</span>
           </div>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/auth'}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-medium"
           >
             Sign In
@@ -35,7 +35,7 @@ export default function Landing() {
               Start your journey to financial freedom today.
             </p>
             <Button 
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => window.location.href = '/auth'}
               className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2 smooth-enter"
             >
               <span>Start Trading Free</span>

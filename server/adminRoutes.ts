@@ -1,10 +1,7 @@
 import type { Express } from "express";
 import { z } from "zod";
-import { isAdminAuthenticated, verifyPassword, hashPassword, logAdminActivity, initializeAdminUser } from "./adminAuth";
+import { isAdminAuthenticated, verifyPassword, hashPassword, logAdminActivity } from "./adminAuth";
 import { storage } from "./storage";
-
-// Initialize admin system
-initializeAdminUser();
 
 export function registerAdminRoutes(app: Express) {
   

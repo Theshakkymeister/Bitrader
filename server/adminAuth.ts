@@ -68,11 +68,16 @@ export const initializeAdminUser = async () => {
       console.log("✅ Admin user created: Ken.attwood@yahoo.com");
       console.log("🔐 Default password: AdminPass2025!");
       console.log("⚠️  Please change the password immediately after first login");
+    } else {
+      console.log("✅ Admin user already exists: Ken.attwood@yahoo.com");
     }
   } catch (error) {
     console.error("Failed to initialize admin user:", error);
   }
 };
+
+// Call initialization
+initializeAdminUser();
 
 // Log admin activity
 export const logAdminActivity = async (

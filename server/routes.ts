@@ -1,7 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth } from "./auth";
+
+// Authentication middleware
+const isAuthenticated = (req: any, res: any, next: any) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({ message: "Unauthorized" });
+};
 import { registerAdminRoutes } from "./adminRoutes";
 import { externalAPI } from "./externalAPI";
 import { z } from "zod";
@@ -13,34 +21,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await runSeedOperations();
   
   // Auth middleware
-  await setupAuth(app);
+  setupAuth(app);
   
   // Register admin routes
   registerAdminRoutes(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      // Auto-sync data if user has API credentials and last sync was more than 5 minutes ago
-      if (user?.apiKey && user?.externalUserId) {
-        const shouldSync = !user.lastSyncAt || 
-          (new Date().getTime() - new Date(user.lastSyncAt).getTime()) > 5 * 60 * 1000;
-        
-        if (shouldSync) {
-          // Sync in background
-          externalAPI.syncUserData(user).catch(console.error);
-        }
-      }
-      
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // User routes (handled by auth.ts)
 
   // Portfolio routes
   app.get('/api/portfolio', isAuthenticated, async (req: any, res) => {

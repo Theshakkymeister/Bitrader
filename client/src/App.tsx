@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useState } from "react";
 import Landing from "@/pages/landing";
+import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import Wallets from "@/pages/wallets";
 import Portfolio from "@/pages/portfolio";
@@ -153,6 +154,9 @@ function Router() {
       {/* Admin routes - always accessible */}
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      
+      {/* Auth route */}
+      <Route path="/auth" component={AuthPage} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
