@@ -124,20 +124,28 @@ export default function Dashboard() {
                 Dashboard
               </button>
               <button 
-                onClick={() => setActiveView('portfolio')}
+                onClick={() => setActiveView('stocks')}
                 className={`text-sm font-medium transition-colors ${
-                  activeView === 'portfolio' ? 'text-black' : 'text-gray-600 hover:text-black'
+                  activeView === 'stocks' ? 'text-black' : 'text-gray-600 hover:text-black'
                 }`}
               >
-                Portfolio
+                Stocks
               </button>
               <button 
-                onClick={() => setActiveView('trades')}
+                onClick={() => setActiveView('crypto')}
                 className={`text-sm font-medium transition-colors ${
-                  activeView === 'trades' ? 'text-black' : 'text-gray-600 hover:text-black'
+                  activeView === 'crypto' ? 'text-black' : 'text-gray-600 hover:text-black'
                 }`}
               >
-                History
+                Crypto
+              </button>
+              <button 
+                onClick={() => setActiveView('wallet')}
+                className={`text-sm font-medium transition-colors ${
+                  activeView === 'wallet' ? 'text-black' : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Wallet
               </button>
             </nav>
           </div>
@@ -187,12 +195,28 @@ export default function Dashboard() {
             Dashboard
           </button>
           <button 
-            onClick={() => { setActiveView('portfolio'); setSidebarOpen(false); }}
+            onClick={() => { setActiveView('stocks'); setSidebarOpen(false); }}
             className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'portfolio' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
+              activeView === 'stocks' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
-            Portfolio
+            Stock Holdings
+          </button>
+          <button 
+            onClick={() => { setActiveView('crypto'); setSidebarOpen(false); }}
+            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
+              activeView === 'crypto' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Crypto Holdings
+          </button>
+          <button 
+            onClick={() => { setActiveView('wallet'); setSidebarOpen(false); }}
+            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
+              activeView === 'wallet' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Wallet
           </button>
           <button 
             onClick={() => { setActiveView('trades'); setSidebarOpen(false); }}
@@ -240,8 +264,12 @@ export default function Dashboard() {
     switch (activeView) {
       case 'dashboard':
         return renderDashboard();
-      case 'portfolio':
-        return renderPortfolio();
+      case 'stocks':
+        return renderStocks();
+      case 'crypto':
+        return renderCrypto();
+      case 'wallet':
+        return renderWallet();
       case 'trades':
         return renderTrades();
       case 'settings':
@@ -254,66 +282,136 @@ export default function Dashboard() {
   function renderDashboard() {
     return (
       <div className="space-y-6">
-        {/* Portfolio Value Card */}
+        {/* Portfolio Value Card with Chart */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="text-sm text-gray-600 mb-1">Portfolio Value</div>
-          <div className="text-3xl font-bold text-black mb-2">
-            ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <div className="text-sm text-gray-600 mb-1">Portfolio Value</div>
+              <div className="text-3xl font-bold text-black mb-2">
+                ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
+              </div>
+              <div className="flex items-center text-sm">
+                <span className="text-green-600 font-medium">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
+                <span className="text-gray-600 ml-1">(+1.97%) Today</span>
+              </div>
+            </div>
+            <Select>
+              <SelectTrigger className="w-24 h-8 text-xs">
+                <SelectValue placeholder="1D" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1d">1D</SelectItem>
+                <SelectItem value="1w">1W</SelectItem>
+                <SelectItem value="1m">1M</SelectItem>
+                <SelectItem value="1y">1Y</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex items-center text-sm">
-            <span className="text-green-600 font-medium">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
-            <span className="text-gray-600 ml-1">(+1.97%) Today</span>
+          
+          {/* Simple Portfolio Chart */}
+          <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden">
+            <svg className="w-full h-full" viewBox="0 0 400 100">
+              <path 
+                d="M 0,80 Q 100,60 200,45 T 400,20" 
+                stroke="#10b981" 
+                strokeWidth="2" 
+                fill="none"
+              />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              <path 
+                d="M 0,80 Q 100,60 200,45 T 400,20 L 400,100 L 0,100 Z" 
+                fill="url(#gradient)"
+              />
+            </svg>
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Buying Power and Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Buying Power</div>
+            <div className="text-xl font-bold text-black">$15,420.00</div>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Active Positions</div>
-            <div className="text-xl font-bold text-black">4</div>
+            <div className="text-xl font-bold text-black">8</div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Win Rate</div>
-            <div className="text-xl font-bold text-green-600">82.4%</div>
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's Return</div>
+            <div className="text-xl font-bold text-green-600">+2.45%</div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Monthly Return</div>
-            <div className="text-xl font-bold text-green-600">+12.5%</div>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Total Trades</div>
-            <div className="text-xl font-bold text-black">1,247</div>
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Total Return</div>
+            <div className="text-xl font-bold text-green-600">+18.7%</div>
           </div>
         </div>
 
-        {/* Trading Algorithms */}
-        <div>
-          <h3 className="text-lg font-semibold text-black mb-4">Your Trading Algorithms</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-              <div className="flex items-center justify-between mb-2">
+        {/* Holdings Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Stock Holdings */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-black mb-4">Stock Holdings</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                    <Coins className="h-4 w-4 text-yellow-600" />
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-blue-600">AAPL</span>
                   </div>
-                  <span className="font-medium text-black">Forex Algorithm</span>
+                  <span className="font-medium">Apple Inc.</span>
                 </div>
-                <div className="text-green-600 font-medium">+24.5%</div>
+                <div className="text-right">
+                  <div className="font-medium">$2,450.00</div>
+                  <div className="text-xs text-green-600">+1.2%</div>
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Active • 347 trades</div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-green-600">TSLA</span>
+                  </div>
+                  <span className="font-medium">Tesla Inc.</span>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">$1,875.00</div>
+                  <div className="text-xs text-red-600">-0.8%</div>
+                </div>
+              </div>
             </div>
-            
-            <div className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-              <div className="flex items-center justify-between mb-2">
+          </div>
+
+          {/* Crypto Holdings */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-black mb-4">Crypto Holdings</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
                     <Bitcoin className="h-4 w-4 text-orange-600" />
                   </div>
-                  <span className="font-medium text-black">Crypto Algorithm</span>
+                  <span className="font-medium">Bitcoin</span>
                 </div>
-                <div className="text-green-600 font-medium">+31.2%</div>
+                <div className="text-right">
+                  <div className="font-medium">$8,750.00</div>
+                  <div className="text-xs text-green-600">+3.5%</div>
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Active • 456 trades</div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-purple-600">ETH</span>
+                  </div>
+                  <span className="font-medium">Ethereum</span>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium">$3,200.00</div>
+                  <div className="text-xs text-green-600">+2.1%</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -321,18 +419,273 @@ export default function Dashboard() {
     );
   }
 
-  function renderPortfolio() {
+
+
+  function renderStocks() {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-black">Portfolio</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-black">Stock Holdings</h2>
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
+            Buy Stocks
+          </Button>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-sm font-medium text-black">My Positions</div>
+          </div>
+          <div className="divide-y divide-gray-200">
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-sm font-bold text-blue-600">AAPL</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Apple Inc.</div>
+                    <div className="text-sm text-gray-600">12 shares</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$2,450.00</div>
+                  <div className="text-sm text-green-600">+$29.40 (+1.2%)</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-sm font-bold text-green-600">TSLA</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Tesla Inc.</div>
+                    <div className="text-sm text-gray-600">8 shares</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$1,875.00</div>
+                  <div className="text-sm text-red-600">-$15.20 (-0.8%)</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-sm font-bold text-purple-600">MSFT</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Microsoft Corp.</div>
+                    <div className="text-sm text-gray-600">6 shares</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$2,100.00</div>
+                  <div className="text-sm text-green-600">+$42.00 (+2.0%)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderCrypto() {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-black">Crypto Holdings</h2>
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
+            Buy Crypto
+          </Button>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-sm font-medium text-black">My Crypto Portfolio</div>
+          </div>
+          <div className="divide-y divide-gray-200">
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                    <Bitcoin className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Bitcoin</div>
+                    <div className="text-sm text-gray-600">0.1854 BTC</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$8,750.00</div>
+                  <div className="text-sm text-green-600">+$298.25 (+3.5%)</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-sm font-bold text-purple-600">ETH</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Ethereum</div>
+                    <div className="text-sm text-gray-600">1.24 ETH</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$3,200.00</div>
+                  <div className="text-sm text-green-600">+$65.80 (+2.1%)</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-sm font-bold text-blue-600">SOL</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Solana</div>
+                    <div className="text-sm text-gray-600">45.2 SOL</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$1,580.00</div>
+                  <div className="text-sm text-green-600">+$78.40 (+5.2%)</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-xs font-bold text-green-600">USDT</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Tether</div>
+                    <div className="text-sm text-gray-600">2,450 USDT</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-black">$2,450.00</div>
+                  <div className="text-sm text-gray-600">$0.00 (0.0%)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderWallet() {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-black">Wallet</h2>
+        
+        {/* Balance Overview */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="text-center">
-            <div className="text-sm text-gray-600 mb-2">Total Portfolio Value</div>
-            <div className="text-4xl font-bold text-black mb-4">
-              ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
+            <div className="text-sm text-gray-600 mb-1">Available Cash</div>
+            <div className="text-3xl font-bold text-black mb-4">$15,420.00</div>
+            <Button className="bg-green-500 hover:bg-green-600 text-white">
+              Add Money
+            </Button>
+          </div>
+        </div>
+
+        {/* Crypto Deposit Options */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Deposit Cryptocurrencies</div>
+            <div className="text-sm text-gray-600">Send crypto to your Bitrader wallet</div>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Bitcoin Deposit */}
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                    <Bitcoin className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Bitcoin (BTC)</div>
+                    <div className="text-sm text-gray-600">Network: Bitcoin</div>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  Get Deposit Address
+                </Button>
+              </div>
+
+              {/* Ethereum Deposit */}
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-sm font-bold text-purple-600">ETH</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Ethereum (ETH)</div>
+                    <div className="text-sm text-gray-600">Network: Ethereum</div>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  Get Deposit Address
+                </Button>
+              </div>
+
+              {/* Solana Deposit */}
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-sm font-bold text-blue-600">SOL</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Solana (SOL)</div>
+                    <div className="text-sm text-gray-600">Network: Solana</div>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  Get Deposit Address
+                </Button>
+              </div>
+
+              {/* USDT Deposit */}
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                <div className="flex items-center mb-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-green-600">USDT</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-black">Tether (USDT)</div>
+                    <div className="text-sm text-gray-600">Network: Ethereum</div>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full">
+                  Get Deposit Address
+                </Button>
+              </div>
             </div>
-            <div className="text-green-600 font-medium">
-              +${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'} (+1.97%) Today
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Recent Transactions</div>
+          </div>
+          <div className="p-4">
+            <div className="text-center text-gray-600 py-8">
+              No transactions yet. Make your first deposit to get started.
             </div>
           </div>
         </div>
