@@ -1,234 +1,199 @@
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, Shield, Users, BarChart3 } from "lucide-react";
+import { TrendingUp, ArrowRight, Star, Shield, Smartphone } from "lucide-react";
 
 export default function Landing() {
-  const { isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-slate-800 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-              Bitrader
-            </h1>
-            <nav className="hidden md:flex space-x-6">
-              <a href="#about" className="text-slate-400 hover:text-white transition-colors">About</a>
-              <a href="#solutions" className="text-slate-400 hover:text-white transition-colors">Solutions</a>
-              <a href="#success" className="text-slate-400 hover:text-white transition-colors">Success Stories</a>
-            </nav>
+      <header className="px-6 py-4 border-b border-gray-100">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-semibold text-black">Bitrader</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              className="border-slate-700 text-slate-300 hover:bg-slate-800"
-              onClick={() => window.location.href = '/api/login'}
-            >
-              Client Portal
-            </Button>
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => window.location.href = '/api/login'}
-            >
-              Get Started
-            </Button>
-          </div>
+          <Button 
+            onClick={() => window.location.href = '/api/login'}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-medium"
+          >
+            Sign In
+          </Button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl font-bold mb-6 leading-tight">
-                Transform Your Trading Experience with{" "}
-                <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  Bitrader
-                </span>
-              </h1>
-              <p className="text-xl text-slate-400 mb-4">
-                Start your journey with smarter trading today!
-              </p>
-              <p className="text-slate-300 mb-8 leading-relaxed">
-                By leveraging proprietary AI, Bitrader deciphers the signals that matter,
-                delivering actionable insights directly into the hands of traders who demand the
-                most from their strategies.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  Get Started
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  Login
-                </Button>
+      <main className="max-w-7xl mx-auto px-6">
+        <div className="pt-16 pb-20">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-6xl font-bold text-black mb-6 leading-tight">
+              Investing for
+              <span className="text-green-500 block">Everyone</span>
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Commission-free trading of stocks, crypto, and more. 
+              Build your portfolio with our advanced algorithms.
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/api/login'}
+              className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2 smooth-enter"
+            >
+              <span>Get Started</span>
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Phone Mockup */}
+          <div className="mt-16 flex justify-center">
+            <div className="relative">
+              <div className="w-80 h-[600px] bg-black rounded-[3rem] p-3 shadow-2xl">
+                <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden">
+                  {/* App Interface Mockup */}
+                  <div className="p-6">
+                    {/* Status Bar */}
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="text-sm font-medium">9:41</span>
+                      <div className="flex space-x-1">
+                        <div className="w-4 h-2 bg-green-500 rounded-sm"></div>
+                        <div className="w-6 h-2 bg-gray-300 rounded-sm"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Portfolio Value */}
+                    <div className="mb-8">
+                      <div className="text-sm text-gray-600 mb-1">Portfolio</div>
+                      <div className="text-3xl font-bold text-black mb-2">$24,567.89</div>
+                      <div className="text-green-500 font-medium">+$432.10 (+1.79%) Today</div>
+                    </div>
+
+                    {/* Chart Visualization */}
+                    <div className="h-32 bg-gray-50 rounded-lg mb-6 relative overflow-hidden">
+                      <svg className="w-full h-full" viewBox="0 0 300 100">
+                        <path 
+                          d="M 0,70 Q 75,50 150,35 T 300,15" 
+                          stroke="#10b981" 
+                          strokeWidth="2" 
+                          fill="none"
+                        />
+                        <defs>
+                          <linearGradient id="mockupGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                        <path 
+                          d="M 0,70 Q 75,50 150,35 T 300,15 L 300,100 L 0,100 Z" 
+                          fill="url(#mockupGradient)"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Holdings */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <span className="text-xs font-bold text-blue-600">AAPL</span>
+                          </div>
+                          <span className="font-medium">Apple</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">$2,450</div>
+                          <div className="text-xs text-green-500">+1.2%</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                            <span className="text-xs font-bold text-orange-600">BTC</span>
+                          </div>
+                          <span className="font-medium">Bitcoin</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">$8,750</div>
+                          <div className="text-xs text-green-500">+3.5%</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-                alt="AI trading dashboard visualization" 
-                className="rounded-2xl shadow-2xl opacity-90"
-              />
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-transparent rounded-2xl"></div>
-            </div>
           </div>
         </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="py-16 px-6 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-slate-800 border-slate-700">
-              <CardContent className="p-8 text-center">
-                <Users className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-white mb-2">98%</div>
-                <div className="text-slate-400">User Satisfaction Rate</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-slate-800 border-slate-700">
-              <CardContent className="p-8 text-center">
-                <Shield className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-white mb-2">50+</div>
-                <div className="text-slate-400">Countries Global Reach</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-slate-800 border-slate-700">
-              <CardContent className="p-8 text-center">
-                <BarChart3 className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-white mb-2">100+</div>
-                <div className="text-slate-400">Successful Trades Daily</div>
-              </CardContent>
-            </Card>
+        {/* Features Section */}
+        <div className="py-20 border-t border-gray-100">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-black mb-4">Built for the way you invest</h2>
+            <p className="text-xl text-gray-600">Simple, commission-free, and powerful.</p>
           </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <img 
-                src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400" 
-                alt="AI trading algorithms visualization" 
-                className="rounded-2xl shadow-xl opacity-90"
-              />
-            </div>
-            <div>
-              <h2 className="text-4xl font-bold mb-6">About Bitrader</h2>
-              <p className="text-slate-300 mb-6 leading-relaxed">
-                At Bitrader, it's about more than just following trends—it's about crafting
-                them. Our team of data scientists and market experts works tirelessly to ensure
-                that Bitrader remains at the bleeding edge, offering strategies that
-                anticipate market movements before they happen.
+          
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Star className="h-8 w-8 text-green-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-4">Commission-Free</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Trade stocks, crypto, and more without paying fees that eat into your returns.
               </p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center space-x-3">
-                  <TrendingUp className="w-5 h-5 text-blue-500" />
-                  <span className="text-slate-300">Innovation at Core</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <Users className="w-5 h-5 text-blue-500" />
-                  <span className="text-slate-300">User-Friendly Experience</span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <Shield className="w-5 h-5 text-blue-500" />
-                  <span className="text-slate-300">Reliable and Trustworthy</span>
-                </li>
-              </ul>
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => window.location.href = '/api/login'}
-              >
-                Learn More
-              </Button>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="h-8 w-8 text-green-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-4">Secure & Trusted</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Your investments are protected with bank-level security and SIPC insurance.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Smartphone className="h-8 w-8 text-green-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-4">Mobile First</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Manage your portfolio anywhere with our award-winning mobile experience.
+              </p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-blue-900/50 to-slate-900/50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to Transform Your Trading?
-          </h2>
-          <p className="text-xl text-slate-300 mb-8">
-            Join thousands of successful traders who trust Bitrader's AI-powered algorithms
-          </p>
-          <Button 
-            size="lg" 
-            className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3"
-            onClick={() => window.location.href = '/api/login'}
-          >
-            Get Started Now
-          </Button>
+        {/* CTA Section */}
+        <div className="py-20 text-center">
+          <div className="bg-gray-50 rounded-3xl p-16">
+            <h2 className="text-4xl font-bold text-black mb-6">
+              Ready to start investing?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Join millions of people using Bitrader to build their portfolios.
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/api/login'}
+              className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2"
+            >
+              <span>Get Started</span>
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-12 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-4">
-                Bitrader
-              </h3>
-              <p className="text-slate-400 text-sm">
-                AI-powered trading algorithms for the modern investor.
-              </p>
+      <footer className="border-t border-gray-100 py-12">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-white" />
             </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Home</a></li>
-                <li><a href="#about" className="text-slate-400 hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#solutions" className="text-slate-400 hover:text-white transition-colors">Our Solutions</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Contact Us</h4>
-              <p className="text-slate-400 text-sm">
-                <a href="mailto:support@bitrader.net" className="hover:text-white transition-colors">
-                  support@bitrader.net
-                </a>
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Trading involves risk and is not suitable for all investors. 
-                Past performance is not indicative of future results.
-              </p>
-            </div>
+            <span className="text-lg font-semibold text-black">Bitrader</span>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center">
-            <p className="text-slate-400 text-sm">
-              © 2025 Bitrader – All rights reserved
-            </p>
-          </div>
+          <p className="text-gray-600">
+            Investing made simple for everyone.
+          </p>
         </div>
       </footer>
     </div>
