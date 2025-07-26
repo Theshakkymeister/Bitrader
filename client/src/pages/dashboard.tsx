@@ -461,141 +461,369 @@ export default function Dashboard() {
     }
   }
 
+
+
+
+
   function renderDashboard() {
+    const portfolioValue = portfolio?.totalBalance ? parseFloat(portfolio.totalBalance) : 24567.89;
+    const todayPL = portfolio?.todayPL ? parseFloat(portfolio.todayPL) : 432.10;
+    const todayPLPercent = ((todayPL / portfolioValue) * 100).toFixed(2);
+    
+    // Sample portfolio holdings with realistic data
+    const holdings = [
+      { symbol: 'AAPL', name: 'Apple Inc.', value: 5420.00, change: 1.24, shares: 32, price: 169.38 },
+      { symbol: 'MSFT', name: 'Microsoft Corp.', value: 4230.50, change: 0.87, shares: 12, price: 352.54 },
+      { symbol: 'TSLA', name: 'Tesla Inc.', value: 3890.00, change: -2.15, shares: 15, price: 259.33 },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', value: 3150.75, change: 0.65, shares: 23, price: 137.00 },
+      { symbol: 'BTC', name: 'Bitcoin', value: 4567.25, change: 3.45, shares: 0.1234, price: 37012.50 },
+      { symbol: 'ETH', name: 'Ethereum', value: 2890.00, change: 2.87, shares: 1.2567, price: 2300.45 },
+      { symbol: 'SOL', name: 'Solana', value: 1456.80, change: 5.23, shares: 15.67, price: 92.98 }
+    ];
+
+    const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
+    const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
+    
     return (
       <div className="space-y-6 fade-in">
-        {/* Portfolio Value Card with Chart */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 hover-scale transition-all duration-300 smooth-enter">
+        {/* Main Portfolio Header */}
+        <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 p-6">
           <div className="flex justify-between items-start mb-4">
-            <div className="slide-in-left">
-              <div className="text-sm text-gray-600 mb-1">Portfolio Value</div>
-              <div className="text-3xl font-bold text-black mb-2 bounce-in">
-                ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
+            <div>
+              <div className="text-sm text-gray-600 mb-1">Total Portfolio Value</div>
+              <div className="text-4xl font-bold text-black mb-2">
+                ${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
               </div>
-              <div className="flex items-center text-sm">
-                <span className="text-green-600 font-medium pulse-glow">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
-                <span className="text-gray-600 ml-1">(+1.97%) Today</span>
+              <div className="flex items-center text-sm space-x-4">
+                <div className="flex items-center">
+                  <span className={`font-medium ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {todayPL >= 0 ? '+' : ''}${todayPL.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                  </span>
+                  <span className={`ml-1 ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ({todayPL >= 0 ? '+' : ''}{todayPLPercent}%) Today
+                  </span>
+                </div>
+                <div className="text-gray-600">
+                  All Time: <span className="text-green-600 font-medium">+$4,123.45 (+20.17%)</span>
+                </div>
               </div>
             </div>
-            <div className="slide-in-right">
+            <div className="text-right">
               <Select>
-                <SelectTrigger className="w-24 h-8 text-xs hover-glow">
+                <SelectTrigger className="w-24 h-8 text-xs">
                   <SelectValue placeholder="1D" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1d">1D</SelectItem>
                   <SelectItem value="1w">1W</SelectItem>
                   <SelectItem value="1m">1M</SelectItem>
+                  <SelectItem value="3m">3M</SelectItem>
                   <SelectItem value="1y">1Y</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           
-          {/* Animated Portfolio Chart */}
-          <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden hover-glow transition-all duration-300">
-            <svg className="w-full h-full" viewBox="0 0 400 100">
+          {/* Portfolio Performance Chart */}
+          <div className="h-40 bg-white rounded-lg flex items-center justify-center relative overflow-hidden border">
+            <svg className="w-full h-full" viewBox="0 0 500 120">
               <path 
-                d="M 0,80 Q 100,60 200,45 T 400,20" 
+                d="M 0,90 Q 125,75 250,60 T 500,30" 
                 stroke="#10b981" 
                 strokeWidth="2" 
                 fill="none"
-                className="animate-pulse"
               />
               <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
                 </linearGradient>
               </defs>
               <path 
-                d="M 0,80 Q 100,60 200,45 T 400,20 L 400,100 L 0,100 Z" 
-                fill="url(#gradient)"
+                d="M 0,90 Q 125,75 250,60 T 500,30 L 500,120 L 0,120 Z" 
+                fill="url(#portfolioGradient)"
               />
+              {/* Price points */}
+              <circle cx="125" cy="75" r="3" fill="#10b981" />
+              <circle cx="250" cy="60" r="3" fill="#10b981" />
+              <circle cx="375" cy="45" r="3" fill="#10b981" />
+              <circle cx="500" cy="30" r="3" fill="#10b981" />
             </svg>
           </div>
         </div>
 
-        {/* Buying Power and Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.1s'}}>
+        {/* Key Portfolio Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Buying Power</div>
-            <div className="text-xl font-bold text-black bounce-in">$15,420.00</div>
+            <div className="text-xl font-bold text-black">$15,420.00</div>
+            <div className="text-xs text-gray-500 mt-1">Available Cash</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.2s'}}>
-            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Active Positions</div>
-            <div className="text-xl font-bold text-black bounce-in">8</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Positions</div>
+            <div className="text-xl font-bold text-black">{holdings.length}</div>
+            <div className="text-xs text-gray-500 mt-1">Active Holdings</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.3s'}}>
-            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's Return</div>
-            <div className="text-xl font-bold text-green-600 bounce-in pulse-glow">+2.45%</div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's P&L</div>
+            <div className={`text-xl font-bold ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {todayPL >= 0 ? '+' : ''}${todayPL.toFixed(2)}
+            </div>
+            <div className={`text-xs mt-1 ${todayPL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {todayPL >= 0 ? '+' : ''}{todayPLPercent}%
+            </div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.4s'}}>
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Total Return</div>
-            <div className="text-xl font-bold text-green-600 bounce-in pulse-glow">+18.7%</div>
+            <div className="text-xl font-bold text-green-600">+$4,123.45</div>
+            <div className="text-xs text-green-500 mt-1">+20.17%</div>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Diversity Score</div>
+            <div className="text-xl font-bold text-black">8.5/10</div>
+            <div className="text-xs text-green-500 mt-1">Well Diversified</div>
           </div>
         </div>
 
-        {/* Holdings Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Stock Holdings */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-lg font-semibold text-black mb-4">Stock Holdings</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-green-600">AAPL</span>
+        {/* Asset Allocation */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Asset Allocation Pie Chart */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-black mb-4">Asset Allocation</h3>
+            <div className="relative h-48 flex items-center justify-center">
+              {/* Simple donut chart representation */}
+              <div className="relative w-32 h-32">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" strokeWidth="20"/>
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="50" 
+                    fill="none" 
+                    stroke="#10b981" 
+                    strokeWidth="20"
+                    strokeDasharray={`${(totalStocks/portfolioValue) * 314} 314`}
+                    strokeDashoffset="0"
+                  />
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="50" 
+                    fill="none" 
+                    stroke="#f59e0b" 
+                    strokeWidth="20"
+                    strokeDasharray={`${(totalCrypto/portfolioValue) * 314} 314`}
+                    strokeDashoffset={`-${(totalStocks/portfolioValue) * 314}`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-sm font-medium text-gray-600">Total</div>
+                    <div className="text-lg font-bold text-black">${(portfolioValue/1000).toFixed(0)}K</div>
                   </div>
-                  <span className="font-medium">Apple Inc.</span>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium">$2,450.00</div>
-                  <div className="text-xs text-green-600">+1.2%</div>
                 </div>
               </div>
-              <div className="flex justify-between items-center">
+            </div>
+            <div className="space-y-2 mt-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-green-600">TSLA</span>
-                  </div>
-                  <span className="font-medium">Tesla Inc.</span>
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <span className="text-sm">Stocks</span>
                 </div>
-                <div className="text-right">
-                  <div className="font-medium">$1,875.00</div>
-                  <div className="text-xs text-red-600">-0.8%</div>
+                <span className="text-sm font-medium">{((totalStocks/portfolioValue) * 100).toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div>
+                  <span className="text-sm">Crypto</span>
                 </div>
+                <span className="text-sm font-medium">{((totalCrypto/portfolioValue) * 100).toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
+                  <span className="text-sm">Cash</span>
+                </div>
+                <span className="text-sm font-medium">38.5%</span>
               </div>
             </div>
           </div>
 
-          {/* Crypto Holdings */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-lg font-semibold text-black mb-4">Crypto Holdings</h3>
+          {/* Top Performers */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-black mb-4">Top Performers Today</h3>
+            <div className="space-y-3">
+              {holdings
+                .filter(h => h.change > 0)
+                .sort((a, b) => b.change - a.change)
+                .slice(0, 4)
+                .map((holding) => (
+                  <div key={holding.symbol} className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-xs font-bold text-green-600">{holding.symbol}</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{holding.symbol}</div>
+                        <div className="text-xs text-gray-500">{holding.name}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-green-600">+{holding.change.toFixed(2)}%</div>
+                      <div className="text-xs text-gray-500">${holding.value.toLocaleString()}</div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Market Overview */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-black mb-4">Market Overview</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                    <Bitcoin className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <span className="font-medium">Bitcoin</span>
-                </div>
+                <span className="text-sm text-gray-600">S&P 500</span>
                 <div className="text-right">
-                  <div className="font-medium">$8,750.00</div>
-                  <div className="text-xs text-green-600">+3.5%</div>
+                  <div className="text-sm font-medium">4,567.12</div>
+                  <div className="text-xs text-green-600">+0.75%</div>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-purple-600">ETH</span>
-                  </div>
-                  <span className="font-medium">Ethereum</span>
-                </div>
+                <span className="text-sm text-gray-600">NASDAQ</span>
                 <div className="text-right">
-                  <div className="font-medium">$3,200.00</div>
-                  <div className="text-xs text-green-600">+2.1%</div>
+                  <div className="text-sm font-medium">14,234.56</div>
+                  <div className="text-xs text-green-600">+1.23%</div>
                 </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Bitcoin</span>
+                <div className="text-right">
+                  <div className="text-sm font-medium">$37,012</div>
+                  <div className="text-xs text-green-600">+3.45%</div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">VIX</span>
+                <div className="text-right">
+                  <div className="text-sm font-medium">18.45</div>
+                  <div className="text-xs text-red-600">-2.34%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Holdings */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-black">Portfolio Holdings</h3>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button size="sm" className="bg-green-500 hover:bg-green-600">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Position
+              </Button>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-medium text-gray-600">Symbol</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-600">Shares/Amount</th>
+                  <th className="text-right py-3 px-4 font-medium text-gray-600">Price</th>
+                  <th className="text-right py-3 px-4 font-medium text-gray-600">Market Value</th>
+                  <th className="text-right py-3 px-4 font-medium text-gray-600">Day Change</th>
+                  <th className="text-right py-3 px-4 font-medium text-gray-600">% of Portfolio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {holdings.map((holding) => (
+                  <tr key={holding.symbol} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-xs font-bold text-green-600">{holding.symbol}</span>
+                        </div>
+                        <div>
+                          <div className="font-medium">{holding.symbol}</div>
+                          <div className="text-sm text-gray-500">{holding.name}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm">
+                      {holding.shares < 1 ? holding.shares.toFixed(4) : holding.shares.toFixed(0)}
+                    </td>
+                    <td className="py-3 px-4 text-right text-sm">
+                      ${holding.price.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    </td>
+                    <td className="py-3 px-4 text-right font-medium">
+                      ${holding.value.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    </td>
+                    <td className={`py-3 px-4 text-right font-medium ${holding.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {holding.change >= 0 ? '+' : ''}{holding.change.toFixed(2)}%
+                    </td>
+                    <td className="py-3 px-4 text-right text-sm">
+                      {((holding.value / portfolioValue) * 100).toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-black mb-4">Recent Activity</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-sm">Bought 5 shares of AAPL</div>
+                  <div className="text-xs text-gray-500">2 hours ago</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium">$846.90</div>
+                <div className="text-xs text-green-600">Executed</div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                  <Bitcoin className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-sm">Sold 0.05 BTC</div>
+                  <div className="text-xs text-gray-500">1 day ago</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium">$1,850.63</div>
+                <div className="text-xs text-green-600">Executed</div>
+              </div>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <DollarSign className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <div className="font-medium text-sm">Dividend received from MSFT</div>
+                  <div className="text-xs text-gray-500">3 days ago</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium">$32.40</div>
+                <div className="text-xs text-green-600">Received</div>
               </div>
             </div>
           </div>
@@ -603,8 +831,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-
 
   function renderStocks() {
     return (
