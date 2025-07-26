@@ -61,6 +61,7 @@ export default function Dashboard() {
   const [stockAssets, setStockAssets] = useState<MarketAsset[]>(getAssetsByType('stock'));
   const [filteredCryptos, setFilteredCryptos] = useState<MarketAsset[]>(cryptoAssets.slice(0, 20));
   const [filteredStocks, setFilteredStocks] = useState<MarketAsset[]>(stockAssets.slice(0, 20));
+  const [liveAssets, setLiveAssets] = useState(allAssets);
   
   const queryClient = useQueryClient();
   const [depositAddresses, setDepositAddresses] = useState({
@@ -84,6 +85,29 @@ export default function Dashboard() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
+
+  // Real-time price updates simulation
+  useEffect(() => {
+    const updatePrices = () => {
+      setLiveAssets(prevAssets => 
+        prevAssets.map(asset => {
+          // Simulate price changes between -5% to +5%
+          const changePercent = (Math.random() - 0.5) * 10; // -5% to +5%
+          const newPrice = Math.max(0.01, asset.price * (1 + changePercent / 100));
+          const newChange = asset.change + (changePercent * 0.1); // Accumulate change
+          
+          return {
+            ...asset,
+            price: parseFloat(newPrice.toFixed(4)),
+            change: parseFloat(newChange.toFixed(2))
+          };
+        })
+      );
+    };
+
+    const interval = setInterval(updatePrices, 5000); // Update every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Live trading mutations
   const placeTradeMutation = useMutation({
@@ -120,15 +144,25 @@ export default function Dashboard() {
 
   // Search functionality
   useEffect(() => {
+    const liveCryptos = liveAssets.filter(asset => asset.type === 'crypto');
+    const liveStocks = liveAssets.filter(asset => asset.type === 'stock');
+    
     if (searchQuery.trim() === '') {
-      setFilteredCryptos(cryptoAssets.slice(0, 20));
-      setFilteredStocks(stockAssets.slice(0, 20));
+      setFilteredCryptos(liveCryptos.slice(0, 20));
+      setFilteredStocks(liveStocks.slice(0, 20));
     } else {
-      const searchResults = searchAssets(searchQuery);
-      setFilteredCryptos(searchResults.filter(asset => asset.type === 'crypto').slice(0, 20));
-      setFilteredStocks(searchResults.filter(asset => asset.type === 'stock').slice(0, 20));
+      const crypto = liveCryptos.filter(asset => 
+        asset.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        asset.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 20);
+      const stocks = liveStocks.filter(asset => 
+        asset.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        asset.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 20);
+      setFilteredCryptos(crypto);
+      setFilteredStocks(stocks);
     }
-  }, [searchQuery, cryptoAssets, stockAssets]);
+  }, [searchQuery, liveAssets]);
 
   // Real-time market data updates
   useEffect(() => {
@@ -470,16 +504,22 @@ export default function Dashboard() {
     const todayPL = portfolio?.todayPL ? parseFloat(portfolio.todayPL) : 432.10;
     const todayPLPercent = ((todayPL / portfolioValue) * 100).toFixed(2);
     
-    // Sample portfolio holdings with realistic data
+    // Get real market data for holdings
+    const portfolioSymbols = ['AAPL', 'MSFT', 'TSLA', 'GOOGL', 'BTC', 'ETH', 'SOL'];
+    const marketData = portfolioSymbols.map(symbol => {
+      const asset = liveAssets.find(a => a.symbol === symbol);
+      return asset || { symbol, name: symbol, price: 0, change: 0, type: 'stock', logo: '' };
+    });
+    
     const holdings = [
-      { symbol: 'AAPL', name: 'Apple Inc.', value: 5420.00, change: 1.24, shares: 32, price: 169.38 },
-      { symbol: 'MSFT', name: 'Microsoft Corp.', value: 4230.50, change: 0.87, shares: 12, price: 352.54 },
-      { symbol: 'TSLA', name: 'Tesla Inc.', value: 3890.00, change: -2.15, shares: 15, price: 259.33 },
-      { symbol: 'GOOGL', name: 'Alphabet Inc.', value: 3150.75, change: 0.65, shares: 23, price: 137.00 },
-      { symbol: 'BTC', name: 'Bitcoin', value: 4567.25, change: 3.45, shares: 0.1234, price: 37012.50 },
-      { symbol: 'ETH', name: 'Ethereum', value: 2890.00, change: 2.87, shares: 1.2567, price: 2300.45 },
-      { symbol: 'SOL', name: 'Solana', value: 1456.80, change: 5.23, shares: 15.67, price: 92.98 }
-    ];
+      { ...marketData.find(a => a.symbol === 'AAPL'), shares: 32, value: marketData.find(a => a.symbol === 'AAPL')?.price * 32 || 0 },
+      { ...marketData.find(a => a.symbol === 'MSFT'), shares: 12, value: marketData.find(a => a.symbol === 'MSFT')?.price * 12 || 0 },
+      { ...marketData.find(a => a.symbol === 'TSLA'), shares: 15, value: marketData.find(a => a.symbol === 'TSLA')?.price * 15 || 0 },
+      { ...marketData.find(a => a.symbol === 'GOOGL'), shares: 23, value: marketData.find(a => a.symbol === 'GOOGL')?.price * 23 || 0 },
+      { ...marketData.find(a => a.symbol === 'BTC'), shares: 0.1234, value: marketData.find(a => a.symbol === 'BTC')?.price * 0.1234 || 0 },
+      { ...marketData.find(a => a.symbol === 'ETH'), shares: 1.2567, value: marketData.find(a => a.symbol === 'ETH')?.price * 1.2567 || 0 },
+      { ...marketData.find(a => a.symbol === 'SOL'), shares: 15.67, value: marketData.find(a => a.symbol === 'SOL')?.price * 15.67 || 0 }
+    ].filter(h => h && h.symbol);
 
     const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
     const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
@@ -661,8 +701,12 @@ export default function Dashboard() {
                 .map((holding) => (
                   <div key={holding.symbol} className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-xs font-bold text-green-600">{holding.symbol}</span>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 overflow-hidden bg-gray-100">
+                        {holding.logo ? (
+                          <img src={holding.logo} alt={holding.symbol} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xs font-bold text-green-600">{holding.symbol}</span>
+                        )}
                       </div>
                       <div>
                         <div className="font-medium text-sm">{holding.symbol}</div>
@@ -682,34 +726,31 @@ export default function Dashboard() {
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-black mb-4">Market Overview</h3>
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">S&P 500</span>
-                <div className="text-right">
-                  <div className="text-sm font-medium">4,567.12</div>
-                  <div className="text-xs text-green-600">+0.75%</div>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">NASDAQ</span>
-                <div className="text-right">
-                  <div className="text-sm font-medium">14,234.56</div>
-                  <div className="text-xs text-green-600">+1.23%</div>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Bitcoin</span>
-                <div className="text-right">
-                  <div className="text-sm font-medium">$37,012</div>
-                  <div className="text-xs text-green-600">+3.45%</div>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">VIX</span>
-                <div className="text-right">
-                  <div className="text-sm font-medium">18.45</div>
-                  <div className="text-xs text-red-600">-2.34%</div>
-                </div>
-              </div>
+              {(() => {
+                const marketIndices = [
+                  { symbol: 'SPY', name: 'S&P 500' },
+                  { symbol: 'QQQ', name: 'NASDAQ' },
+                  { symbol: 'BTC', name: 'Bitcoin' },
+                  { symbol: 'VIX', name: 'VIX' }
+                ];
+                
+                return marketIndices.map(index => {
+                  const asset = liveAssets.find(a => a.symbol === index.symbol);
+                  return (
+                    <div key={index.symbol} className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">{index.name}</span>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          {asset ? `${index.symbol === 'BTC' ? '$' : ''}${asset.price.toLocaleString('en-US', {minimumFractionDigits: 2})}` : 'N/A'}
+                        </div>
+                        <div className={`text-xs ${asset && asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {asset ? `${asset.change >= 0 ? '+' : ''}${asset.change.toFixed(2)}%` : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
@@ -746,8 +787,12 @@ export default function Dashboard() {
                   <tr key={holding.symbol} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-xs font-bold text-green-600">{holding.symbol}</span>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 overflow-hidden bg-gray-100">
+                          {holding.logo ? (
+                            <img src={holding.logo} alt={holding.symbol} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-xs font-bold text-green-600">{holding.symbol}</span>
+                          )}
                         </div>
                         <div>
                           <div className="font-medium">{holding.symbol}</div>
@@ -759,13 +804,13 @@ export default function Dashboard() {
                       {holding.shares < 1 ? holding.shares.toFixed(4) : holding.shares.toFixed(0)}
                     </td>
                     <td className="py-3 px-4 text-right text-sm">
-                      ${holding.price.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                      ${holding.price?.toLocaleString('en-US', {minimumFractionDigits: 2}) || '0.00'}
                     </td>
                     <td className="py-3 px-4 text-right font-medium">
-                      ${holding.value.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                      ${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2}) || '0.00'}
                     </td>
                     <td className={`py-3 px-4 text-right font-medium ${holding.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {holding.change >= 0 ? '+' : ''}{holding.change.toFixed(2)}%
+                      {holding.change >= 0 ? '+' : ''}{holding.change?.toFixed(2) || '0.00'}%
                     </td>
                     <td className="py-3 px-4 text-right text-sm">
                       {((holding.value / portfolioValue) * 100).toFixed(1)}%
