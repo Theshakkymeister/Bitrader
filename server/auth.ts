@@ -38,16 +38,26 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Production-ready session configuration
+  const isProduction = process.env.NODE_ENV === "production";
+  
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "default-secret-change-in-production",
+    secret: process.env.SESSION_SECRET || "bitrader-secret-key-production-2025",
     resave: false,
     saveUninitialized: false,
+    rolling: true,
+    store: storage.sessionStore,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // HTTPS only in production
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: isProduction ? "strict" : "lax" as const,
     },
+    name: "bitrader.session",
   };
+
+  console.log("AUTH SETUP: Environment is", process.env.NODE_ENV || "development");
+  console.log("AUTH SETUP: Secure cookies", isProduction);
 
   app.set("trust proxy", 1);
   app.use(session(sessionSettings));

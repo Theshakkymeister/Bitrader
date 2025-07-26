@@ -328,14 +328,20 @@ export class DatabaseStorage implements IStorage {
     return updatedMetric;
   }
 
-  // Admin operations
+  // Admin operations - PRODUCTION READY
   async getAdminByEmail(email: string): Promise<AdminUser | undefined> {
-    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, email.toLowerCase()));
+    const normalizedEmail = email.toLowerCase().trim();
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, normalizedEmail));
+    console.log("STORAGE: Admin lookup for", normalizedEmail, admin ? "found" : "not found");
     return admin;
   }
 
   async createAdmin(admin: InsertAdminUser): Promise<AdminUser> {
-    const [newAdmin] = await db.insert(adminUsers).values(admin).returning();
+    const [newAdmin] = await db.insert(adminUsers).values({
+      ...admin,
+      email: admin.email.toLowerCase().trim()
+    }).returning();
+    console.log("STORAGE: Admin created", newAdmin.email);
     return newAdmin;
   }
 
@@ -345,6 +351,7 @@ export class DatabaseStorage implements IStorage {
       .set({ lastLoginAt: new Date(), updatedAt: new Date() })
       .where(eq(adminUsers.id, id))
       .returning();
+    console.log("STORAGE: Admin last login updated", updatedAdmin.email);
     return updatedAdmin;
   }
 

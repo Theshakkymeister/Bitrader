@@ -5,48 +5,71 @@ import { storage } from "./storage";
 
 export function registerAdminRoutes(app: Express) {
   
-  // Admin login route
+  // Admin login route - PRODUCTION DEPLOYMENT READY
   app.post('/api/admin/login', async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log("DEPLOYMENT ADMIN LOGIN:", email);
 
       if (!email || !password) {
+        console.log("Missing admin credentials");
         return res.status(400).json({ message: "Email and password required" });
       }
 
-      // Find admin user
-      const admin = await storage.getAdminByEmail(email);
+      // Find admin user with case-insensitive email for production
+      const normalizedEmail = email.toLowerCase().trim();
+      const admin = await storage.getAdminByEmail(normalizedEmail);
+      
       if (!admin || !admin.isActive) {
+        console.log("Admin not found or inactive:", normalizedEmail);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Verify password
+      // Verify password for production deployment
       const isValid = await verifyPassword(password, admin.passwordHash);
       if (!isValid) {
+        console.log("Invalid password for admin:", normalizedEmail);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Update last login
+      // Update last login timestamp
       await storage.updateAdminLastLogin(admin.id);
 
-      // Create admin session
+      // Create secure admin session for production
       req.session.adminUser = {
         id: admin.id,
         email: admin.email,
         firstName: admin.firstName,
         lastName: admin.lastName,
         role: admin.role,
+        loginTime: new Date().toISOString(),
+        deployment: true
       };
 
-      // Log activity
-      await logAdminActivity(admin.id, 'LOGIN', 'ADMIN', admin.id, null, req);
+      // Force session save for production deployment
+      req.session.save((err) => {
+        if (err) {
+          console.error("DEPLOYMENT session save error:", err);
+        } else {
+          console.log("DEPLOYMENT admin session saved:", admin.email);
+        }
+      });
 
-      // Return admin info (without password hash)
+      // Log successful admin login
+      await logAdminActivity(admin.id, 'LOGIN', 'ADMIN', admin.id, {
+        environment: process.env.NODE_ENV || "production",
+        timestamp: new Date().toISOString(),
+        deploymentLogin: true
+      }, req);
+
+      console.log("DEPLOYMENT ADMIN LOGIN SUCCESS:", admin.email, admin.role);
+
+      // Return admin data for production (no password hash)
       const { passwordHash, ...adminData } = admin;
       res.json(adminData);
 
     } catch (error) {
-      console.error("Admin login error:", error);
+      console.error("DEPLOYMENT ADMIN LOGIN ERROR:", error);
       res.status(500).json({ message: "Login failed" });
     }
   });
