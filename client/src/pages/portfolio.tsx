@@ -364,13 +364,13 @@ export default function Portfolio() {
               <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-5 shadow-lg border-2 border-green-200">
                 <div className="text-center space-y-3">
                   {/* Portfolio Value Label */}
-                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Portfolio Value</div>
+                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Current Portfolio Value</div>
                   
                   {/* Current Value */}
                   <div className="text-4xl font-bold text-green-600">$25,235.99</div>
                   
                   {/* Today's Performance */}
-                  <div className="flex items-center justify-center space-x-2 text-green-600">
+                  <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50/30 rounded-lg py-2 px-4">
                     <span className="text-lg font-semibold">+$373.49</span>
                     <span className="text-sm font-medium">(+1.48%) Today</span>
                   </div>
