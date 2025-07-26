@@ -112,7 +112,7 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
-      const existingEmail = await storage.getUserByEmail(email);
+      const existingEmail = await storage.getUserByEmail(email.toLowerCase());
       if (existingEmail) {
         return res.status(400).json({ message: "Email already exists" });
       }
@@ -120,7 +120,7 @@ export function setupAuth(app: Express) {
       // Create new user
       const user = await storage.createUser({
         username,
-        email,
+        email: email.toLowerCase(),
         password: await hashPassword(password),
         firstName: username, // Use username as firstName for now
         lastName: "",

@@ -94,7 +94,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
     return user;
   }
 
@@ -207,7 +207,7 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAdminByEmail(email: string): Promise<AdminUser | undefined> {
-    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, email));
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.email, email.toLowerCase()));
     return admin;
   }
 
