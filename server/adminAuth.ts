@@ -7,9 +7,12 @@ declare global {
     interface Request {
       adminUser?: any;
     }
-    interface Session {
-      adminUser?: any;
-    }
+  }
+}
+
+declare module 'express-session' {
+  interface SessionData {
+    adminUser?: any;
   }
 }
 

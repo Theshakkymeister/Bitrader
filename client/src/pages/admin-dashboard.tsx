@@ -79,18 +79,18 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
 
   // Get current admin user
-  const { data: adminUser } = useQuery({
+  const { data: adminUser } = useQuery<AdminUser>({
     queryKey: ["/api/admin/user"],
     retry: false,
   });
 
   // Get crypto addresses
-  const { data: cryptoAddresses = [] } = useQuery({
+  const { data: cryptoAddresses = [] } = useQuery<CryptoAddress[]>({
     queryKey: ["/api/admin/crypto-addresses"],
   });
 
   // Get website settings
-  const { data: websiteSettings = [] } = useQuery({
+  const { data: websiteSettings = [] } = useQuery<WebsiteSetting[]>({
     queryKey: ["/api/admin/settings"],
   });
 
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
       </Card>
 
       <div className="grid gap-4">
-        {cryptoAddresses.map((address: CryptoAddress, index) => (
+        {cryptoAddresses.map((address: CryptoAddress, index: number) => (
           <motion.div
             key={address.id}
             initial={{ opacity: 0, x: -20 }}
@@ -460,7 +460,7 @@ export default function AdminDashboard() {
       </Card>
 
       <div className="grid gap-4">
-        {websiteSettings.map((setting: WebsiteSetting, index) => (
+        {websiteSettings.map((setting: WebsiteSetting, index: number) => (
           <motion.div
             key={setting.id}
             initial={{ opacity: 0, x: -20 }}
