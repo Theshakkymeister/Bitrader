@@ -47,11 +47,17 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication System
 The application uses dual authentication systems:
-- **User Authentication**: Replit's OAuth system for regular users
+- **User Authentication**: Traditional email/password system with bcrypt hashing
 - **Admin Authentication**: Separate bcrypt-based system for administrators
-- Session management with PostgreSQL persistence
+- Session management with express-session
 - Middleware for protecting both user and admin routes
 - Role-based access control for admin functions
+
+#### User Authentication Flow
+- Users can register and login at `/auth` with username, email, and password
+- Passwords are securely hashed using bcrypt
+- Sessions are managed server-side with express-session
+- Protected routes require authentication middleware
 
 ### Admin System (Ken.attwood@yahoo.com)
 Complete backend control system with:

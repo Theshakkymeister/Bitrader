@@ -37,9 +37,18 @@ export default function AdminLogin() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Login failed");
+        let errorMessage = "Login failed";
+        try {
+          const error = await response.json();
+          errorMessage = error.message || errorMessage;
+        } catch {
+          errorMessage = "Invalid email or password";
+        }
+        throw new Error(errorMessage);
       }
+
+      const data = await response.json();
+      console.log("Admin login successful:", data);
 
       toast({
         title: "Login Successful",
@@ -48,7 +57,9 @@ export default function AdminLogin() {
       });
 
       // Redirect to admin dashboard
-      window.location.href = "/admin/dashboard";
+      setTimeout(() => {
+        window.location.href = "/admin/dashboard";
+      }, 1000);
 
     } catch (error: any) {
       toast({
