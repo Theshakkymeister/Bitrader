@@ -367,22 +367,7 @@ export default function Dashboard() {
           >
             Dashboard
           </button>
-          <button 
-            onClick={() => { setActiveView('stocks'); setSidebarOpen(false); }}
-            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'stocks' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Stock Holdings
-          </button>
-          <button 
-            onClick={() => { setActiveView('crypto'); setSidebarOpen(false); }}
-            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'crypto' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Crypto Holdings
-          </button>
+
           <button 
             onClick={() => { setActiveView('wallet'); setSidebarOpen(false); }}
             className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
