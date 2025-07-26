@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { Home, TrendingUp, PieChart, Settings, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
@@ -25,11 +25,13 @@ function MobileNav() {
     <div className="lg:hidden">
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="md:hidden">
+          <Button variant="ghost" size="sm">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetDescription className="sr-only">Navigate to different sections of the app</SheetDescription>
           <div className="flex flex-col space-y-4 mt-8">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
@@ -103,7 +105,7 @@ function AppHeader() {
             <MobileNav />
             <div className="hidden sm:flex items-center space-x-3">
               <div className="text-sm text-gray-600">
-                Welcome, {user?.firstName || 'Trader'}
+                Welcome, Trader
               </div>
               <a href="/api/logout">
                 <Button variant="outline" size="sm">

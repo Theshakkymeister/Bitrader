@@ -50,15 +50,25 @@ export default function Dashboard() {
   const todayPL = portfolioValue * (todayPLPercent / 100);
 
   // Holdings data with real market data
+  const getHolding = (symbol: string, shares: number) => {
+    const asset = allAssets.find(a => a.symbol === symbol);
+    if (!asset) return null;
+    return {
+      ...asset,
+      shares,
+      value: asset.price * shares
+    };
+  };
+
   const holdings = [
-    { ...allAssets.find(a => a.symbol === 'AAPL'), shares: 32, value: allAssets.find(a => a.symbol === 'AAPL')?.price * 32 || 0 },
-    { ...allAssets.find(a => a.symbol === 'MSFT'), shares: 12, value: allAssets.find(a => a.symbol === 'MSFT')?.price * 12 || 0 },
-    { ...allAssets.find(a => a.symbol === 'TSLA'), shares: 15, value: allAssets.find(a => a.symbol === 'TSLA')?.price * 15 || 0 },
-    { ...allAssets.find(a => a.symbol === 'GOOGL'), shares: 23, value: allAssets.find(a => a.symbol === 'GOOGL')?.price * 23 || 0 },
-    { ...allAssets.find(a => a.symbol === 'BTC'), shares: 0.1234, value: allAssets.find(a => a.symbol === 'BTC')?.price * 0.1234 || 0 },
-    { ...allAssets.find(a => a.symbol === 'ETH'), shares: 1.2567, value: allAssets.find(a => a.symbol === 'ETH')?.price * 1.2567 || 0 },
-    { ...allAssets.find(a => a.symbol === 'SOL'), shares: 15.67, value: allAssets.find(a => a.symbol === 'SOL')?.price * 15.67 || 0 }
-  ].filter(h => h && h.symbol);
+    getHolding('AAPL', 32),
+    getHolding('MSFT', 12),
+    getHolding('TSLA', 15),
+    getHolding('GOOGL', 23),
+    getHolding('BTC', 0.1234),
+    getHolding('ETH', 1.2567),
+    getHolding('SOL', 15.67)
+  ].filter(h => h !== null);
 
   const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
