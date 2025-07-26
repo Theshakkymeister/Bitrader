@@ -6,6 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConnectAccount } from "@/components/connect-account";
 import { 
   Wallet, 
@@ -24,7 +27,9 @@ import {
   Plus,
   Menu,
   X,
-  HelpCircle
+  HelpCircle,
+  Shield,
+  Copy
 } from "lucide-react";
 import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 
@@ -33,6 +38,17 @@ export default function Dashboard() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const [activeView, setActiveView] = useState('dashboard');
+  const [buyStockDialog, setBuyStockDialog] = useState(false);
+  const [buyCryptoDialog, setBuyCryptoDialog] = useState(false);
+  const [adminDialog, setAdminDialog] = useState(false);
+  const [selectedStock, setSelectedStock] = useState('');
+  const [selectedCrypto, setSelectedCrypto] = useState('');
+  const [depositAddresses, setDepositAddresses] = useState({
+    btc: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    eth: '0x742d35Cc6634C0532925a3b8D73C6d3D8f4b1234',
+    sol: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
+    usdt: '0x742d35Cc6634C0532925a3b8D73C6d3D8f4b1234'
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -158,6 +174,74 @@ export default function Dashboard() {
             >
               <Menu className="h-5 w-5" />
             </Button>
+            
+            {/* Admin Button for authorized users */}
+            {user?.email === '5k7whkfvpw@private.replit.com' && (
+              <Dialog open={adminDialog} onOpenChange={setAdminDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="hidden md:flex pulse-glow">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="smooth-enter">
+                  <DialogHeader>
+                    <DialogTitle>Admin Panel - Manage Deposit Addresses</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="btc-address">Bitcoin (BTC) Address</Label>
+                      <Input
+                        id="btc-address"
+                        value={depositAddresses.btc}
+                        onChange={(e) => setDepositAddresses(prev => ({ ...prev, btc: e.target.value }))}
+                        placeholder="Enter BTC address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="eth-address">Ethereum (ETH) Address</Label>
+                      <Input
+                        id="eth-address"
+                        value={depositAddresses.eth}
+                        onChange={(e) => setDepositAddresses(prev => ({ ...prev, eth: e.target.value }))}
+                        placeholder="Enter ETH address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sol-address">Solana (SOL) Address</Label>
+                      <Input
+                        id="sol-address"
+                        value={depositAddresses.sol}
+                        onChange={(e) => setDepositAddresses(prev => ({ ...prev, sol: e.target.value }))}
+                        placeholder="Enter SOL address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="usdt-address">Tether (USDT) Address</Label>
+                      <Input
+                        id="usdt-address"
+                        value={depositAddresses.usdt}
+                        onChange={(e) => setDepositAddresses(prev => ({ ...prev, usdt: e.target.value }))}
+                        placeholder="Enter USDT address"
+                      />
+                    </div>
+                    <Button 
+                      onClick={() => {
+                        toast({
+                          title: "Success",
+                          description: "Deposit addresses updated successfully!",
+                        });
+                        setAdminDialog(false);
+                      }}
+                      className="w-full bg-green-500 hover:bg-green-600"
+                    >
+                      Save Changes
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            
             <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
               <span className="text-xs font-medium text-white">{getUserInitials(user)}</span>
             </div>
@@ -281,41 +365,44 @@ export default function Dashboard() {
 
   function renderDashboard() {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 fade-in">
         {/* Portfolio Value Card with Chart */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 hover-scale transition-all duration-300 smooth-enter">
           <div className="flex justify-between items-start mb-4">
-            <div>
+            <div className="slide-in-left">
               <div className="text-sm text-gray-600 mb-1">Portfolio Value</div>
-              <div className="text-3xl font-bold text-black mb-2">
+              <div className="text-3xl font-bold text-black mb-2 bounce-in">
                 ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
               </div>
               <div className="flex items-center text-sm">
-                <span className="text-green-600 font-medium">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
+                <span className="text-green-600 font-medium pulse-glow">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
                 <span className="text-gray-600 ml-1">(+1.97%) Today</span>
               </div>
             </div>
-            <Select>
-              <SelectTrigger className="w-24 h-8 text-xs">
-                <SelectValue placeholder="1D" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1d">1D</SelectItem>
-                <SelectItem value="1w">1W</SelectItem>
-                <SelectItem value="1m">1M</SelectItem>
-                <SelectItem value="1y">1Y</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="slide-in-right">
+              <Select>
+                <SelectTrigger className="w-24 h-8 text-xs hover-glow">
+                  <SelectValue placeholder="1D" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1d">1D</SelectItem>
+                  <SelectItem value="1w">1W</SelectItem>
+                  <SelectItem value="1m">1M</SelectItem>
+                  <SelectItem value="1y">1Y</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
-          {/* Simple Portfolio Chart */}
-          <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden">
+          {/* Animated Portfolio Chart */}
+          <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden hover-glow transition-all duration-300">
             <svg className="w-full h-full" viewBox="0 0 400 100">
               <path 
                 d="M 0,80 Q 100,60 200,45 T 400,20" 
                 stroke="#10b981" 
                 strokeWidth="2" 
                 fill="none"
+                className="animate-pulse"
               />
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -333,21 +420,21 @@ export default function Dashboard() {
 
         {/* Buying Power and Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.1s'}}>
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Buying Power</div>
-            <div className="text-xl font-bold text-black">$15,420.00</div>
+            <div className="text-xl font-bold text-black bounce-in">$15,420.00</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.2s'}}>
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Active Positions</div>
-            <div className="text-xl font-bold text-black">8</div>
+            <div className="text-xl font-bold text-black bounce-in">8</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.3s'}}>
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's Return</div>
-            <div className="text-xl font-bold text-green-600">+2.45%</div>
+            <div className="text-xl font-bold text-green-600 bounce-in pulse-glow">+2.45%</div>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.4s'}}>
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Total Return</div>
-            <div className="text-xl font-bold text-green-600">+18.7%</div>
+            <div className="text-xl font-bold text-green-600 bounce-in pulse-glow">+18.7%</div>
           </div>
         </div>
 
@@ -423,12 +510,55 @@ export default function Dashboard() {
 
   function renderStocks() {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 fade-in">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black">Stock Holdings</h2>
-          <Button className="bg-green-500 hover:bg-green-600 text-white">
-            Buy Stocks
-          </Button>
+          <h2 className="text-2xl font-bold text-black slide-in-left">Stock Holdings</h2>
+          <Dialog open={buyStockDialog} onOpenChange={setBuyStockDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-500 hover:bg-green-600 text-white hover-scale transition-all duration-300 pulse-glow">
+                Buy Stocks
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="smooth-enter">
+              <DialogHeader>
+                <DialogTitle>Buy Stocks</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="stock-symbol">Stock Symbol</Label>
+                  <Select value={selectedStock} onValueChange={setSelectedStock}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a stock" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AAPL">AAPL - Apple Inc.</SelectItem>
+                      <SelectItem value="TSLA">TSLA - Tesla Inc.</SelectItem>
+                      <SelectItem value="MSFT">MSFT - Microsoft Corp.</SelectItem>
+                      <SelectItem value="GOOGL">GOOGL - Alphabet Inc.</SelectItem>
+                      <SelectItem value="AMZN">AMZN - Amazon.com Inc.</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="shares">Number of Shares</Label>
+                  <Input id="shares" type="number" placeholder="Enter number of shares" />
+                </div>
+                <Button 
+                  onClick={() => {
+                    toast({
+                      title: "Order Placed",
+                      description: `Successfully placed order to buy ${selectedStock}`,
+                    });
+                    setBuyStockDialog(false);
+                  }}
+                  className="w-full bg-green-500 hover:bg-green-600"
+                  disabled={!selectedStock}
+                >
+                  Place Order
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
         
         <div className="bg-white rounded-lg border border-gray-200">
@@ -497,12 +627,54 @@ export default function Dashboard() {
 
   function renderCrypto() {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 fade-in">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black">Crypto Holdings</h2>
-          <Button className="bg-green-500 hover:bg-green-600 text-white">
-            Buy Crypto
-          </Button>
+          <h2 className="text-2xl font-bold text-black slide-in-left">Crypto Holdings</h2>
+          <Dialog open={buyCryptoDialog} onOpenChange={setBuyCryptoDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-500 hover:bg-green-600 text-white hover-scale transition-all duration-300 pulse-glow">
+                Buy Crypto
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="smooth-enter">
+              <DialogHeader>
+                <DialogTitle>Buy Cryptocurrency</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="crypto-symbol">Cryptocurrency</Label>
+                  <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a cryptocurrency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
+                      <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
+                      <SelectItem value="SOL">Solana (SOL)</SelectItem>
+                      <SelectItem value="USDT">Tether (USDT)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="amount">Amount (USD)</Label>
+                  <Input id="amount" type="number" placeholder="Enter amount in USD" />
+                </div>
+                <Button 
+                  onClick={() => {
+                    toast({
+                      title: "Order Placed",
+                      description: `Successfully placed order to buy ${selectedCrypto}`,
+                    });
+                    setBuyCryptoDialog(false);
+                  }}
+                  className="w-full bg-green-500 hover:bg-green-600"
+                  disabled={!selectedCrypto}
+                >
+                  Place Order
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
         
         <div className="bg-white rounded-lg border border-gray-200">
@@ -612,7 +784,7 @@ export default function Dashboard() {
           <div className="p-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Bitcoin Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
                     <Bitcoin className="h-5 w-5 text-orange-600" />
@@ -622,13 +794,24 @@ export default function Dashboard() {
                     <div className="text-sm text-gray-600">Network: Bitcoin</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full">
-                  Get Deposit Address
+                <Button 
+                  variant="outline" 
+                  className="w-full hover-scale transition-all duration-300"
+                  onClick={() => {
+                    navigator.clipboard.writeText(depositAddresses.btc);
+                    toast({
+                      title: "Address Copied",
+                      description: "Bitcoin deposit address copied to clipboard",
+                    });
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Address
                 </Button>
               </div>
 
               {/* Ethereum Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
                     <span className="text-sm font-bold text-purple-600">ETH</span>
@@ -638,13 +821,24 @@ export default function Dashboard() {
                     <div className="text-sm text-gray-600">Network: Ethereum</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full">
-                  Get Deposit Address
+                <Button 
+                  variant="outline" 
+                  className="w-full hover-scale transition-all duration-300"
+                  onClick={() => {
+                    navigator.clipboard.writeText(depositAddresses.eth);
+                    toast({
+                      title: "Address Copied",
+                      description: "Ethereum deposit address copied to clipboard",
+                    });
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Address
                 </Button>
               </div>
 
               {/* Solana Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                     <span className="text-sm font-bold text-blue-600">SOL</span>
@@ -654,13 +848,24 @@ export default function Dashboard() {
                     <div className="text-sm text-gray-600">Network: Solana</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full">
-                  Get Deposit Address
+                <Button 
+                  variant="outline" 
+                  className="w-full hover-scale transition-all duration-300"
+                  onClick={() => {
+                    navigator.clipboard.writeText(depositAddresses.sol);
+                    toast({
+                      title: "Address Copied",
+                      description: "Solana deposit address copied to clipboard",
+                    });
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Address
                 </Button>
               </div>
 
               {/* USDT Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
                 <div className="flex items-center mb-3">
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
                     <span className="text-xs font-bold text-green-600">USDT</span>
@@ -670,8 +875,19 @@ export default function Dashboard() {
                     <div className="text-sm text-gray-600">Network: Ethereum</div>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full">
-                  Get Deposit Address
+                <Button 
+                  variant="outline" 
+                  className="w-full hover-scale transition-all duration-300"
+                  onClick={() => {
+                    navigator.clipboard.writeText(depositAddresses.usdt);
+                    toast({
+                      title: "Address Copied",
+                      description: "USDT deposit address copied to clipboard",
+                    });
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Address
                 </Button>
               </div>
             </div>
