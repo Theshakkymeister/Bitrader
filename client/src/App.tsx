@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
+import SettingsPage from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function MobileNav() {
@@ -135,7 +136,7 @@ function Router() {
               <Route path="/" component={Dashboard} />
               <Route path="/wallets" component={() => <div className="text-center py-20 text-gray-500">Wallets page coming soon</div>} />
               <Route path="/portfolio" component={() => <div className="text-center py-20 text-gray-500">Portfolio page coming soon</div>} />
-              <Route path="/settings" component={() => <div className="text-center py-20 text-gray-500">Settings page coming soon</div>} />
+              <Route path="/settings" component={SettingsPage} />
             </main>
           </div>
         </>
