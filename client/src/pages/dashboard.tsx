@@ -37,9 +37,11 @@ import {
   Square,
   DollarSign,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Search
 } from "lucide-react";
 import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
+import { allAssets, getAssetsByType, searchAssets, type MarketAsset } from "@/lib/marketData";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -54,39 +56,11 @@ export default function Dashboard() {
   const [liveTrading, setLiveTrading] = useState(false);
   const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
   const [mobileWalletExpanded, setMobileWalletExpanded] = useState(false);
-  const [marketData, setMarketData] = useState({
-    // Crypto
-    BTC: { price: 43250.75, change: 2.45, type: 'crypto' },
-    ETH: { price: 2580.40, change: 1.82, type: 'crypto' },
-    BNB: { price: 315.80, change: 1.25, type: 'crypto' },
-    SOL: { price: 98.45, change: 4.12, type: 'crypto' },
-    ADA: { price: 0.385, change: -1.85, type: 'crypto' },
-    XRP: { price: 0.525, change: 2.18, type: 'crypto' },
-    DOGE: { price: 0.085, change: 3.45, type: 'crypto' },
-    AVAX: { price: 35.60, change: -0.92, type: 'crypto' },
-    DOT: { price: 7.85, change: 1.65, type: 'crypto' },
-    MATIC: { price: 0.895, change: -2.15, type: 'crypto' },
-    
-    // Major Stocks
-    AAPL: { price: 185.60, change: -0.75, type: 'stock' },
-    MSFT: { price: 378.85, change: 1.25, type: 'stock' },
-    GOOGL: { price: 142.65, change: 0.85, type: 'stock' },
-    AMZN: { price: 153.75, change: 2.15, type: 'stock' },
-    TSLA: { price: 248.90, change: 3.20, type: 'stock' },
-    META: { price: 355.20, change: 1.85, type: 'stock' },
-    NFLX: { price: 485.30, change: -1.25, type: 'stock' },
-    NVDA: { price: 875.40, change: 4.85, type: 'stock' },
-    AMD: { price: 148.25, change: 2.65, type: 'stock' },
-    BABA: { price: 78.95, change: -0.85, type: 'stock' },
-    
-    // Forex & Commodities
-    EURUSD: { price: 1.0845, change: 0.25, type: 'forex' },
-    GBPUSD: { price: 1.2635, change: -0.15, type: 'forex' },
-    USDJPY: { price: 148.75, change: 0.85, type: 'forex' },
-    GOLD: { price: 2024.50, change: 0.85, type: 'commodity' },
-    SILVER: { price: 23.45, change: 1.25, type: 'commodity' },
-    OIL: { price: 78.65, change: -1.85, type: 'commodity' }
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cryptoAssets, setCryptoAssets] = useState<MarketAsset[]>(getAssetsByType('crypto'));
+  const [stockAssets, setStockAssets] = useState<MarketAsset[]>(getAssetsByType('stock'));
+  const [filteredCryptos, setFilteredCryptos] = useState<MarketAsset[]>(cryptoAssets.slice(0, 20));
+  const [filteredStocks, setFilteredStocks] = useState<MarketAsset[]>(stockAssets.slice(0, 20));
   
   const queryClient = useQueryClient();
   const [depositAddresses, setDepositAddresses] = useState({
@@ -144,23 +118,31 @@ export default function Dashboard() {
     },
   });
 
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredCryptos(cryptoAssets.slice(0, 20));
+      setFilteredStocks(stockAssets.slice(0, 20));
+    } else {
+      const searchResults = searchAssets(searchQuery);
+      setFilteredCryptos(searchResults.filter(asset => asset.type === 'crypto').slice(0, 20));
+      setFilteredStocks(searchResults.filter(asset => asset.type === 'stock').slice(0, 20));
+    }
+  }, [searchQuery, cryptoAssets, stockAssets]);
+
   // Real-time market data updates
   useEffect(() => {
     if (liveTrading) {
       const interval = setInterval(() => {
-        setMarketData(prev => {
-          const updated = { ...prev };
-          Object.keys(updated).forEach(symbol => {
-            const currentData = updated[symbol as keyof typeof updated];
-            const variance = currentData.price * 0.002; // 0.2% max variance
-            updated[symbol as keyof typeof updated] = {
-              ...currentData,
-              price: Math.max(0.001, currentData.price + (Math.random() - 0.5) * variance),
-              change: currentData.change + (Math.random() - 0.5) * 0.5
-            };
-          });
-          return updated;
-        });
+        const updateAssets = (assets: MarketAsset[]) => 
+          assets.map(asset => ({
+            ...asset,
+            price: Math.max(0.01, asset.price * (1 + (Math.random() - 0.5) * 0.004)),
+            change: asset.change + (Math.random() - 0.5) * 0.5
+          }));
+
+        setCryptoAssets(prev => updateAssets(prev));
+        setStockAssets(prev => updateAssets(prev));
       }, 1000);
       
       return () => clearInterval(interval);
@@ -661,66 +643,54 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search stocks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         {/* Stock Holdings */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-black">Your Holdings</h3>
+            <h3 className="text-lg font-medium text-black">Your Holdings ({filteredStocks.length} stocks)</h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {Object.entries(marketData).filter(([_, data]) => data.type === 'stock').map(([symbol, data]) => (
-              <div key={symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+            {filteredStocks.slice(0, 20).map((asset) => (
+              <div key={asset.symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-blue-600">{symbol}</span>
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                      {asset.logo ? (
+                        <img src={asset.logo} alt={asset.symbol} className="w-8 h-8 object-contain" />
+                      ) : (
+                        <span className="text-sm font-bold text-blue-600">{asset.symbol}</span>
+                      )}
                     </div>
                     <div>
-                      <div className="font-medium text-black">{symbol}</div>
-                      <div className="text-sm text-gray-600">
-                        {symbol === 'AAPL' ? '12 shares' : 
-                         symbol === 'MSFT' ? '8 shares' :
-                         symbol === 'GOOGL' ? '15 shares' :
-                         symbol === 'TSLA' ? '5 shares' :
-                         symbol === 'AMZN' ? '10 shares' :
-                         symbol === 'META' ? '6 shares' :
-                         symbol === 'NFLX' ? '3 shares' :
-                         symbol === 'NVDA' ? '4 shares' :
-                         symbol === 'AMD' ? '18 shares' : '7 shares'}
-                      </div>
+                      <div className="font-medium text-black">{asset.symbol}</div>
+                      <div className="text-sm text-gray-600">{asset.name}</div>
+                      <div className="text-xs text-gray-500">{Math.floor(Math.random() * 50) + 1} shares</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium text-black">${data.price.toFixed(2)}</div>
-                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    <div className="font-medium text-black">${asset.price.toFixed(2)}</div>
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                     </div>
                   </div>
                   <div className="text-right ml-6">
                     <div className="font-bold text-black">
-                      ${(data.price * (
-                        symbol === 'AAPL' ? 12 : 
-                        symbol === 'MSFT' ? 8 :
-                        symbol === 'GOOGL' ? 15 :
-                        symbol === 'TSLA' ? 5 :
-                        symbol === 'AMZN' ? 10 :
-                        symbol === 'META' ? 6 :
-                        symbol === 'NFLX' ? 3 :
-                        symbol === 'NVDA' ? 4 :
-                        symbol === 'AMD' ? 18 : 7
-                      )).toLocaleString()}
+                      ${(asset.price * (Math.floor(Math.random() * 50) + 1)).toLocaleString()}
                     </div>
-                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}${((data.price * (
-                        symbol === 'AAPL' ? 12 : 
-                        symbol === 'MSFT' ? 8 :
-                        symbol === 'GOOGL' ? 15 :
-                        symbol === 'TSLA' ? 5 :
-                        symbol === 'AMZN' ? 10 :
-                        symbol === 'META' ? 6 :
-                        symbol === 'NFLX' ? 3 :
-                        symbol === 'NVDA' ? 4 :
-                        symbol === 'AMD' ? 18 : 7
-                      )) * data.change / 100).toFixed(2)}
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {asset.change >= 0 ? '+' : ''}${((asset.price * (Math.floor(Math.random() * 50) + 1)) * asset.change / 100).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -796,70 +766,58 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search cryptocurrencies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         {/* Crypto Holdings */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-black">Your Holdings</h3>
+            <h3 className="text-lg font-medium text-black">Your Holdings ({filteredCryptos.length} cryptocurrencies)</h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {Object.entries(marketData).filter(([_, data]) => data.type === 'crypto').map(([symbol, data]) => (
-              <div key={symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+            {filteredCryptos.slice(0, 20).map((asset) => (
+              <div key={asset.symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                      {symbol === 'BTC' ? (
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center overflow-hidden">
+                      {asset.logo ? (
+                        <img src={asset.logo} alt={asset.symbol} className="w-8 h-8 object-contain" />
+                      ) : asset.symbol === 'BTC' ? (
                         <Bitcoin className="h-6 w-6 text-orange-600" />
                       ) : (
-                        <span className="text-sm font-bold text-orange-600">{symbol}</span>
+                        <span className="text-sm font-bold text-orange-600">{asset.symbol}</span>
                       )}
                     </div>
                     <div>
-                      <div className="font-medium text-black">{symbol}</div>
-                      <div className="text-sm text-gray-600">
-                        {symbol === 'BTC' ? '0.25 BTC' : 
-                         symbol === 'ETH' ? '2.5 ETH' :
-                         symbol === 'BNB' ? '15.8 BNB' :
-                         symbol === 'SOL' ? '45.2 SOL' :
-                         symbol === 'ADA' ? '2,500 ADA' :
-                         symbol === 'XRP' ? '3,200 XRP' :
-                         symbol === 'DOGE' ? '12,000 DOGE' :
-                         symbol === 'AVAX' ? '85.5 AVAX' :
-                         symbol === 'DOT' ? '425 DOT' : '1,800 MATIC'}
+                      <div className="font-medium text-black">{asset.symbol}</div>
+                      <div className="text-sm text-gray-600">{asset.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {(Math.random() * 100).toFixed(asset.price > 1000 ? 4 : 2)} {asset.symbol}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium text-black">${data.price.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : 3)}</div>
-                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    <div className="font-medium text-black">${asset.price.toFixed(asset.price > 1000 ? 2 : asset.price > 1 ? 2 : 4)}</div>
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                     </div>
                   </div>
                   <div className="text-right ml-6">
                     <div className="font-bold text-black">
-                      ${(data.price * (
-                        symbol === 'BTC' ? 0.25 : 
-                        symbol === 'ETH' ? 2.5 :
-                        symbol === 'BNB' ? 15.8 :
-                        symbol === 'SOL' ? 45.2 :
-                        symbol === 'ADA' ? 2500 :
-                        symbol === 'XRP' ? 3200 :
-                        symbol === 'DOGE' ? 12000 :
-                        symbol === 'AVAX' ? 85.5 :
-                        symbol === 'DOT' ? 425 : 1800
-                      )).toLocaleString()}
+                      ${(asset.price * (Math.random() * 100)).toLocaleString()}
                     </div>
-                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}${((data.price * (
-                        symbol === 'BTC' ? 0.25 : 
-                        symbol === 'ETH' ? 2.5 :
-                        symbol === 'BNB' ? 15.8 :
-                        symbol === 'SOL' ? 45.2 :
-                        symbol === 'ADA' ? 2500 :
-                        symbol === 'XRP' ? 3200 :
-                        symbol === 'DOGE' ? 12000 :
-                        symbol === 'AVAX' ? 85.5 :
-                        symbol === 'DOT' ? 425 : 1800
-                      )) * data.change / 100).toFixed(2)}
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {asset.change >= 0 ? '+' : ''}${((asset.price * (Math.random() * 100)) * asset.change / 100).toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -956,19 +914,19 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
             <div className="text-sm text-gray-600">Crypto Markets</div>
-            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'crypto').length}</div>
+            <div className="text-2xl font-bold text-black">{cryptoAssets.length}</div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
             <div className="text-sm text-gray-600">Stock Markets</div>
-            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'stock').length}</div>
+            <div className="text-2xl font-bold text-black">{stockAssets.length}</div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-            <div className="text-sm text-gray-600">Forex Pairs</div>
-            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'forex').length}</div>
+            <div className="text-sm text-gray-600">Total Assets</div>
+            <div className="text-2xl font-bold text-black">{allAssets.length}</div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
-            <div className="text-sm text-gray-600">Commodities</div>
-            <div className="text-2xl font-bold text-black">{Object.values(marketData).filter(d => d.type === 'commodity').length}</div>
+            <div className="text-sm text-gray-600">Trading Pairs</div>
+            <div className="text-2xl font-bold text-black">{cryptoAssets.length + stockAssets.length}</div>
           </div>
         </div>
 
@@ -979,29 +937,41 @@ export default function Dashboard() {
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(marketData).filter(([_, data]) => data.type === 'crypto').map(([symbol, data]) => (
-                <div key={symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
+              {cryptoAssets.slice(0, 12).map((asset) => (
+                <div key={asset.symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="font-bold text-lg text-black">{symbol}</div>
-                      <div className="text-2xl font-bold text-black">${data.price.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : 3)}</div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center overflow-hidden">
+                        {asset.logo ? (
+                          <img src={asset.logo} alt={asset.symbol} className="w-6 h-6 object-contain" />
+                        ) : (
+                          <span className="text-xs font-bold text-orange-600">{asset.symbol.slice(0, 3)}</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-lg text-black">{asset.symbol}</div>
+                        <div className="text-xs text-gray-600">{asset.name}</div>
+                      </div>
                     </div>
-                    <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-black">${asset.price.toFixed(asset.price > 1000 ? 2 : asset.price > 1 ? 2 : 4)}</div>
+                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
+                      </div>
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
                       className="flex-1 bg-green-500 hover:bg-green-600"
-                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
-                          symbol,
+                          symbol: asset.symbol,
                           type: 'buy',
                           quantity: 1,
-                          price: data.price,
-                          amount: data.price.toString()
+                          price: asset.price,
+                          amount: asset.price.toString()
                         });
                       }}
                     >
@@ -1012,14 +982,14 @@ export default function Dashboard() {
                       size="sm"
                       variant="outline"
                       className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
-                          symbol,
+                          symbol: asset.symbol,
                           type: 'sell',
                           quantity: 1,
-                          price: data.price,
-                          amount: data.price.toString()
+                          price: asset.price,
+                          amount: asset.price.toString()
                         });
                       }}
                     >
@@ -1040,29 +1010,41 @@ export default function Dashboard() {
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(marketData).filter(([_, data]) => data.type === 'stock').map(([symbol, data]) => (
-                <div key={symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
+              {stockAssets.slice(0, 12).map((asset) => (
+                <div key={asset.symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="font-bold text-lg text-black">{symbol}</div>
-                      <div className="text-2xl font-bold text-black">${data.price.toFixed(2)}</div>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                        {asset.logo ? (
+                          <img src={asset.logo} alt={asset.symbol} className="w-6 h-6 object-contain" />
+                        ) : (
+                          <span className="text-xs font-bold text-blue-600">{asset.symbol.slice(0, 3)}</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-lg text-black">{asset.symbol}</div>
+                        <div className="text-xs text-gray-600">{asset.name}</div>
+                      </div>
                     </div>
-                    <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-black">${asset.price.toFixed(2)}</div>
+                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
+                      </div>
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
                       className="flex-1 bg-green-500 hover:bg-green-600"
-                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
-                          symbol,
+                          symbol: asset.symbol,
                           type: 'buy',
                           quantity: 1,
-                          price: data.price,
-                          amount: data.price.toString()
+                          price: asset.price,
+                          amount: asset.price.toString()
                         });
                       }}
                     >
@@ -1073,14 +1055,14 @@ export default function Dashboard() {
                       size="sm"
                       variant="outline"
                       className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
-                          symbol,
+                          symbol: asset.symbol,
                           type: 'sell',
                           quantity: 1,
-                          price: data.price,
-                          amount: data.price.toString()
+                          price: asset.price,
+                          amount: asset.price.toString()
                         });
                       }}
                     >
@@ -1094,36 +1076,48 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Forex & Commodities */}
+        {/* Popular Assets */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Forex & Commodities</div>
+            <div className="text-lg font-medium text-black">Popular Trading Assets</div>
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(marketData).filter(([_, data]) => data.type === 'forex' || data.type === 'commodity').map(([symbol, data]) => (
-                <div key={symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
+              {[...cryptoAssets.slice(0, 6), ...stockAssets.slice(0, 6)].map((asset) => (
+                <div key={asset.symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="font-bold text-lg text-black">{symbol}</div>
-                      <div className="text-2xl font-bold text-black">${data.price.toFixed(data.type === 'forex' ? 4 : 2)}</div>
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 ${asset.type === 'crypto' ? 'bg-orange-100' : 'bg-blue-100'} rounded-full flex items-center justify-center overflow-hidden`}>
+                        {asset.logo ? (
+                          <img src={asset.logo} alt={asset.symbol} className="w-6 h-6 object-contain" />
+                        ) : (
+                          <span className={`text-xs font-bold ${asset.type === 'crypto' ? 'text-orange-600' : 'text-blue-600'}`}>{asset.symbol.slice(0, 3)}</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-lg text-black">{asset.symbol}</div>
+                        <div className="text-xs text-gray-600">{asset.name}</div>
+                      </div>
                     </div>
-                    <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-black">${asset.price.toFixed(asset.price > 1000 ? 2 : asset.price > 1 ? 2 : 4)}</div>
+                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
+                      </div>
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
                       className="flex-1 bg-green-500 hover:bg-green-600"
-                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
-                          symbol,
+                          symbol: asset.symbol,
                           type: 'buy',
                           quantity: 1,
-                          price: data.price,
-                          amount: data.price.toString()
+                          price: asset.price,
+                          amount: asset.price.toString()
                         });
                       }}
                     >
@@ -1134,14 +1128,14 @@ export default function Dashboard() {
                       size="sm"
                       variant="outline"
                       className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-                      disabled={!liveTrading || placeTradeMutation.isPending || isIOS}
+                      disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
-                          symbol,
+                          symbol: asset.symbol,
                           type: 'sell',
                           quantity: 1,
-                          price: data.price,
-                          amount: data.price.toString()
+                          price: asset.price,
+                          amount: asset.price.toString()
                         });
                       }}
                     >
