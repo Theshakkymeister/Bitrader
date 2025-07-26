@@ -13,12 +13,21 @@ export default function Landing() {
             </div>
             <span className="text-xl font-semibold text-black">Bitrader</span>
           </div>
-          <Button 
-            onClick={() => window.location.href = '/auth'}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-medium"
-          >
-            Sign In
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={() => window.location.href = '/auth'}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full font-medium"
+            >
+              Sign In
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/admin/login'}
+              variant="outline"
+              className="border-blue-500 text-blue-500 hover:bg-blue-50 px-6 py-2 rounded-full font-medium"
+            >
+              Admin
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -34,13 +43,23 @@ export default function Landing() {
               Join thousands of traders using our advanced AI algorithms for forex, crypto, stocks, and gold trading. 
               Start your journey to financial freedom today.
             </p>
-            <Button 
-              onClick={() => window.location.href = '/auth'}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2 smooth-enter"
-            >
-              <span>Start Trading Free</span>
-              <ArrowRight className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center justify-center space-x-4">
+              <Button 
+                onClick={() => window.location.href = '/auth'}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2 smooth-enter"
+              >
+                <span>Start Trading Free</span>
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/admin/login'}
+                variant="outline"
+                className="border-blue-500 text-blue-500 hover:bg-blue-50 px-8 py-4 text-lg rounded-full font-medium inline-flex items-center space-x-2"
+              >
+                <Shield className="h-5 w-5" />
+                <span>Admin Access</span>
+              </Button>
+            </div>
           </div>
 
           {/* Phone Mockup */}
