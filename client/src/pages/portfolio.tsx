@@ -254,9 +254,9 @@ export default function Portfolio() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent className="p-2">
-          <div className="h-64 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border border-gray-100 rounded-lg">
-            <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
+        <CardContent className="p-6">
+          <div className="h-80 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border border-gray-100 rounded-lg mx-auto max-w-4xl">
+            <svg className="w-full h-full" viewBox="0 0 800 240" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#059669" stopOpacity="0.15"/>
@@ -276,33 +276,33 @@ export default function Portfolio() {
               </defs>
               
               {/* Grid lines */}
-              <g stroke="#e5e7eb" strokeWidth="0.5" opacity="0.5">
-                {[40, 80, 120, 160].map(y => (
-                  <line key={y} x1="0" y1={y} x2="800" y2={y} />
+              <g stroke="#e5e7eb" strokeWidth="0.5" opacity="0.4">
+                {[48, 96, 144, 192].map(y => (
+                  <line key={y} x1="40" y1={y} x2="760" y2={y} />
                 ))}
                 {[160, 320, 480, 640].map(x => (
-                  <line key={x} x1={x} y1="0" x2={x} y2="200" />
+                  <line key={x} x1={x} y1="20" x2={x} y2="220" />
                 ))}
               </g>
               
               {/* Portfolio trend line with smooth curve */}
               <path 
-                d="M 0,160 C 100,150 150,135 200,125 S 350,110 400,100 S 550,85 600,75 S 720,65 800,55" 
+                d="M 60,180 C 140,170 180,155 240,145 S 380,130 440,120 S 580,105 640,95 S 720,85 760,75" 
                 stroke="#059669" 
-                strokeWidth="3" 
+                strokeWidth="4" 
                 fill="none"
                 filter="url(#glow)"
                 className="animate-pulse"
                 style={{
-                  strokeDasharray: '1000',
-                  strokeDashoffset: '1000',
+                  strokeDasharray: '1200',
+                  strokeDashoffset: '1200',
                   animation: 'drawLine 3s ease-in-out forwards, pulse 2s ease-in-out infinite 3s'
                 }}
               />
               
               {/* Filled area under curve */}
               <path 
-                d="M 0,160 C 100,150 150,135 200,125 S 350,110 400,100 S 550,85 600,75 S 720,65 800,55 L 800,200 L 0,200 Z" 
+                d="M 60,180 C 140,170 180,155 240,145 S 380,130 440,120 S 580,105 640,95 S 720,85 760,75 L 760,220 L 60,220 Z" 
                 fill="url(#portfolioGradient)"
                 className="animate-fade-in"
                 style={{ 
@@ -313,43 +313,53 @@ export default function Portfolio() {
               
               {/* Animated glowing dot at the end */}
               <g className="animate-bounce">
-                <circle cx="800" cy="55" r="8" fill="#059669" opacity="0.1">
-                  <animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/>
+                <circle cx="760" cy="75" r="10" fill="#059669" opacity="0.1">
+                  <animate attributeName="r" values="10;18;10" dur="2s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.1;0.02;0.1" dur="2s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="800" cy="55" r="5" fill="#059669" opacity="0.3">
-                  <animate attributeName="r" values="5;8;5" dur="1.5s" repeatCount="indefinite"/>
+                <circle cx="760" cy="75" r="6" fill="#059669" opacity="0.3">
+                  <animate attributeName="r" values="6;10;6" dur="1.5s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.5s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="800" cy="55" r="3" fill="#059669" filter="url(#shadow)"/>
-                <circle cx="800" cy="55" r="1.5" fill="#ffffff"/>
+                <circle cx="760" cy="75" r="4" fill="#059669" filter="url(#shadow)"/>
+                <circle cx="760" cy="75" r="2" fill="#ffffff"/>
               </g>
               
               {/* Data points */}
               {[
-                {x: 160, y: 140}, {x: 320, y: 115}, {x: 480, y: 90}, {x: 640, y: 70}
+                {x: 180, y: 160}, {x: 340, y: 135}, {x: 500, y: 110}, {x: 660, y: 90}
               ].map((point, index) => (
                 <g key={index}>
                   <circle 
                     cx={point.x} 
                     cy={point.y} 
-                    r="4" 
+                    r="5" 
                     fill="#059669" 
                     opacity="0.8"
                     className="animate-pulse"
                     style={{ animationDelay: `${index * 0.5 + 2}s` }}
                   />
-                  <circle cx={point.x} cy={point.y} r="2" fill="#ffffff"/>
+                  <circle cx={point.x} cy={point.y} r="2.5" fill="#ffffff"/>
                 </g>
               ))}
             </svg>
             
             {/* Performance indicators */}
-            <div className="absolute top-4 left-4 text-sm text-gray-600">
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
+            <div className="absolute top-6 left-6 text-sm text-gray-600">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border border-gray-100">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Live Data</span>
+                  <span className="font-medium">Live Market Data</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Chart value display */}
+            <div className="absolute top-6 right-6 text-sm text-gray-600">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border border-gray-100">
+                <div className="text-right">
+                  <div className="text-lg font-bold text-green-600">{formatCurrency(totalPortfolioValue)}</div>
+                  <div className="text-xs text-gray-500">Total Value</div>
                 </div>
               </div>
             </div>
