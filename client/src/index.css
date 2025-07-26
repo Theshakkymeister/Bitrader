@@ -415,4 +415,10 @@
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(217, 33%, 32%);
   }
+
+  /* Glowing green text effect */
+  .glow-green {
+    text-shadow: 0 0 10px #10b981, 0 0 20px #10b981, 0 0 30px #10b981;
+    filter: brightness(1.2);
+  }
 }

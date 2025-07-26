@@ -64,16 +64,16 @@ export default function Dashboard() {
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   
   return (
-    <div className="space-y-6 fade-in">
-      {/* Main Portfolio Header */}
-      <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="text-sm text-gray-600 mb-1">Total Portfolio Value</div>
-            <div className="text-4xl font-bold text-black mb-2">
+    <div className="min-h-screen bg-white">
+      {/* Mobile-Optimized Portfolio Header */}
+      <div className="bg-white p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
+          <div className="flex-1">
+            <div className="text-xs sm:text-sm text-gray-600 mb-1">Total Portfolio Value</div>
+            <div className="text-2xl sm:text-4xl font-bold text-black mb-2">
               ${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </div>
-            <div className="flex items-center text-sm space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center text-xs sm:text-sm space-y-1 sm:space-y-0 sm:space-x-4">
               <div className="flex items-center">
                 <span className={`font-medium ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {todayPL >= 0 ? '+' : ''}${todayPL.toLocaleString('en-US', {minimumFractionDigits: 2})}
@@ -82,14 +82,14 @@ export default function Dashboard() {
                   ({todayPL >= 0 ? '+' : ''}{todayPLPercent}%) Today
                 </span>
               </div>
-              <div className="text-gray-600">
+              <div className="text-gray-600 text-xs sm:text-sm">
                 All Time: <span className="text-green-600 font-medium">+$4,123.45 (+20.17%)</span>
               </div>
             </div>
           </div>
-          <div className="text-right">
+          <div className="flex justify-end sm:justify-start">
             <Select>
-              <SelectTrigger className="w-24 h-8 text-xs">
+              <SelectTrigger className="w-20 sm:w-24 h-8 text-xs">
                 <SelectValue placeholder="1D" />
               </SelectTrigger>
               <SelectContent>
@@ -105,15 +105,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Full-Width Portfolio Chart - Robinhood Style */}
-      <div className="h-64 bg-white relative overflow-hidden -mx-6">
+      {/* Transparent Portfolio Chart - Mobile Optimized */}
+      <div className="h-48 sm:h-64 relative overflow-hidden">
         <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#059669" stopOpacity="0.08"/>
-              <stop offset="50%" stopColor="#059669" stopOpacity="0.04"/>
-              <stop offset="100%" stopColor="#059669" stopOpacity="0"/>
-            </linearGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
               <feMerge> 
@@ -126,47 +121,33 @@ export default function Dashboard() {
           {/* Portfolio trend line with smooth curve */}
           <path 
             d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65" 
-            stroke="#059669" 
-            strokeWidth="2" 
+            stroke="#10b981" 
+            strokeWidth="3" 
             fill="none"
             filter="url(#glow)"
-            className="chart-line"
-            strokeDasharray="1000"
-            strokeDashoffset="0"
-            opacity="0.8"
-          />
-          
-          {/* Filled area under curve */}
-          <path 
-            d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65 L 800,200 L 0,200 Z" 
-            fill="url(#portfolioGradient)"
-            className="chart-fill"
-            style={{ opacity: 1 }}
+            className="chart-line animate-pulse"
+            opacity="0.9"
           />
           
           {/* Live indicator */}
-          <g className="live-dot" opacity="0.6">
-            <circle cx="800" cy="65" r="6" fill="#059669" opacity="0.1">
-              <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" values="0.1;0;0.1" dur="3s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="800" cy="65" r="2" fill="#059669" opacity="0.8">
-              <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="800" cy="65" r="1.5" fill="#ffffff"/>
+          <g className="live-dot" opacity="0.8">
+            <circle cx="800" cy="65" r="4" fill="#10b981" className="animate-ping"/>
+            <circle cx="800" cy="65" r="2" fill="#ffffff"/>
           </g>
         </svg>
       </div>
 
-      {/* Buying Power Display - Robinhood Style */}
-      <div className="px-4 py-2 bg-gray-50/30">
+      {/* Buying Power Display - Green Glowing Text */}
+      <div className="px-4 py-2">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">Buying Power</span>
-          <span className="text-sm font-semibold text-gray-900">
+          <span className="text-sm font-bold text-green-500 glow-green">
             ${(50000 - portfolioValue).toLocaleString('en-US', {minimumFractionDigits: 2})}
           </span>
         </div>
       </div>
+
+      <div className="px-4 space-y-6">
 
       {/* Key Portfolio Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -324,6 +305,7 @@ export default function Dashboard() {
             <div className="text-sm">Analytics</div>
           </div>
         </Button>
+      </div>
       </div>
     </div>
   );
