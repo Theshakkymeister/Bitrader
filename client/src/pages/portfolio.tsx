@@ -13,7 +13,12 @@ import {
   EyeOff,
   ArrowUpRight,
   ArrowDownRight,
-  Search
+  Search,
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  Shield,
+  Zap
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SiApple, SiBitcoin, SiTesla, SiGoogle, SiEthereum } from "react-icons/si";
@@ -38,6 +43,7 @@ export default function Portfolio() {
   const [timeframe, setTimeframe] = useState("1d");
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedHoldings, setExpandedHoldings] = useState<Set<string>>(new Set());
 
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
@@ -187,6 +193,16 @@ export default function Portfolio() {
   const formatShares = (shares: number, symbol: string) => {
     const decimals = ['BTC', 'ETH'].includes(symbol) ? 4 : 0;
     return showValues ? shares.toFixed(decimals) : "••••••••";
+  };
+
+  const toggleExpanded = (symbol: string) => {
+    const newExpanded = new Set(expandedHoldings);
+    if (newExpanded.has(symbol)) {
+      newExpanded.delete(symbol);
+    } else {
+      newExpanded.add(symbol);
+    }
+    setExpandedHoldings(newExpanded);
   };
 
   return (
@@ -484,24 +500,105 @@ export default function Portfolio() {
             <CardContent>
               <div className="space-y-4">
                 {filteredStockHoldings.length > 0 ? filteredStockHoldings.map((holding) => (
-                  <div key={holding.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
-                    <div className="flex items-center space-x-4">
-                      <holding.icon className={`h-10 w-10 ${holding.color}`} />
-                      <div>
-                        <div className="font-medium">{holding.symbol}</div>
-                        <div className="text-sm text-gray-500">{holding.name}</div>
-                        <div className="text-xs text-gray-400">
-                          {formatShares(holding.shares, holding.symbol)} shares
+                  <div key={holding.symbol} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
+                    {/* Main holding info */}
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center space-x-4">
+                        <holding.icon className={`h-12 w-12 ${holding.color}`} />
+                        <div>
+                          <div className="font-bold text-lg">{holding.symbol}</div>
+                          <div className="text-sm text-gray-600">{holding.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {formatShares(holding.shares, holding.symbol)} shares • {formatCurrency(holding.currentPrice)}/share
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-xl">{showValues ? formatCurrency(holding.value) : "••••••••"}</div>
+                        <div className={`text-sm font-medium ${holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {showValues ? `${holding.changePercent >= 0 ? '+' : ''}${holding.changePercent.toFixed(2)}%` : "••••••••"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Avg: {showValues ? formatCurrency(holding.avgPrice) : "••••••••"}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium">{formatCurrency(holding.value)}</div>
-                      <div className={`text-sm ${holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {showValues ? `${holding.changePercent >= 0 ? '+' : ''}${holding.changePercent.toFixed(2)}%` : "••••••••"}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Avg: {formatCurrency(holding.avgPrice)}
+                    
+                    {/* Detailed stock metrics */}
+                    <div className="bg-gray-50 px-4 py-3 border-t">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <div>
+                          <div className="text-gray-500 font-medium">Market Cap</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '$3.5T'}
+                            {holding.symbol === 'TSLA' && '$800.2B'}
+                            {holding.symbol === 'GOOGL' && '$2.1T'}
+                            {holding.symbol === 'MSFT' && '$3.1T'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">P/E Ratio</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '29.85'}
+                            {holding.symbol === 'TSLA' && '65.12'}
+                            {holding.symbol === 'GOOGL' && '23.47'}
+                            {holding.symbol === 'MSFT' && '35.29'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">52W High</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '$237.23'}
+                            {holding.symbol === 'TSLA' && '$278.98'}
+                            {holding.symbol === 'GOOGL' && '$191.75'}
+                            {holding.symbol === 'MSFT' && '$468.35'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">52W Low</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '$164.08'}
+                            {holding.symbol === 'TSLA' && '$138.80'}
+                            {holding.symbol === 'GOOGL' && '$129.40'}
+                            {holding.symbol === 'MSFT' && '$309.45'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Dividend Yield</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '0.44%'}
+                            {holding.symbol === 'TSLA' && 'N/A'}
+                            {holding.symbol === 'GOOGL' && 'N/A'}
+                            {holding.symbol === 'MSFT' && '0.72%'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Volume</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '47.2M'}
+                            {holding.symbol === 'TSLA' && '89.4M'}
+                            {holding.symbol === 'GOOGL' && '23.8M'}
+                            {holding.symbol === 'MSFT' && '31.5M'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Beta</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && '1.25'}
+                            {holding.symbol === 'TSLA' && '2.31'}
+                            {holding.symbol === 'GOOGL' && '1.05'}
+                            {holding.symbol === 'MSFT' && '0.89'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Sector</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'AAPL' && 'Technology'}
+                            {holding.symbol === 'TSLA' && 'Automotive'}
+                            {holding.symbol === 'GOOGL' && 'Technology'}
+                            {holding.symbol === 'MSFT' && 'Technology'}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -539,24 +636,102 @@ export default function Portfolio() {
             <CardContent>
               <div className="space-y-4">
                 {filteredCryptoHoldings.length > 0 ? filteredCryptoHoldings.map((holding) => (
-                  <div key={holding.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
-                    <div className="flex items-center space-x-4">
-                      <holding.icon className={`h-10 w-10 ${holding.color}`} />
-                      <div>
-                        <div className="font-medium">{holding.symbol}</div>
-                        <div className="text-sm text-gray-500">{holding.name}</div>
-                        <div className="text-xs text-gray-400">
-                          {formatShares(holding.shares, holding.symbol)} coins
+                  <div key={holding.symbol} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
+                    {/* Main holding info */}
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center space-x-4">
+                        <holding.icon className={`h-12 w-12 ${holding.color}`} />
+                        <div>
+                          <div className="font-bold text-lg">{holding.symbol}</div>
+                          <div className="text-sm text-gray-600">{holding.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {formatShares(holding.shares, holding.symbol)} coins • {formatCurrency(holding.currentPrice)}/coin
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-xl">{showValues ? formatCurrency(holding.value) : "••••••••"}</div>
+                        <div className={`text-sm font-medium ${holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {showValues ? `${holding.changePercent >= 0 ? '+' : ''}${holding.changePercent.toFixed(2)}%` : "••••••••"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Avg: {showValues ? formatCurrency(holding.avgPrice) : "••••••••"}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium">{formatCurrency(holding.value)}</div>
-                      <div className={`text-sm ${holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {showValues ? `${holding.changePercent >= 0 ? '+' : ''}${holding.changePercent.toFixed(2)}%` : "••••••••"}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Avg: {formatCurrency(holding.avgPrice)}
+                    
+                    {/* Detailed crypto metrics */}
+                    <div className="bg-gray-50 px-4 py-3 border-t">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <div>
+                          <div className="text-gray-500 font-medium">Market Cap</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && '$1.97T'}
+                            {holding.symbol === 'ETH' && '$425.3B'}
+                            {holding.symbol === 'SOL' && '$115.8B'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">24h Volume</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && '$28.4B'}
+                            {holding.symbol === 'ETH' && '$18.7B'}
+                            {holding.symbol === 'SOL' && '$3.2B'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">All-Time High</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && '$108,135'}
+                            {holding.symbol === 'ETH' && '$4,891'}
+                            {holding.symbol === 'SOL' && '$263.83'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Circulating Supply</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && '19.8M BTC'}
+                            {holding.symbol === 'ETH' && '120.4M ETH'}
+                            {holding.symbol === 'SOL' && '474.3M SOL'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Market Dominance</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && '55.2%'}
+                            {holding.symbol === 'ETH' && '12.8%'}
+                            {holding.symbol === 'SOL' && '3.5%'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">7d Change</div>
+                          <div className={`font-semibold ${
+                            (holding.symbol === 'BTC' && 'text-green-600') ||
+                            (holding.symbol === 'ETH' && 'text-green-600') ||
+                            (holding.symbol === 'SOL' && 'text-red-600') ||
+                            'text-gray-700'
+                          }`}>
+                            {holding.symbol === 'BTC' && '+8.4%'}
+                            {holding.symbol === 'ETH' && '+12.1%'}
+                            {holding.symbol === 'SOL' && '-2.8%'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Rank</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && '#1'}
+                            {holding.symbol === 'ETH' && '#2'}
+                            {holding.symbol === 'SOL' && '#4'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 font-medium">Technology</div>
+                          <div className="font-semibold">
+                            {holding.symbol === 'BTC' && 'Proof of Work'}
+                            {holding.symbol === 'ETH' && 'Proof of Stake'}
+                            {holding.symbol === 'SOL' && 'Proof of History'}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
