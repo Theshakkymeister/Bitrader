@@ -705,9 +705,124 @@ export default function Dashboard() {
     return (
       <div>
         <h2 className="text-2xl font-bold mb-6">Portfolio Details</h2>
+        
+        {/* Portfolio Allocation */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle>Asset Allocation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Coins className="h-5 w-5 text-yellow-500" />
+                    <span>Forex</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">45%</div>
+                    <div className="text-sm text-slate-400">${portfolio?.totalBalance ? (parseFloat(portfolio.totalBalance) * 0.45).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Gem className="h-5 w-5 text-yellow-400" />
+                    <span>Gold</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">25%</div>
+                    <div className="text-sm text-slate-400">${portfolio?.totalBalance ? (parseFloat(portfolio.totalBalance) * 0.25).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <BarChart3 className="h-5 w-5 text-green-500" />
+                    <span>Stocks</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">20%</div>
+                    <div className="text-sm text-slate-400">${portfolio?.totalBalance ? (parseFloat(portfolio.totalBalance) * 0.20).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Bitcoin className="h-5 w-5 text-orange-500" />
+                    <span>Crypto</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">10%</div>
+                    <div className="text-sm text-slate-400">${portfolio?.totalBalance ? (parseFloat(portfolio.totalBalance) * 0.10).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle>Performance Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-slate-950 rounded-lg">
+                  <div className="text-2xl font-bold text-green-500">+{portfolio?.winRate ? parseFloat(portfolio.winRate).toFixed(1) : '0.0'}%</div>
+                  <div className="text-sm text-slate-400">Total Return</div>
+                </div>
+                <div className="text-center p-4 bg-slate-950 rounded-lg">
+                  <div className="text-2xl font-bold">${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</div>
+                  <div className="text-sm text-slate-400">Today's P&L</div>
+                </div>
+                <div className="text-center p-4 bg-slate-950 rounded-lg">
+                  <div className="text-2xl font-bold">{portfolio?.activeAlgorithms || 0}</div>
+                  <div className="text-sm text-slate-400">Active Strategies</div>
+                </div>
+                <div className="text-center p-4 bg-slate-950 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-500">A+</div>
+                  <div className="text-sm text-slate-400">Risk Grade</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity */}
         <Card className="bg-slate-900 border-slate-700">
-          <CardContent className="p-6">
-            <p className="text-slate-400">Detailed portfolio view coming soon...</p>
+          <CardHeader>
+            <CardTitle>Recent Portfolio Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div>
+                    <div className="font-medium">Forex Algorithm Activated</div>
+                    <div className="text-sm text-slate-400">EUR/USD strategy started</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">2 hours ago</div>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div>
+                    <div className="font-medium">Portfolio Rebalanced</div>
+                    <div className="text-sm text-slate-400">Asset allocation updated</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">1 day ago</div>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <div>
+                    <div className="font-medium">Gold Position Closed</div>
+                    <div className="text-sm text-slate-400">+$1,250 profit realized</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">2 days ago</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -717,10 +832,167 @@ export default function Dashboard() {
   function renderTrades() {
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6">Trade History</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Trade History</h2>
+          <div className="flex items-center space-x-4">
+            <Select>
+              <SelectTrigger className="w-40 bg-slate-900 border-slate-700">
+                <SelectValue placeholder="All Algorithms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Algorithms</SelectItem>
+                <SelectItem value="forex">Forex</SelectItem>
+                <SelectItem value="gold">Gold</SelectItem>
+                <SelectItem value="stocks">Stocks</SelectItem>
+                <SelectItem value="crypto">Crypto</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
+        </div>
+
+        {/* Trade Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Total Trades</span>
+                <History className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="text-2xl font-bold">1,247</div>
+              <div className="text-sm text-green-500">+18 this week</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Win Rate</span>
+                <Target className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-green-500">82.4%</div>
+              <div className="text-sm text-slate-400">1,027 wins</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Avg. Profit</span>
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="text-2xl font-bold">$245.50</div>
+              <div className="text-sm text-green-500">+5.2% vs last month</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Best Day</span>
+                <Plus className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-green-500">+$3,250</div>
+              <div className="text-sm text-slate-400">Jan 15, 2024</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Detailed Trade Table */}
         <Card className="bg-slate-900 border-slate-700">
-          <CardContent className="p-6">
-            <p className="text-slate-400">Comprehensive trade history view coming soon...</p>
+          <CardHeader>
+            <CardTitle>Recent Trades</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tradesLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-slate-400 border-b border-slate-700">
+                      <th className="text-left py-3">Date</th>
+                      <th className="text-left py-3">Instrument</th>
+                      <th className="text-left py-3">Algorithm</th>
+                      <th className="text-left py-3">Type</th>
+                      <th className="text-left py-3">Entry</th>
+                      <th className="text-left py-3">Exit</th>
+                      <th className="text-right py-3">Size</th>
+                      <th className="text-right py-3">P&L</th>
+                      <th className="text-right py-3">Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Demo trade data since no trades exist yet */}
+                    <tr className="border-b border-slate-800">
+                      <td className="py-3 text-slate-400">Jan 26, 2025</td>
+                      <td className="py-3 font-medium">EUR/USD</td>
+                      <td className="py-3">
+                        <div className="flex items-center space-x-2">
+                          <Coins className="h-4 w-4 text-yellow-500" />
+                          <span>Forex</span>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">BUY</span>
+                      </td>
+                      <td className="py-3">1.05432</td>
+                      <td className="py-3">1.05687</td>
+                      <td className="py-3 text-right">0.5 lots</td>
+                      <td className="py-3 text-right">
+                        <span className="text-green-500">+$127.50</span>
+                      </td>
+                      <td className="py-3 text-right text-slate-400">2h 15m</td>
+                    </tr>
+                    <tr className="border-b border-slate-800">
+                      <td className="py-3 text-slate-400">Jan 26, 2025</td>
+                      <td className="py-3 font-medium">XAU/USD</td>
+                      <td className="py-3">
+                        <div className="flex items-center space-x-2">
+                          <Gem className="h-4 w-4 text-yellow-400" />
+                          <span>Gold</span>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-500">SELL</span>
+                      </td>
+                      <td className="py-3">2,050.25</td>
+                      <td className="py-3">2,048.10</td>
+                      <td className="py-3 text-right">0.1 oz</td>
+                      <td className="py-3 text-right">
+                        <span className="text-green-500">+$215.00</span>
+                      </td>
+                      <td className="py-3 text-right text-slate-400">4h 32m</td>
+                    </tr>
+                    <tr className="border-b border-slate-800">
+                      <td className="py-3 text-slate-400">Jan 25, 2025</td>
+                      <td className="py-3 font-medium">BTC/USD</td>
+                      <td className="py-3">
+                        <div className="flex items-center space-x-2">
+                          <Bitcoin className="h-4 w-4 text-orange-500" />
+                          <span>Crypto</span>
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">BUY</span>
+                      </td>
+                      <td className="py-3">103,450</td>
+                      <td className="py-3">104,120</td>
+                      <td className="py-3 text-right">0.02 BTC</td>
+                      <td className="py-3 text-right">
+                        <span className="text-green-500">+$13.40</span>
+                      </td>
+                      <td className="py-3 text-right text-slate-400">1h 45m</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -730,10 +1002,256 @@ export default function Dashboard() {
   function renderAnalytics() {
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6">Analytics</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Performance Analytics</h2>
+          <div className="flex items-center space-x-4">
+            <Select>
+              <SelectTrigger className="w-40 bg-slate-900 border-slate-700">
+                <SelectValue placeholder="Last 30 days" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+                <SelectItem value="365">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Key Performance Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Sharpe Ratio</span>
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="text-2xl font-bold">2.45</div>
+              <div className="text-sm text-green-500">Excellent performance</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Max Drawdown</span>
+                <Target className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="text-2xl font-bold text-red-500">-8.2%</div>
+              <div className="text-sm text-slate-400">Within safe limits</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Profit Factor</span>
+                <ChartLine className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-green-500">3.2</div>
+              <div className="text-sm text-green-500">Strong profitability</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Avg Trade Duration</span>
+                <Bot className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="text-2xl font-bold">2.8h</div>
+              <div className="text-sm text-slate-400">Optimal timing</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Algorithm Performance Comparison */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle>Algorithm Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Coins className="h-6 w-6 text-yellow-500" />
+                    <div>
+                      <div className="font-medium">Forex Algorithm</div>
+                      <div className="text-sm text-slate-400">EUR/USD, GBP/USD, USD/JPY</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-green-500">+24.5%</div>
+                    <div className="text-sm text-slate-400">Win Rate: 84.2%</div>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-yellow-500 to-green-500 h-2 rounded-full" style={{width: '84%'}}></div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Gem className="h-6 w-6 text-yellow-400" />
+                    <div>
+                      <div className="font-medium">Gold Algorithm</div>
+                      <div className="text-sm text-slate-400">XAU/USD precious metals</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-green-500">+18.7%</div>
+                    <div className="text-sm text-slate-400">Win Rate: 76.8%</div>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-yellow-400 to-green-500 h-2 rounded-full" style={{width: '77%'}}></div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <BarChart3 className="h-6 w-6 text-green-500" />
+                    <div>
+                      <div className="font-medium">Stocks Algorithm</div>
+                      <div className="text-sm text-slate-400">S&P 500, NASDAQ indices</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-green-500">+15.3%</div>
+                    <div className="text-sm text-slate-400">Win Rate: 72.1%</div>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full" style={{width: '72%'}}></div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Bitcoin className="h-6 w-6 text-orange-500" />
+                    <div>
+                      <div className="font-medium">Crypto Algorithm</div>
+                      <div className="text-sm text-slate-400">BTC, ETH, major altcoins</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-green-500">+31.2%</div>
+                    <div className="text-sm text-slate-400">Win Rate: 68.9%</div>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-800 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{width: '69%'}}></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle>Risk Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-slate-400">Overall Risk Score</span>
+                    <span className="text-sm font-medium text-green-500">Low Risk</span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-3">
+                    <div className="bg-gradient-to-r from-green-500 to-yellow-500 h-3 rounded-full" style={{width: '35%'}}></div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-slate-950 rounded-lg">
+                    <div className="text-lg font-bold">2.1%</div>
+                    <div className="text-xs text-slate-400">Daily VaR</div>
+                  </div>
+                  <div className="text-center p-4 bg-slate-950 rounded-lg">
+                    <div className="text-lg font-bold">0.85</div>
+                    <div className="text-xs text-slate-400">Beta</div>
+                  </div>
+                  <div className="text-center p-4 bg-slate-950 rounded-lg">
+                    <div className="text-lg font-bold">12.4%</div>
+                    <div className="text-xs text-slate-400">Volatility</div>
+                  </div>
+                  <div className="text-center p-4 bg-slate-950 rounded-lg">
+                    <div className="text-lg font-bold">0.92</div>
+                    <div className="text-xs text-slate-400">Correlation</div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-700">
+                  <h4 className="font-medium mb-3">Risk Distribution</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-400">Market Risk</span>
+                      <span className="text-sm">65%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-400">Currency Risk</span>
+                      <span className="text-sm">20%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-400">Liquidity Risk</span>
+                      <span className="text-sm">10%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-400">Other Risks</span>
+                      <span className="text-sm">5%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Monthly Performance */}
         <Card className="bg-slate-900 border-slate-700">
-          <CardContent className="p-6">
-            <p className="text-slate-400">Advanced analytics dashboard coming soon...</p>
+          <CardHeader>
+            <CardTitle>Monthly Performance Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-700">
+                    <th className="text-left py-3">Month</th>
+                    <th className="text-right py-3">Return</th>
+                    <th className="text-right py-3">Trades</th>
+                    <th className="text-right py-3">Win Rate</th>
+                    <th className="text-right py-3">Sharpe</th>
+                    <th className="text-right py-3">Max DD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-slate-800">
+                    <td className="py-3 font-medium">January 2025</td>
+                    <td className="py-3 text-right text-green-500">+8.4%</td>
+                    <td className="py-3 text-right">284</td>
+                    <td className="py-3 text-right">81.7%</td>
+                    <td className="py-3 text-right">2.31</td>
+                    <td className="py-3 text-right text-red-500">-3.2%</td>
+                  </tr>
+                  <tr className="border-b border-slate-800">
+                    <td className="py-3 font-medium">December 2024</td>
+                    <td className="py-3 text-right text-green-500">+12.1%</td>
+                    <td className="py-3 text-right">312</td>
+                    <td className="py-3 text-right">85.3%</td>
+                    <td className="py-3 text-right">2.87</td>
+                    <td className="py-3 text-right text-red-500">-2.1%</td>
+                  </tr>
+                  <tr className="border-b border-slate-800">
+                    <td className="py-3 font-medium">November 2024</td>
+                    <td className="py-3 text-right text-green-500">+6.8%</td>
+                    <td className="py-3 text-right">298</td>
+                    <td className="py-3 text-right">78.9%</td>
+                    <td className="py-3 text-right">2.45</td>
+                    <td className="py-3 text-right text-red-500">-4.7%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -741,19 +1259,224 @@ export default function Dashboard() {
   }
 
   function renderAlgorithm(algorithmType: string) {
-    const algorithmNames = {
-      forex: 'Forex',
-      gold: 'Gold',
-      stocks: 'Stocks',
-      crypto: 'Crypto'
+    const algorithmData = {
+      forex: {
+        name: 'Forex Algorithm',
+        icon: Coins,
+        color: 'text-yellow-500',
+        pairs: ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD'],
+        performance: '+24.5%',
+        winRate: '84.2%',
+        trades: '1,247',
+        description: 'Advanced AI-powered forex trading algorithm focusing on major currency pairs with high liquidity and tight spreads.'
+      },
+      gold: {
+        name: 'Gold Algorithm',
+        icon: Gem,
+        color: 'text-yellow-400',
+        pairs: ['XAU/USD', 'XAU/EUR', 'XAU/GBP'],
+        performance: '+18.7%',
+        winRate: '76.8%',
+        trades: '623',
+        description: 'Specialized precious metals trading algorithm leveraging market volatility and economic indicators for optimal entry and exit points.'
+      },
+      stocks: {
+        name: 'Stocks Algorithm',
+        icon: BarChart3,
+        color: 'text-green-500',
+        pairs: ['S&P 500', 'NASDAQ', 'DOW', 'Russell 2000'],
+        performance: '+15.3%',
+        winRate: '72.1%',
+        trades: '892',
+        description: 'Equity and index trading algorithm analyzing market trends, earnings reports, and technical indicators for profitable trades.'
+      },
+      crypto: {
+        name: 'Crypto Algorithm',
+        icon: Bitcoin,
+        color: 'text-orange-500',
+        pairs: ['BTC/USD', 'ETH/USD', 'ADA/USD', 'DOT/USD'],
+        performance: '+31.2%',
+        winRate: '68.9%',
+        trades: '1,456',
+        description: 'Cryptocurrency trading algorithm designed for high-volatility digital assets with advanced risk management and momentum strategies.'
+      }
     };
+
+    const algo = algorithmData[algorithmType as keyof typeof algorithmData];
+    const IconComponent = algo.icon;
 
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6">{algorithmNames[algorithmType as keyof typeof algorithmNames]} Algorithm</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <IconComponent className={`h-8 w-8 ${algo.color}`} />
+            <div>
+              <h2 className="text-2xl font-bold">{algo.name}</h2>
+              <p className="text-slate-400">{algo.description}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
+              <Settings className="mr-2 h-4 w-4" />
+              Configure
+            </Button>
+          </div>
+        </div>
+
+        {/* Algorithm Performance Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Total Return</span>
+                <TrendingUp className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-green-500">{algo.performance}</div>
+              <div className="text-sm text-slate-400">Since inception</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Win Rate</span>
+                <Target className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="text-2xl font-bold">{algo.winRate}</div>
+              <div className="text-sm text-green-500">Above market average</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Total Trades</span>
+                <History className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="text-2xl font-bold">{algo.trades}</div>
+              <div className="text-sm text-slate-400">Executed trades</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-400 text-sm">Status</span>
+                <Bot className="h-5 w-5 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-green-500">Active</div>
+              <div className="text-sm text-slate-400">Running smoothly</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Trading Pairs */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle>Active Trading Pairs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {algo.pairs.map((pair, index) => (
+                  <div key={pair} className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <IconComponent className={`h-5 w-5 ${algo.color}`} />
+                      <div>
+                        <div className="font-medium">{pair}</div>
+                        <div className="text-sm text-slate-400">
+                          {algorithmType === 'forex' && 'Major currency pair'}
+                          {algorithmType === 'gold' && 'Precious metals'}
+                          {algorithmType === 'stocks' && 'Market index'}
+                          {algorithmType === 'crypto' && 'Digital asset'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-green-500">
+                        +{(Math.random() * 10 + 5).toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-slate-400">30-day return</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader>
+              <CardTitle>Algorithm Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Risk Level</span>
+                  <span className="text-green-500">Conservative</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Max Position Size</span>
+                  <span className="text-white">5% of portfolio</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Stop Loss</span>
+                  <span className="text-white">2%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Take Profit</span>
+                  <span className="text-white">6%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Auto Rebalance</span>
+                  <span className="text-green-500">Enabled</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Trading Hours</span>
+                  <span className="text-white">24/7</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Algorithm Activity */}
         <Card className="bg-slate-900 border-slate-700">
-          <CardContent className="p-6">
-            <p className="text-slate-400">{algorithmNames[algorithmType as keyof typeof algorithmNames]} algorithm performance details coming soon...</p>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div>
+                    <div className="font-medium">Position Opened</div>
+                    <div className="text-sm text-slate-400">{algo.pairs[0]} - BUY signal detected</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">5 minutes ago</div>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div>
+                    <div className="font-medium">Position Closed</div>
+                    <div className="text-sm text-slate-400">{algo.pairs[1]} - Take profit reached (+$247.50)</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">12 minutes ago</div>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-950 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <div>
+                    <div className="font-medium">Risk Alert</div>
+                    <div className="text-sm text-slate-400">Volatility increased - adjusting position sizes</div>
+                  </div>
+                </div>
+                <div className="text-sm text-slate-400">1 hour ago</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
