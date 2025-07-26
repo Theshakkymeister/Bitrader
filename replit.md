@@ -1,0 +1,113 @@
+# Bitrader Trading Platform
+
+## Overview
+
+This is a full-stack AI-powered trading platform built with modern web technologies. The application provides users with automated trading algorithms for various financial markets including forex, gold, stocks, and cryptocurrencies. The platform features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and Replit's authentication system for user management.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and optimized builds
+- **UI Library**: shadcn/ui components built on Radix UI primitives
+- **Styling**: Tailwind CSS with custom CSS variables for theming
+- **State Management**: TanStack Query (React Query) for server state management
+- **Routing**: Wouter for lightweight client-side routing
+- **Form Handling**: React Hook Form with Zod validation
+
+### Backend Architecture
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js for RESTful API endpoints
+- **Database ORM**: Drizzle ORM for type-safe database operations
+- **Authentication**: Replit's OpenID Connect (OIDC) authentication system
+- **Session Management**: Express sessions with PostgreSQL store
+
+### Database Design
+- **Primary Database**: PostgreSQL (using Neon serverless)
+- **Schema Management**: Drizzle Kit for migrations and schema management
+- **Key Tables**:
+  - `users` - User profiles and authentication data
+  - `portfolios` - User portfolio information and balances
+  - `algorithms` - Available trading algorithms (forex, gold, stocks, crypto)
+  - `trades` - Trading history and transaction records
+  - `performance_metrics` - Algorithm performance data
+  - `sessions` - User session storage
+
+## Key Components
+
+### Authentication System
+The application uses Replit's authentication system which provides:
+- OAuth integration with automatic user provisioning
+- Session management with PostgreSQL persistence
+- Middleware for protecting authenticated routes
+- User profile management
+
+### Trading Dashboard
+The main dashboard provides:
+- Portfolio overview with balance and P&L information
+- Active algorithm management
+- Trading history visualization
+- Performance metrics display
+- Algorithm selection and configuration
+
+### Algorithm Management
+The platform offers four main algorithm types:
+- **Forex Algorithm**: Major currency pair trading
+- **Gold Algorithm**: Precious metals (XAU/USD) trading
+- **Stocks Algorithm**: Equity and index trading
+- **Crypto Algorithm**: Bitcoin, Ethereum, and altcoin trading
+
+## Data Flow
+
+1. **User Authentication**: Users authenticate via Replit's OIDC system
+2. **Portfolio Initialization**: New users get an automatically created portfolio
+3. **Algorithm Selection**: Users can browse and activate trading algorithms
+4. **Trade Execution**: Algorithms generate trades that are stored in the database
+5. **Performance Tracking**: Metrics are calculated and stored for analysis
+6. **Real-time Updates**: Frontend uses React Query to keep data synchronized
+
+## External Dependencies
+
+### Database Services
+- **Neon Database**: Serverless PostgreSQL hosting
+- **WebSocket Support**: For real-time database connections
+
+### Authentication
+- **Replit OIDC**: OpenID Connect authentication provider
+- **Express Session**: Session management with PostgreSQL persistence
+
+### UI Components
+- **Radix UI**: Accessible component primitives
+- **Lucide React**: Icon library
+- **Tailwind CSS**: Utility-first CSS framework
+
+### Development Tools
+- **TypeScript**: Type safety across frontend and backend
+- **ESBuild**: Fast bundling for production builds
+- **Vite**: Development server with hot module replacement
+
+## Deployment Strategy
+
+### Development Environment
+- Frontend and backend run concurrently during development
+- Vite development server with proxy to Express API
+- Hot reloading for both client and server code
+- TypeScript compilation checking
+
+### Production Build
+- Frontend builds to static assets using Vite
+- Backend bundles with ESBuild for Node.js deployment
+- Environment variables for database connections and secrets
+- Session storage persisted in PostgreSQL
+
+### Database Management
+- Schema definitions in shared TypeScript files
+- Migrations generated and applied via Drizzle Kit
+- Connection pooling for efficient database usage
+- Automatic table creation for session storage
+
+The architecture emphasizes type safety, developer experience, and scalability while maintaining a clean separation between frontend presentation, backend business logic, and data persistence layers.
