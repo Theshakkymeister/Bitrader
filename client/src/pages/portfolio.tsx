@@ -233,15 +233,15 @@ export default function Portfolio() {
       </div>
 
       {/* Animated Portfolio Chart */}
-      <Card className="overflow-hidden border border-gray-200">
-        <CardHeader>
+      <Card className="overflow-hidden border-2 border-gray-300 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b-2 border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
-              <CardTitle>Portfolio Performance</CardTitle>
+              <CardTitle className="text-xl">Portfolio Performance</CardTitle>
             </div>
             <Select value={timeframe} onValueChange={setTimeframe}>
-              <SelectTrigger className="w-24">
+              <SelectTrigger className="w-24 border-2 border-gray-200">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -254,9 +254,9 @@ export default function Portfolio() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="h-80 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border border-gray-100 rounded-lg mx-auto max-w-4xl">
-            <svg className="w-full h-full" viewBox="0 0 800 240" preserveAspectRatio="none">
+        <CardContent className="p-8">
+          <div className="h-96 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border-2 border-gray-200 rounded-xl mx-auto w-full">
+            <svg className="w-full h-full p-4" viewBox="0 0 800 280" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#059669" stopOpacity="0.15"/>
@@ -276,33 +276,33 @@ export default function Portfolio() {
               </defs>
               
               {/* Grid lines */}
-              <g stroke="#e5e7eb" strokeWidth="0.5" opacity="0.4">
-                {[48, 96, 144, 192].map(y => (
-                  <line key={y} x1="40" y1={y} x2="760" y2={y} />
+              <g stroke="#d1d5db" strokeWidth="0.8" opacity="0.6">
+                {[60, 110, 160, 210].map(y => (
+                  <line key={y} x1="60" y1={y} x2="740" y2={y} />
                 ))}
-                {[160, 320, 480, 640].map(x => (
-                  <line key={x} x1={x} y1="20" x2={x} y2="220" />
+                {[160, 280, 400, 520, 640].map(x => (
+                  <line key={x} x1={x} y1="40" x2={x} y2="240" />
                 ))}
               </g>
               
               {/* Portfolio trend line with smooth curve */}
               <path 
-                d="M 60,180 C 140,170 180,155 240,145 S 380,130 440,120 S 580,105 640,95 S 720,85 760,75" 
+                d="M 80,200 C 160,190 200,175 260,165 S 400,150 460,140 S 600,125 660,115 S 720,105 740,95" 
                 stroke="#059669" 
-                strokeWidth="4" 
+                strokeWidth="5" 
                 fill="none"
                 filter="url(#glow)"
                 className="animate-pulse"
                 style={{
-                  strokeDasharray: '1200',
-                  strokeDashoffset: '1200',
+                  strokeDasharray: '1400',
+                  strokeDashoffset: '1400',
                   animation: 'drawLine 3s ease-in-out forwards, pulse 2s ease-in-out infinite 3s'
                 }}
               />
               
               {/* Filled area under curve */}
               <path 
-                d="M 60,180 C 140,170 180,155 240,145 S 380,130 440,120 S 580,105 640,95 S 720,85 760,75 L 760,220 L 60,220 Z" 
+                d="M 80,200 C 160,190 200,175 260,165 S 400,150 460,140 S 600,125 660,115 S 720,105 740,95 L 740,240 L 80,240 Z" 
                 fill="url(#portfolioGradient)"
                 className="animate-fade-in"
                 style={{ 
@@ -313,53 +313,53 @@ export default function Portfolio() {
               
               {/* Animated glowing dot at the end */}
               <g className="animate-bounce">
-                <circle cx="760" cy="75" r="10" fill="#059669" opacity="0.1">
-                  <animate attributeName="r" values="10;18;10" dur="2s" repeatCount="indefinite"/>
+                <circle cx="740" cy="95" r="12" fill="#059669" opacity="0.1">
+                  <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.1;0.02;0.1" dur="2s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="760" cy="75" r="6" fill="#059669" opacity="0.3">
-                  <animate attributeName="r" values="6;10;6" dur="1.5s" repeatCount="indefinite"/>
+                <circle cx="740" cy="95" r="8" fill="#059669" opacity="0.3">
+                  <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.5s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="760" cy="75" r="4" fill="#059669" filter="url(#shadow)"/>
-                <circle cx="760" cy="75" r="2" fill="#ffffff"/>
+                <circle cx="740" cy="95" r="5" fill="#059669" filter="url(#shadow)"/>
+                <circle cx="740" cy="95" r="2.5" fill="#ffffff"/>
               </g>
               
               {/* Data points */}
               {[
-                {x: 180, y: 160}, {x: 340, y: 135}, {x: 500, y: 110}, {x: 660, y: 90}
+                {x: 200, y: 180}, {x: 360, y: 155}, {x: 520, y: 130}, {x: 680, y: 110}
               ].map((point, index) => (
                 <g key={index}>
                   <circle 
                     cx={point.x} 
                     cy={point.y} 
-                    r="5" 
+                    r="6" 
                     fill="#059669" 
                     opacity="0.8"
                     className="animate-pulse"
                     style={{ animationDelay: `${index * 0.5 + 2}s` }}
                   />
-                  <circle cx={point.x} cy={point.y} r="2.5" fill="#ffffff"/>
+                  <circle cx={point.x} cy={point.y} r="3" fill="#ffffff"/>
                 </g>
               ))}
             </svg>
             
             {/* Performance indicators */}
             <div className="absolute top-6 left-6 text-sm text-gray-600">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border border-gray-100">
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-3 shadow-md border-2 border-green-100">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="font-medium">Live Market Data</span>
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-semibold text-gray-700">Live Market Data</span>
                 </div>
               </div>
             </div>
             
             {/* Chart value display */}
             <div className="absolute top-6 right-6 text-sm text-gray-600">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border border-gray-100">
+              <div className="bg-white/95 backdrop-blur-sm rounded-lg px-5 py-3 shadow-md border-2 border-green-100">
                 <div className="text-right">
-                  <div className="text-lg font-bold text-green-600">{formatCurrency(totalPortfolioValue)}</div>
-                  <div className="text-xs text-gray-500">Total Value</div>
+                  <div className="text-xl font-bold text-green-600">{formatCurrency(totalPortfolioValue)}</div>
+                  <div className="text-sm text-gray-500 font-medium">Portfolio Value</div>
                 </div>
               </div>
             </div>
