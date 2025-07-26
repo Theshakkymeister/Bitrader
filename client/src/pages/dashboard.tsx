@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,7 +30,11 @@ import {
   X,
   HelpCircle,
   Shield,
-  Copy
+  Copy,
+  Activity,
+  Play,
+  Square,
+  DollarSign
 } from "lucide-react";
 import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 
@@ -43,6 +48,16 @@ export default function Dashboard() {
   const [adminDialog, setAdminDialog] = useState(false);
   const [selectedStock, setSelectedStock] = useState('');
   const [selectedCrypto, setSelectedCrypto] = useState('');
+  const [liveTrading, setLiveTrading] = useState(false);
+  const [marketData, setMarketData] = useState({
+    BTC: { price: 43250.75, change: 2.45 },
+    ETH: { price: 2580.40, change: 1.82 },
+    AAPL: { price: 185.60, change: -0.75 },
+    TSLA: { price: 248.90, change: 3.20 },
+    GOLD: { price: 2024.50, change: 0.85 }
+  });
+  
+  const queryClient = useQueryClient();
   const [depositAddresses, setDepositAddresses] = useState({
     btc: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     eth: '0x742d35Cc6634C0532925a3b8D73C6d3D8f4b1234',
@@ -64,6 +79,74 @@ export default function Dashboard() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
+
+  // Live trading mutations
+  const placeTradeMutation = useMutation({
+    mutationFn: async (tradeData: any) => {
+      return await apiRequest('/api/trades', {
+        method: 'POST',
+        body: JSON.stringify(tradeData)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolio'] });
+      toast({
+        title: "Trade Executed",
+        description: "Your live trade has been placed successfully!",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Trade Failed",
+        description: "Unable to place trade. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Real-time market data updates
+  useEffect(() => {
+    if (liveTrading) {
+      const interval = setInterval(() => {
+        setMarketData(prev => ({
+          BTC: { 
+            price: prev.BTC.price + (Math.random() - 0.5) * 100, 
+            change: (Math.random() - 0.5) * 5 
+          },
+          ETH: { 
+            price: prev.ETH.price + (Math.random() - 0.5) * 50, 
+            change: (Math.random() - 0.5) * 3 
+          },
+          AAPL: { 
+            price: prev.AAPL.price + (Math.random() - 0.5) * 5, 
+            change: (Math.random() - 0.5) * 2 
+          },
+          TSLA: { 
+            price: prev.TSLA.price + (Math.random() - 0.5) * 10, 
+            change: (Math.random() - 0.5) * 4 
+          },
+          GOLD: { 
+            price: prev.GOLD.price + (Math.random() - 0.5) * 10, 
+            change: (Math.random() - 0.5) * 2 
+          }
+        }));
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [liveTrading]);
 
   const { data: portfolio, isLoading: portfolioLoading } = useQuery<Portfolio>({
     queryKey: ["/api/portfolio"],
@@ -154,6 +237,14 @@ export default function Dashboard() {
                 }`}
               >
                 Crypto
+              </button>
+              <button 
+                onClick={() => setActiveView('live-trading')}
+                className={`text-sm font-medium transition-colors ${
+                  activeView === 'live-trading' ? 'text-black' : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Live Trading
               </button>
               <button 
                 onClick={() => setActiveView('wallet')}
@@ -358,6 +449,8 @@ export default function Dashboard() {
         return renderTrades();
       case 'settings':
         return renderSettings();
+      case 'live-trading':
+        return renderLiveTrading();
       default:
         return renderDashboard();
     }
@@ -903,6 +996,120 @@ export default function Dashboard() {
             <div className="text-center text-gray-600 py-8">
               No transactions yet. Make your first deposit to get started.
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderLiveTrading() {
+    return (
+      <div className="space-y-6 fade-in">
+        {/* Live Trading Header */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-black slide-in-left">Live Trading</h2>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className={`w-3 h-3 rounded-full ${liveTrading ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+              <span className="text-sm font-medium">{liveTrading ? 'Live' : 'Offline'}</span>
+            </div>
+            <Button
+              onClick={() => setLiveTrading(!liveTrading)}
+              className={`${liveTrading ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white hover-scale transition-all duration-300`}
+            >
+              {liveTrading ? <Square className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+              {liveTrading ? 'Stop Trading' : 'Start Trading'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Market Data Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(marketData).map(([symbol, data]) => (
+            <div key={symbol} className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="font-bold text-lg text-black">{symbol}</div>
+                  <div className="text-2xl font-bold text-black">${data.price.toFixed(2)}</div>
+                </div>
+                <div className={`text-sm font-medium px-2 py-1 rounded ${data.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                  {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  className="flex-1 bg-green-500 hover:bg-green-600"
+                  disabled={!liveTrading || placeTradeMutation.isPending}
+                  onClick={() => {
+                    placeTradeMutation.mutate({
+                      symbol,
+                      type: 'buy',
+                      quantity: 1,
+                      price: data.price,
+                      amount: data.price.toString()
+                    });
+                  }}
+                >
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Buy
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                  disabled={!liveTrading || placeTradeMutation.isPending}
+                  onClick={() => {
+                    placeTradeMutation.mutate({
+                      symbol,
+                      type: 'sell',
+                      quantity: 1,
+                      price: data.price,
+                      amount: data.price.toString()
+                    });
+                  }}
+                >
+                  <TrendingUp className="h-4 w-4 mr-1 rotate-180" />
+                  Sell
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent Live Trades */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Live Trading Activity</div>
+          </div>
+          <div className="p-4">
+            {trades && trades.length > 0 ? (
+              <div className="space-y-3">
+                {trades.slice(0, 5).map((trade) => (
+                  <div key={trade.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover-scale transition-all duration-300">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${trade.type === 'buy' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <div>
+                        <div className="font-medium text-black">{trade.symbol}</div>
+                        <div className="text-sm text-gray-600">{new Date(trade.createdAt).toLocaleTimeString()}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-black">${parseFloat(trade.amount).toFixed(2)}</div>
+                      <div className={`text-sm ${trade.type === 'buy' ? 'text-green-600' : 'text-red-600'}`}>
+                        {trade.type.toUpperCase()} {trade.quantity}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-gray-600 py-8">
+                <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <div>No live trades yet</div>
+                <div className="text-sm">Start live trading to see activity here</div>
+              </div>
+            )}
           </div>
         </div>
       </div>
