@@ -372,8 +372,6 @@ export default function Portfolio() {
                     <span className="text-lg font-semibold">+$373.49</span>
                     <span className="text-sm font-medium">(+1.48%) Today</span>
                   </div>
-                  
-
                 </div>
               </div>
               {/* Connecting line to chart */}
