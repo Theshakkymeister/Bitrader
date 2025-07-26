@@ -332,4 +332,39 @@ export function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to get admin stats" });
     }
   });
+
+  // Trade approval routes
+  app.get('/api/admin/trades/pending', isAdminAuthenticated, async (req, res) => {
+    try {
+      const pendingTrades = await storage.getAllTradesPendingApproval();
+      res.json(pendingTrades);
+    } catch (error) {
+      console.error("Error fetching pending trades:", error);
+      res.status(500).json({ message: "Failed to fetch pending trades" });
+    }
+  });
+
+  app.patch('/api/admin/trades/:id/approve', isAdminAuthenticated, async (req, res) => {
+    try {
+      const adminId = req.adminUser.id;
+      const tradeId = req.params.id;
+      const { approval, rejectionReason } = req.body;
+
+      const updatedTrade = await storage.updateTrade(tradeId, {
+        adminApproval: approval,
+        approvedBy: adminId,
+        approvedAt: approval === "approved" ? new Date() : undefined,
+        rejectionReason: approval === "rejected" ? rejectionReason : undefined,
+        status: approval === "approved" ? "approved" : "rejected"
+      });
+
+      // Log admin action
+      await logAdminActivity(adminId, approval === "approved" ? "APPROVE_TRADE" : "REJECT_TRADE", "TRADE", tradeId, { approval, rejectionReason }, req);
+
+      res.json(updatedTrade);
+    } catch (error) {
+      console.error("Trade approval error:", error);
+      res.status(500).json({ message: "Failed to update trade approval" });
+    }
+  });
 }

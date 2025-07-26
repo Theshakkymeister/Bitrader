@@ -64,23 +64,38 @@ export const portfolios = pgTable("portfolios", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Trading history
+// Live trading system with admin approval
 export const trades = pgTable("trades", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  algorithmId: varchar("algorithm_id").references(() => algorithms.id).notNull(),
-  pair: varchar("pair").notNull(),
-  type: varchar("type").notNull(), // 'BUY' or 'SELL'
-  entryPrice: decimal("entry_price", { precision: 15, scale: 5 }).notNull(),
+  algorithmId: varchar("algorithm_id").references(() => algorithms.id),
+  symbol: varchar("symbol").notNull(), // AAPL, BTC, SPY, etc.
+  assetType: varchar("asset_type").notNull().default("stock"), // "stock" | "crypto" | "etf" | "option"
+  type: varchar("type").notNull(), // "buy" | "sell"
+  orderType: varchar("order_type").notNull().default("market"), // "market" | "limit" | "stop"
+  quantity: decimal("quantity", { precision: 18, scale: 8 }).notNull(),
+  price: decimal("price", { precision: 18, scale: 8 }).notNull(), // Current/Market price
+  limitPrice: decimal("limit_price", { precision: 18, scale: 8 }), // For limit orders
+  stopPrice: decimal("stop_price", { precision: 18, scale: 8 }), // For stop orders
+  totalAmount: decimal("total_amount", { precision: 18, scale: 8 }).notNull(),
+  status: varchar("status").notNull().default("pending_approval"), // "pending_approval" | "approved" | "rejected" | "executed" | "cancelled"
+  adminApproval: varchar("admin_approval").default("pending"), // "pending" | "approved" | "rejected"
+  approvedBy: varchar("approved_by").references(() => adminUsers.id),
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
+  executedAt: timestamp("executed_at"),
+  expiresAt: timestamp("expires_at"), // For limit orders
+  // Legacy fields for compatibility
+  pair: varchar("pair"), // For backward compatibility
+  entryPrice: decimal("entry_price", { precision: 15, scale: 5 }),
   exitPrice: decimal("exit_price", { precision: 15, scale: 5 }),
   profitLoss: decimal("profit_loss", { precision: 15, scale: 2 }),
-  volume: decimal("volume", { precision: 15, scale: 5 }), // Trade size/volume
-  duration: integer("duration"), // Trade duration in minutes
-  status: varchar("status").notNull().default('open'), // 'open', 'closed'
-  // External integration fields
-  externalTradeId: varchar("external_trade_id").unique(), // Trade ID from your website
-  createdAt: timestamp("created_at").defaultNow(),
+  volume: decimal("volume", { precision: 15, scale: 5 }),
+  duration: integer("duration"),
+  externalTradeId: varchar("external_trade_id").unique(),
   closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Performance metrics

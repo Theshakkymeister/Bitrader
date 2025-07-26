@@ -272,6 +272,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trading API routes
+  app.post('/api/trades', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const trade = await storage.createTrade({
+        ...req.body,
+        userId,
+        status: "pending_approval",
+        adminApproval: "pending"
+      });
+
+      console.log("Trade created:", trade.id, "for user:", userId);
+      res.status(201).json(trade);
+    } catch (error) {
+      console.error("Trade creation error:", error);
+      res.status(500).json({ message: "Failed to create trade" });
+    }
+  });
+
+  app.get('/api/trades', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const trades = await storage.getTrades(userId);
+      res.json(trades);
+    } catch (error) {
+      console.error("Error fetching trades:", error);
+      res.status(500).json({ message: "Failed to fetch trades" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

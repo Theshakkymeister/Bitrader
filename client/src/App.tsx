@@ -13,6 +13,7 @@ import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import Wallets from "@/pages/wallets";
 import Portfolio from "@/pages/portfolio";
+import TradingPage from "@/pages/trading";
 import SettingsPage from "@/pages/settings";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -25,6 +26,7 @@ function MobileNav() {
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/wallets", icon: TrendingUp, label: "Wallets" },
+    { href: "/trading", icon: PieChart, label: "Trade All" },
     { href: "/portfolio", icon: PieChart, label: "Portfolio" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
@@ -74,6 +76,7 @@ function DesktopNav() {
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/wallets", icon: TrendingUp, label: "Wallets" },
+    { href: "/trading", icon: PieChart, label: "Trade All" },
     { href: "/portfolio", icon: PieChart, label: "Portfolio" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
@@ -183,6 +186,7 @@ function Router() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <Route path="/" component={Dashboard} />
               <Route path="/wallets" component={Wallets} />
+              <Route path="/trading" component={TradingPage} />
               <Route path="/portfolio" component={Portfolio} />
               <Route path="/settings" component={SettingsPage} />
             </main>

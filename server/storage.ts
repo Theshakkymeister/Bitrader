@@ -384,16 +384,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminLogs(adminId?: string, limit = 100): Promise<AdminLog[]> {
-    let query = db.select().from(adminLogs).orderBy(desc(adminLogs.createdAt)).limit(limit);
-    
     if (adminId) {
-      query = db.select().from(adminLogs)
+      return await db.select().from(adminLogs)
         .where(eq(adminLogs.adminId, adminId))
         .orderBy(desc(adminLogs.createdAt))
         .limit(limit);
     }
     
-    return await query;
+    return await db.select().from(adminLogs)
+      .orderBy(desc(adminLogs.createdAt))
+      .limit(limit);
+  }
+
+  // Trading methods
+  async createTrade(trade: any): Promise<any> {
+    const [newTrade] = await db.insert(trades).values(trade).returning();
+    return newTrade;
+  }
+
+  async getTrades(userId: string): Promise<any[]> {
+    const userTrades = await db.select()
+      .from(trades)
+      .where(eq(trades.userId, userId))
+      .orderBy(desc(trades.createdAt));
+    return userTrades;
+  }
+
+  async updateTrade(id: string, updates: any): Promise<any> {
+    const [updated] = await db.update(trades)
+      .set(updates)
+      .where(eq(trades.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getAllTradesPendingApproval(): Promise<any[]> {
+    const pendingTrades = await db.select()
+      .from(trades)
+      .where(eq(trades.adminApproval, "pending"))
+      .orderBy(desc(trades.createdAt));
+    return pendingTrades;
   }
 }
 
