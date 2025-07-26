@@ -109,10 +109,7 @@ export default function Dashboard() {
   // Live trading mutations
   const placeTradeMutation = useMutation({
     mutationFn: async (tradeData: any) => {
-      return await apiRequest('/api/trades', {
-        method: 'POST',
-        body: JSON.stringify(tradeData)
-      });
+      return await apiRequest('/api/trades', 'POST', tradeData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
@@ -149,11 +146,12 @@ export default function Dashboard() {
         setMarketData(prev => {
           const updated = { ...prev };
           Object.keys(updated).forEach(symbol => {
-            const variance = updated[symbol].price * 0.002; // 0.2% max variance
-            updated[symbol] = {
-              ...updated[symbol],
-              price: Math.max(0.001, updated[symbol].price + (Math.random() - 0.5) * variance),
-              change: updated[symbol].change + (Math.random() - 0.5) * 0.5
+            const currentData = updated[symbol as keyof typeof updated];
+            const variance = currentData.price * 0.002; // 0.2% max variance
+            updated[symbol as keyof typeof updated] = {
+              ...currentData,
+              price: Math.max(0.001, currentData.price + (Math.random() - 0.5) * variance),
+              change: currentData.change + (Math.random() - 0.5) * 0.5
             };
           });
           return updated;
@@ -267,7 +265,7 @@ export default function Dashboard() {
             </Button>
             
             {/* Admin Button for authorized users */}
-            {user?.email === '5k7whkfvpw@private.replit.com' && (
+            {(user as any)?.email === '5k7whkfvpw@private.replit.com' && (
               <Dialog open={adminDialog} onOpenChange={setAdminDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="hidden md:flex pulse-glow">
@@ -1256,14 +1254,14 @@ export default function Dashboard() {
                     <div className="flex items-center space-x-3">
                       <div className={`w-2 h-2 rounded-full ${trade.type === 'buy' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                       <div>
-                        <div className="font-medium text-black">{trade.symbol}</div>
-                        <div className="text-sm text-gray-600">{new Date(trade.createdAt).toLocaleTimeString()}</div>
+                        <div className="font-medium text-black">{trade.pair}</div>
+                        <div className="text-sm text-gray-600">{trade.createdAt ? new Date(trade.createdAt).toLocaleTimeString() : 'N/A'}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium text-black">${parseFloat(trade.amount).toFixed(2)}</div>
+                      <div className="font-medium text-black">${trade.entryPrice}</div>
                       <div className={`text-sm ${trade.type === 'buy' ? 'text-green-600' : 'text-red-600'}`}>
-                        {trade.type.toUpperCase()} {trade.quantity}
+                        {trade.type.toUpperCase()} {trade.volume || '1'}
                       </div>
                     </div>
                   </div>
