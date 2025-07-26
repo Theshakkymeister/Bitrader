@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ConnectAccount } from "@/components/connect-account";
 import { 
   Wallet, 
@@ -34,7 +35,9 @@ import {
   Activity,
   Play,
   Square,
-  DollarSign
+  DollarSign,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 
@@ -49,6 +52,8 @@ export default function Dashboard() {
   const [selectedStock, setSelectedStock] = useState('');
   const [selectedCrypto, setSelectedCrypto] = useState('');
   const [liveTrading, setLiveTrading] = useState(false);
+  const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
+  const [mobileWalletExpanded, setMobileWalletExpanded] = useState(false);
   const [marketData, setMarketData] = useState({
     // Crypto
     BTC: { price: 43250.75, change: 2.45, type: 'crypto' },
@@ -236,14 +241,28 @@ export default function Dashboard() {
               >
                 Dashboard
               </button>
-              <button 
-                onClick={() => setActiveView('wallet')}
-                className={`text-sm font-medium transition-colors ${
-                  activeView === 'wallet' ? 'text-black' : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Wallet
-              </button>
+              <DropdownMenu open={walletDropdownOpen} onOpenChange={setWalletDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button 
+                    className={`flex items-center text-sm font-medium transition-colors ${
+                      activeView === 'wallet' || activeView === 'stocks' || activeView === 'crypto' ? 'text-black' : 'text-gray-600 hover:text-black'
+                    }`}
+                  >
+                    Wallet
+                    <ChevronDown className="ml-1 h-3 w-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => { setActiveView('stocks'); setWalletDropdownOpen(false); }}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Stock Holdings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setActiveView('crypto'); setWalletDropdownOpen(false); }}>
+                    <Bitcoin className="mr-2 h-4 w-4" />
+                    Crypto Holdings
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <button 
                 onClick={() => setActiveView('trade')}
                 className={`text-sm font-medium transition-colors ${
@@ -368,14 +387,37 @@ export default function Dashboard() {
             Dashboard
           </button>
 
-          <button 
-            onClick={() => { setActiveView('wallet'); setSidebarOpen(false); }}
-            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'wallet' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            Wallet
-          </button>
+          <div>
+            <button 
+              onClick={() => setMobileWalletExpanded(!mobileWalletExpanded)}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${
+                activeView === 'wallet' || activeView === 'stocks' || activeView === 'crypto' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <span>Wallet</span>
+              <ChevronRight className={`h-4 w-4 transition-transform ${mobileWalletExpanded ? 'rotate-90' : ''}`} />
+            </button>
+            {mobileWalletExpanded && (
+              <div className="ml-4 mt-1 space-y-1">
+                <button 
+                  onClick={() => { setActiveView('stocks'); setSidebarOpen(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                    activeView === 'stocks' ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Stock Holdings
+                </button>
+                <button 
+                  onClick={() => { setActiveView('crypto'); setSidebarOpen(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                    activeView === 'crypto' ? 'bg-green-50 text-green-700' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Crypto Holdings
+                </button>
+              </div>
+            )}
+          </div>
           <button 
             onClick={() => { setActiveView('trades'); setSidebarOpen(false); }}
             className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
@@ -422,8 +464,10 @@ export default function Dashboard() {
     switch (activeView) {
       case 'dashboard':
         return renderDashboard();
-      case 'wallet':
-        return renderWallet();
+      case 'stocks':
+        return renderStocks();
+      case 'crypto':
+        return renderCrypto();
       case 'trade':
         return renderTrade();
       case 'trades':
@@ -583,116 +627,134 @@ export default function Dashboard() {
   function renderStocks() {
     return (
       <div className="space-y-6 fade-in">
+        {/* Header Section */}
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black slide-in-left">Stock Holdings</h2>
-          <Dialog open={buyStockDialog} onOpenChange={setBuyStockDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-green-500 hover:bg-green-600 text-white hover-scale transition-all duration-300 pulse-glow">
-                Buy Stocks
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="smooth-enter">
-              <DialogHeader>
-                <DialogTitle>Buy Stocks</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="stock-symbol">Stock Symbol</Label>
-                  <Select value={selectedStock} onValueChange={setSelectedStock}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a stock" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AAPL">AAPL - Apple Inc.</SelectItem>
-                      <SelectItem value="TSLA">TSLA - Tesla Inc.</SelectItem>
-                      <SelectItem value="MSFT">MSFT - Microsoft Corp.</SelectItem>
-                      <SelectItem value="GOOGL">GOOGL - Alphabet Inc.</SelectItem>
-                      <SelectItem value="AMZN">AMZN - Amazon.com Inc.</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="shares">Number of Shares</Label>
-                  <Input id="shares" type="number" placeholder="Enter number of shares" />
-                </div>
-                <Button 
-                  onClick={() => {
-                    toast({
-                      title: "Order Placed",
-                      description: `Successfully placed order to buy ${selectedStock}`,
-                    });
-                    setBuyStockDialog(false);
-                  }}
-                  className="w-full bg-green-500 hover:bg-green-600"
-                  disabled={!selectedStock}
-                >
-                  Place Order
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <div>
+            <h1 className="text-2xl font-bold text-black">Stocks</h1>
+            <p className="text-gray-600">Total Stock Value: $38,520.00</p>
+          </div>
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Buy Stocks
+          </Button>
         </div>
-        
+
+        {/* Portfolio Summary */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">$38,520</div>
+              <div className="text-sm text-gray-600">Market Value</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">+$1,240</div>
+              <div className="text-sm text-gray-600">Today's Return</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">+$4,820</div>
+              <div className="text-sm text-gray-600">Total Return</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">12.5%</div>
+              <div className="text-sm text-gray-600">Portfolio Gain</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stock Holdings */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-sm font-medium text-black">My Positions</div>
+            <h3 className="text-lg font-medium text-black">Your Holdings</h3>
           </div>
           <div className="divide-y divide-gray-200">
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-sm font-bold text-blue-600">AAPL</span>
+            {Object.entries(marketData).filter(([_, data]) => data.type === 'stock').map(([symbol, data]) => (
+              <div key={symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-blue-600">{symbol}</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-black">{symbol}</div>
+                      <div className="text-sm text-gray-600">
+                        {symbol === 'AAPL' ? '12 shares' : 
+                         symbol === 'MSFT' ? '8 shares' :
+                         symbol === 'GOOGL' ? '15 shares' :
+                         symbol === 'TSLA' ? '5 shares' :
+                         symbol === 'AMZN' ? '10 shares' :
+                         symbol === 'META' ? '6 shares' :
+                         symbol === 'NFLX' ? '3 shares' :
+                         symbol === 'NVDA' ? '4 shares' :
+                         symbol === 'AMD' ? '18 shares' : '7 shares'}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-medium text-black">Apple Inc.</div>
-                    <div className="text-sm text-gray-600">12 shares</div>
+                  <div className="text-right">
+                    <div className="font-medium text-black">${data.price.toFixed(2)}</div>
+                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$2,450.00</div>
-                  <div className="text-sm text-green-600">+$29.40 (+1.2%)</div>
+                  <div className="text-right ml-6">
+                    <div className="font-bold text-black">
+                      ${(data.price * (
+                        symbol === 'AAPL' ? 12 : 
+                        symbol === 'MSFT' ? 8 :
+                        symbol === 'GOOGL' ? 15 :
+                        symbol === 'TSLA' ? 5 :
+                        symbol === 'AMZN' ? 10 :
+                        symbol === 'META' ? 6 :
+                        symbol === 'NFLX' ? 3 :
+                        symbol === 'NVDA' ? 4 :
+                        symbol === 'AMD' ? 18 : 7
+                      )).toLocaleString()}
+                    </div>
+                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}${((data.price * (
+                        symbol === 'AAPL' ? 12 : 
+                        symbol === 'MSFT' ? 8 :
+                        symbol === 'GOOGL' ? 15 :
+                        symbol === 'TSLA' ? 5 :
+                        symbol === 'AMZN' ? 10 :
+                        symbol === 'META' ? 6 :
+                        symbol === 'NFLX' ? 3 :
+                        symbol === 'NVDA' ? 4 :
+                        symbol === 'AMD' ? 18 : 7
+                      )) * data.change / 100).toFixed(2)}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-sm font-bold text-green-600">TSLA</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Tesla Inc.</div>
-                    <div className="text-sm text-gray-600">8 shares</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$1,875.00</div>
-                  <div className="text-sm text-red-600">-$15.20 (-0.8%)</div>
-                </div>
-              </div>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-sm font-bold text-purple-600">MSFT</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Microsoft Corp.</div>
-                    <div className="text-sm text-gray-600">6 shares</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$2,100.00</div>
-                  <div className="text-sm text-green-600">+$42.00 (+2.0%)</div>
-                </div>
+        {/* Market Movers */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-black">Market Movers</h3>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-bold text-green-600">NVDA</div>
+                <div className="text-sm text-gray-600">+4.85%</div>
+                <div className="text-xs text-gray-500">Top Gainer</div>
+              </div>
+              <div className="text-center p-4 bg-red-50 rounded-lg">
+                <div className="text-lg font-bold text-red-600">NFLX</div>
+                <div className="text-sm text-gray-600">-1.25%</div>
+                <div className="text-xs text-gray-500">Top Loser</div>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-lg font-bold text-blue-600">AAPL</div>
+                <div className="text-sm text-gray-600">$185.60</div>
+                <div className="text-xs text-gray-500">Most Active</div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     );
   }
@@ -700,161 +762,36 @@ export default function Dashboard() {
   function renderCrypto() {
     return (
       <div className="space-y-6 fade-in">
+        {/* Header Section */}
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black slide-in-left">Crypto Holdings</h2>
-          <Dialog open={buyCryptoDialog} onOpenChange={setBuyCryptoDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-green-500 hover:bg-green-600 text-white hover-scale transition-all duration-300 pulse-glow">
-                Buy Crypto
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="smooth-enter">
-              <DialogHeader>
-                <DialogTitle>Buy Cryptocurrency</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="crypto-symbol">Cryptocurrency</Label>
-                  <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a cryptocurrency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
-                      <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
-                      <SelectItem value="SOL">Solana (SOL)</SelectItem>
-                      <SelectItem value="USDT">Tether (USDT)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="amount">Amount (USD)</Label>
-                  <Input id="amount" type="number" placeholder="Enter amount in USD" />
-                </div>
-                <Button 
-                  onClick={() => {
-                    toast({
-                      title: "Order Placed",
-                      description: `Successfully placed order to buy ${selectedCrypto}`,
-                    });
-                    setBuyCryptoDialog(false);
-                  }}
-                  className="w-full bg-green-500 hover:bg-green-600"
-                  disabled={!selectedCrypto}
-                >
-                  Place Order
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-4 border-b border-gray-200">
-            <div className="text-sm font-medium text-black">My Crypto Portfolio</div>
+          <div>
+            <h1 className="text-2xl font-bold text-black">Crypto</h1>
+            <p className="text-gray-600">Total Crypto Value: $18,250.00</p>
           </div>
-          <div className="divide-y divide-gray-200">
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
-                    <Bitcoin className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Bitcoin</div>
-                    <div className="text-sm text-gray-600">0.1854 BTC</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$8,750.00</div>
-                  <div className="text-sm text-green-600">+$298.25 (+3.5%)</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-sm font-bold text-purple-600">ETH</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Ethereum</div>
-                    <div className="text-sm text-gray-600">1.24 ETH</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$3,200.00</div>
-                  <div className="text-sm text-green-600">+$65.80 (+2.1%)</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-sm font-bold text-blue-600">SOL</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Solana</div>
-                    <div className="text-sm text-gray-600">45.2 SOL</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$1,580.00</div>
-                  <div className="text-sm text-green-600">+$78.40 (+5.2%)</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-xs font-bold text-green-600">USDT</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Tether</div>
-                    <div className="text-sm text-gray-600">2,450 USDT</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-black">$2,450.00</div>
-                  <div className="text-sm text-gray-600">$0.00 (0.0%)</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Buy Crypto
+          </Button>
         </div>
-      </div>
-    );
-  }
 
-  function renderWallet() {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-black">Wallet & Holdings</h2>
-        
         {/* Portfolio Summary */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="text-lg font-medium text-black mb-4">Portfolio Summary</div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString() : '0'}</div>
-              <div className="text-sm text-gray-600">Total Balance</div>
+              <div className="text-2xl font-bold text-black">$18,250</div>
+              <div className="text-sm text-gray-600">Market Value</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">+$2,450</div>
-              <div className="text-sm text-gray-600">Today's P&L</div>
+              <div className="text-2xl font-bold text-green-600">+$850</div>
+              <div className="text-sm text-gray-600">Today's Return</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">$12,850</div>
-              <div className="text-sm text-gray-600">Crypto Holdings</div>
+              <div className="text-2xl font-bold text-green-600">+$3,250</div>
+              <div className="text-sm text-gray-600">Total Return</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-black">$25,670</div>
-              <div className="text-sm text-gray-600">Stock Holdings</div>
+              <div className="text-2xl font-bold text-black">21.7%</div>
+              <div className="text-sm text-gray-600">Portfolio Gain</div>
             </div>
           </div>
         </div>
@@ -862,22 +799,68 @@ export default function Dashboard() {
         {/* Crypto Holdings */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Crypto Holdings</div>
+            <h3 className="text-lg font-medium text-black">Your Holdings</h3>
           </div>
-          <div className="p-4 space-y-3">
+          <div className="divide-y divide-gray-200">
             {Object.entries(marketData).filter(([_, data]) => data.type === 'crypto').map(([symbol, data]) => (
-              <div key={symbol} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover-scale transition-all duration-300">
-                <div className="flex items-center space-x-3">
-                  <Bitcoin className="h-8 w-8 text-orange-500" />
-                  <div>
-                    <div className="font-medium text-black">{symbol}</div>
-                    <div className="text-sm text-gray-600">${data.price.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : 3)}</div>
+              <div key={symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                      {symbol === 'BTC' ? (
+                        <Bitcoin className="h-6 w-6 text-orange-600" />
+                      ) : (
+                        <span className="text-sm font-bold text-orange-600">{symbol}</span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-medium text-black">{symbol}</div>
+                      <div className="text-sm text-gray-600">
+                        {symbol === 'BTC' ? '0.25 BTC' : 
+                         symbol === 'ETH' ? '2.5 ETH' :
+                         symbol === 'BNB' ? '15.8 BNB' :
+                         symbol === 'SOL' ? '45.2 SOL' :
+                         symbol === 'ADA' ? '2,500 ADA' :
+                         symbol === 'XRP' ? '3,200 XRP' :
+                         symbol === 'DOGE' ? '12,000 DOGE' :
+                         symbol === 'AVAX' ? '85.5 AVAX' :
+                         symbol === 'DOT' ? '425 DOT' : '1,800 MATIC'}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium text-black">0.00</div>
-                  <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                  <div className="text-right">
+                    <div className="font-medium text-black">${data.price.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : 3)}</div>
+                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="text-right ml-6">
+                    <div className="font-bold text-black">
+                      ${(data.price * (
+                        symbol === 'BTC' ? 0.25 : 
+                        symbol === 'ETH' ? 2.5 :
+                        symbol === 'BNB' ? 15.8 :
+                        symbol === 'SOL' ? 45.2 :
+                        symbol === 'ADA' ? 2500 :
+                        symbol === 'XRP' ? 3200 :
+                        symbol === 'DOGE' ? 12000 :
+                        symbol === 'AVAX' ? 85.5 :
+                        symbol === 'DOT' ? 425 : 1800
+                      )).toLocaleString()}
+                    </div>
+                    <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {data.change >= 0 ? '+' : ''}${((data.price * (
+                        symbol === 'BTC' ? 0.25 : 
+                        symbol === 'ETH' ? 2.5 :
+                        symbol === 'BNB' ? 15.8 :
+                        symbol === 'SOL' ? 45.2 :
+                        symbol === 'ADA' ? 2500 :
+                        symbol === 'XRP' ? 3200 :
+                        symbol === 'DOGE' ? 12000 :
+                        symbol === 'AVAX' ? 85.5 :
+                        symbol === 'DOT' ? 425 : 1800
+                      )) * data.change / 100).toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -885,73 +868,46 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stock Holdings */}
+        {/* Market Movers */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Stock Holdings</div>
+            <h3 className="text-lg font-medium text-black">Market Movers</h3>
           </div>
-          <div className="p-4 space-y-3">
-            {Object.entries(marketData).filter(([_, data]) => data.type === 'stock').map(([symbol, data]) => (
-              <div key={symbol} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover-scale transition-all duration-300">
-                <div className="flex items-center space-x-3">
-                  <TrendingUp className="h-8 w-8 text-blue-500" />
-                  <div>
-                    <div className="font-medium text-black">{symbol}</div>
-                    <div className="text-sm text-gray-600">${data.price.toFixed(2)}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium text-black">0 shares</div>
-                  <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
-                  </div>
-                </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-bold text-green-600">SOL</div>
+                <div className="text-sm text-gray-600">+4.12%</div>
+                <div className="text-xs text-gray-500">Top Gainer</div>
               </div>
-            ))}
+              <div className="text-center p-4 bg-red-50 rounded-lg">
+                <div className="text-lg font-bold text-red-600">MATIC</div>
+                <div className="text-sm text-gray-600">-2.15%</div>
+                <div className="text-xs text-gray-500">Top Loser</div>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-lg font-bold text-blue-600">BTC</div>
+                <div className="text-sm text-gray-600">$43,250</div>
+                <div className="text-xs text-gray-500">Most Active</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Deposit Addresses */}
+        {/* Fear & Greed Index */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Crypto Deposit Addresses</div>
+            <h3 className="text-lg font-medium text-black">Fear & Greed Index</h3>
           </div>
-          <div className="p-4 space-y-4">
-            {[
-              { crypto: 'Bitcoin (BTC)', network: 'Bitcoin', address: depositAddresses.btc },
-              { crypto: 'Ethereum (ETH)', network: 'ERC-20', address: depositAddresses.eth },
-              { crypto: 'Solana (SOL)', network: 'Solana', address: depositAddresses.sol },
-              { crypto: 'Tether (USDT)', network: 'ERC-20', address: depositAddresses.usdt }
-            ].map((item) => (
-              <div key={item.crypto} className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="font-medium text-black">{item.crypto}</div>
-                  <div className="text-sm text-gray-600">Network: {item.network}</div>
-                </div>
-                <div className="text-sm text-gray-800 mb-3 break-all">{item.address}</div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full hover-glow transition-all duration-300"
-                  onClick={() => {
-                    navigator.clipboard.writeText(item.address);
-                    toast({
-                      title: "Address Copied",
-                      description: `${item.crypto.split(' ')[0]} deposit address copied to clipboard`,
-                    });
-                  }}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Address
-                </Button>
-              </div>
-            ))}
+          <div className="p-6 text-center">
+            <div className="text-4xl font-bold text-green-600 mb-2">72</div>
+            <div className="text-lg font-medium text-black mb-1">Greed</div>
+            <div className="text-sm text-gray-600">Market sentiment indicates buying opportunity</div>
           </div>
         </div>
       </div>
     );
   }
-
 
 
   function renderTrade() {
