@@ -849,46 +849,110 @@ export default function Dashboard() {
   function renderWallet() {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-black">Wallet</h2>
+        <h2 className="text-2xl font-bold text-black">Wallet & Holdings</h2>
         
-        {/* Balance Overview */}
+        {/* Portfolio Summary */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="text-center">
-            <div className="text-sm text-gray-600 mb-1">Available Cash</div>
-            <div className="text-3xl font-bold text-black mb-4">$15,420.00</div>
-            <Button className="bg-green-500 hover:bg-green-600 text-white">
-              Add Money
-            </Button>
+          <div className="text-lg font-medium text-black mb-4">Portfolio Summary</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString() : '0'}</div>
+              <div className="text-sm text-gray-600">Total Balance</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">+$2,450</div>
+              <div className="text-sm text-gray-600">Today's P&L</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">$12,850</div>
+              <div className="text-sm text-gray-600">Crypto Holdings</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">$25,670</div>
+              <div className="text-sm text-gray-600">Stock Holdings</div>
+            </div>
           </div>
         </div>
 
-        {/* Crypto Deposit Options */}
+        {/* Crypto Holdings */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Deposit Cryptocurrencies</div>
-            <div className="text-sm text-gray-600">Send crypto to your Bitrader wallet</div>
+            <div className="text-lg font-medium text-black">Crypto Holdings</div>
+          </div>
+          <div className="p-4 space-y-3">
+            {Object.entries(marketData).filter(([_, data]) => data.type === 'crypto').map(([symbol, data]) => (
+              <div key={symbol} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover-scale transition-all duration-300">
+                <div className="flex items-center space-x-3">
+                  <Bitcoin className="h-8 w-8 text-orange-500" />
+                  <div>
+                    <div className="font-medium text-black">{symbol}</div>
+                    <div className="text-sm text-gray-600">${data.price.toFixed(symbol === 'BTC' || symbol === 'ETH' ? 2 : 3)}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-black">0.00</div>
+                  <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stock Holdings */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Stock Holdings</div>
+          </div>
+          <div className="p-4 space-y-3">
+            {Object.entries(marketData).filter(([_, data]) => data.type === 'stock').map(([symbol, data]) => (
+              <div key={symbol} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover-scale transition-all duration-300">
+                <div className="flex items-center space-x-3">
+                  <TrendingUp className="h-8 w-8 text-blue-500" />
+                  <div>
+                    <div className="font-medium text-black">{symbol}</div>
+                    <div className="text-sm text-gray-600">${data.price.toFixed(2)}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium text-black">0 shares</div>
+                  <div className={`text-sm ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Deposit Addresses */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <div className="text-lg font-medium text-black">Crypto Deposit Addresses</div>
           </div>
           <div className="p-4 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Bitcoin Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                    <Bitcoin className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Bitcoin (BTC)</div>
-                    <div className="text-sm text-gray-600">Network: Bitcoin</div>
-                  </div>
+            {[
+              { crypto: 'Bitcoin (BTC)', network: 'Bitcoin', address: depositAddresses.btc },
+              { crypto: 'Ethereum (ETH)', network: 'ERC-20', address: depositAddresses.eth },
+              { crypto: 'Solana (SOL)', network: 'Solana', address: depositAddresses.sol },
+              { crypto: 'Tether (USDT)', network: 'ERC-20', address: depositAddresses.usdt }
+            ].map((item) => (
+              <div key={item.crypto} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="font-medium text-black">{item.crypto}</div>
+                  <div className="text-sm text-gray-600">Network: {item.network}</div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full hover-scale transition-all duration-300"
+                <div className="text-sm text-gray-800 mb-3 break-all">{item.address}</div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full hover-glow transition-all duration-300"
                   onClick={() => {
-                    navigator.clipboard.writeText(depositAddresses.btc);
+                    navigator.clipboard.writeText(item.address);
                     toast({
                       title: "Address Copied",
-                      description: "Bitcoin deposit address copied to clipboard",
+                      description: `${item.crypto.split(' ')[0]} deposit address copied to clipboard`,
                     });
                   }}
                 >
@@ -896,105 +960,14 @@ export default function Dashboard() {
                   Copy Address
                 </Button>
               </div>
-
-              {/* Ethereum Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold text-purple-600">ETH</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Ethereum (ETH)</div>
-                    <div className="text-sm text-gray-600">Network: Ethereum</div>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full hover-scale transition-all duration-300"
-                  onClick={() => {
-                    navigator.clipboard.writeText(depositAddresses.eth);
-                    toast({
-                      title: "Address Copied",
-                      description: "Ethereum deposit address copied to clipboard",
-                    });
-                  }}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Address
-                </Button>
-              </div>
-
-              {/* Solana Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold text-blue-600">SOL</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Solana (SOL)</div>
-                    <div className="text-sm text-gray-600">Network: Solana</div>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full hover-scale transition-all duration-300"
-                  onClick={() => {
-                    navigator.clipboard.writeText(depositAddresses.sol);
-                    toast({
-                      title: "Address Copied",
-                      description: "Solana deposit address copied to clipboard",
-                    });
-                  }}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Address
-                </Button>
-              </div>
-
-              {/* USDT Deposit */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer hover-scale transition-all duration-300">
-                <div className="flex items-center mb-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-green-600">USDT</span>
-                  </div>
-                  <div>
-                    <div className="font-medium text-black">Tether (USDT)</div>
-                    <div className="text-sm text-gray-600">Network: Ethereum</div>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full hover-scale transition-all duration-300"
-                  onClick={() => {
-                    navigator.clipboard.writeText(depositAddresses.usdt);
-                    toast({
-                      title: "Address Copied",
-                      description: "USDT deposit address copied to clipboard",
-                    });
-                  }}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Address
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Transactions */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-4 border-b border-gray-200">
-            <div className="text-lg font-medium text-black">Recent Transactions</div>
-          </div>
-          <div className="p-4">
-            <div className="text-center text-gray-600 py-8">
-              No transactions yet. Make your first deposit to get started.
-            </div>
+            ))}
           </div>
         </div>
       </div>
     );
   }
+
+
 
   function renderTrade() {
     // Check if user is on iOS
