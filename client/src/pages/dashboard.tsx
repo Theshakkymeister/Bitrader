@@ -31,7 +31,7 @@ import type { Portfolio, Trade, PerformanceMetric } from "@shared/schema";
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const [activeView, setActiveView] = useState('dashboard');
 
   // Redirect to login if not authenticated
@@ -149,32 +149,47 @@ export default function Dashboard() {
               </button>
             </nav>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+          <div className="flex items-center space-x-2 lg:space-x-4">
+            <Button className="bg-blue-600 hover:bg-blue-700 hidden sm:flex">
               <Plus className="mr-2 h-4 w-4" />
               New Trade
             </Button>
-            <div className="flex items-center space-x-3">
+            <Button className="bg-blue-600 hover:bg-blue-700 sm:hidden p-2">
+              <Plus className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center space-x-2 lg:space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-xs font-medium">{getUserInitials(user)}</span>
               </div>
-              <span className="text-sm">{getUserName(user)}</span>
+              <span className="text-sm hidden sm:block">{getUserName(user)}</span>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => window.location.href = '/api/logout'}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-2"
               >
-                Logout
+                <span className="hidden sm:block">Logout</span>
+                <span className="sm:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex relative">
+        {/* Mobile Overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        
         {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-slate-900 h-screen border-r border-slate-700 p-6 transition-all duration-300 ease-in-out overflow-hidden`}>
+        <aside className={`${
+          sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-16 lg:translate-x-0'
+        } bg-slate-900 h-screen border-r border-slate-700 transition-all duration-300 ease-in-out overflow-hidden fixed lg:relative z-50`}>
+          <div className="p-6">
           <div className="space-y-6">
             <div>
               {sidebarOpen && <h3 className="text-slate-400 text-xs uppercase tracking-wider mb-3">Account</h3>}
@@ -304,10 +319,11 @@ export default function Dashboard() {
               </nav>
             </div>
           </div>
+          </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-3 lg:p-6 overflow-y-auto">
           {portfolioLoading || tradesLoading || algorithmsLoading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -348,12 +364,12 @@ export default function Dashboard() {
     return (
       <div>
           {/* Portfolio Overview */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Portfolio Overview</h2>
-              <div className="flex items-center space-x-4">
+          <div className="mb-6 lg:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 lg:mb-6 space-y-3 sm:space-y-0">
+              <h2 className="text-xl lg:text-2xl font-bold">Portfolio Overview</h2>
+              <div className="flex items-center space-x-2 lg:space-x-4">
                 <Select>
-                  <SelectTrigger className="w-40 bg-slate-900 border-slate-700">
+                  <SelectTrigger className="w-full sm:w-40 bg-slate-900 border-slate-700">
                     <SelectValue placeholder="Last 30 days" />
                   </SelectTrigger>
                   <SelectContent>
@@ -362,38 +378,38 @@ export default function Dashboard() {
                     <SelectItem value="365">Last year</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
-                  <Download className="mr-2 h-4 w-4" />
-                  Export
+                <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 touch-manipulation">
+                  <Download className="mr-0 sm:mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Export</span>
                 </Button>
               </div>
             </div>
 
             {/* Portfolio Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-1 cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-400 text-sm">Total Balance</span>
-                    <Wallet className="h-5 w-5 text-blue-500 pulse-subtle" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
+              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-1 cursor-pointer touch-manipulation">
+                <CardContent className="p-3 lg:p-6">
+                  <div className="flex items-center justify-between mb-1 lg:mb-2">
+                    <span className="text-slate-400 text-xs lg:text-sm">Total Balance</span>
+                    <Wallet className="h-4 w-4 lg:h-5 lg:w-5 text-blue-500 pulse-subtle" />
                   </div>
-                  <div className="text-2xl font-bold count-up gradient-animate bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+                  <div className="text-lg lg:text-2xl font-bold count-up gradient-animate bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
                     ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
                   </div>
-                  <div className="text-sm text-green-500 slide-in-right">+12.5% this month</div>
+                  <div className="text-xs lg:text-sm text-green-500 slide-in-right hidden sm:block">+12.5% this month</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-2 cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-400 text-sm">Today's P&L</span>
-                    <TrendingUp className="h-5 w-5 text-green-500 heartbeat" />
+              <Card className="bg-slate-900 border-slate-700 hover-lift scale-hover slide-in-left stagger-2 cursor-pointer touch-manipulation">
+                <CardContent className="p-3 lg:p-6">
+                  <div className="flex items-center justify-between mb-1 lg:mb-2">
+                    <span className="text-slate-400 text-xs lg:text-sm">Today's P&L</span>
+                    <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5 text-green-500 heartbeat" />
                   </div>
-                  <div className="text-2xl font-bold text-green-500 count-up">
+                  <div className="text-lg lg:text-2xl font-bold text-green-500 count-up">
                     +${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
                   </div>
-                  <div className="text-sm text-slate-400 slide-in-right">+1.97% today</div>
+                  <div className="text-xs lg:text-sm text-slate-400 slide-in-right hidden sm:block">+1.97% today</div>
                 </CardContent>
               </Card>
 

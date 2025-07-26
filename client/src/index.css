@@ -46,6 +46,35 @@
   100% { transform: translateX(100%); }
 }
 
+/* Touch optimizations for mobile */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+  .hover-lift:active {
+    transform: translateY(-1px) scale(0.98);
+    transition: transform 0.1s ease-in-out;
+  }
+  
+  /* Minimum touch target size */
+  button, .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mobile-optimized text sizes */
+  .mobile-text-sm {
+    font-size: 0.75rem;
+  }
+  
+  .mobile-text-base {
+    font-size: 0.875rem;
+  }
+}
+
 .shimmer {
   position: relative;
   overflow: hidden;
