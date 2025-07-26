@@ -323,7 +323,7 @@ export default function Dashboard() {
                         });
                         setAdminDialog(false);
                       }}
-                      className="w-full bg-blue-500 hover:bg-blue-600"
+                      className="w-full bg-green-500 hover:bg-green-600"
                     >
                       Save Changes
                     </Button>
@@ -332,7 +332,7 @@ export default function Dashboard() {
               </Dialog>
             )}
             
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
               <span className="text-xs font-medium text-white">{getUserInitials(user)}</span>
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function Dashboard() {
           <button 
             onClick={() => { setActiveView('dashboard'); setSidebarOpen(false); }}
             className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+              activeView === 'dashboard' ? 'bg-green-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
             Dashboard
@@ -373,7 +373,7 @@ export default function Dashboard() {
             <button 
               onClick={() => setMobileWalletExpanded(!mobileWalletExpanded)}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${
-                activeView === 'wallet' || activeView === 'stocks' || activeView === 'crypto' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+                activeView === 'wallet' || activeView === 'stocks' || activeView === 'crypto' ? 'bg-green-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
               <span>Wallet</span>
@@ -384,7 +384,7 @@ export default function Dashboard() {
                 <button 
                   onClick={() => { setActiveView('stocks'); setSidebarOpen(false); }}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeView === 'stocks' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                    activeView === 'stocks' ? 'bg-green-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   Stock Holdings
@@ -392,7 +392,7 @@ export default function Dashboard() {
                 <button 
                   onClick={() => { setActiveView('crypto'); setSidebarOpen(false); }}
                   className={`w-full text-left px-3 py-2 rounded-md text-sm ${
-                    activeView === 'crypto' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                    activeView === 'crypto' ? 'bg-green-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   Crypto Holdings
@@ -403,7 +403,7 @@ export default function Dashboard() {
           <button 
             onClick={() => { setActiveView('trades'); setSidebarOpen(false); }}
             className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'trades' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+              activeView === 'trades' ? 'bg-green-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
             History
@@ -411,7 +411,7 @@ export default function Dashboard() {
           <button 
             onClick={() => { setActiveView('settings'); setSidebarOpen(false); }}
             className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium ${
-              activeView === 'settings' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+              activeView === 'settings' ? 'bg-green-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
             }`}
           >
             Settings
@@ -473,7 +473,7 @@ export default function Dashboard() {
                 ${portfolio?.totalBalance ? parseFloat(portfolio.totalBalance).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}
               </div>
               <div className="flex items-center text-sm">
-                <span className="text-blue-600 font-medium pulse-glow">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
+                <span className="text-green-600 font-medium pulse-glow">+${portfolio?.todayPL ? parseFloat(portfolio.todayPL).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00'}</span>
                 <span className="text-gray-600 ml-1">(+1.97%) Today</span>
               </div>
             </div>
@@ -528,11 +528,11 @@ export default function Dashboard() {
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.3s'}}>
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's Return</div>
-            <div className="text-xl font-bold text-blue-600 bounce-in pulse-glow">+2.45%</div>
+            <div className="text-xl font-bold text-green-600 bounce-in pulse-glow">+2.45%</div>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 hover-scale transition-all duration-300 smooth-enter" style={{animationDelay: '0.4s'}}>
             <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Total Return</div>
-            <div className="text-xl font-bold text-blue-600 bounce-in pulse-glow">+18.7%</div>
+            <div className="text-xl font-bold text-green-600 bounce-in pulse-glow">+18.7%</div>
           </div>
         </div>
 
@@ -544,20 +544,20 @@ export default function Dashboard() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-blue-600">AAPL</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-green-600">AAPL</span>
                   </div>
                   <span className="font-medium">Apple Inc.</span>
                 </div>
                 <div className="text-right">
                   <div className="font-medium">$2,450.00</div>
-                  <div className="text-xs text-blue-600">+1.2%</div>
+                  <div className="text-xs text-green-600">+1.2%</div>
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-xs font-bold text-blue-600">TSLA</span>
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-bold text-green-600">TSLA</span>
                   </div>
                   <span className="font-medium">Tesla Inc.</span>
                 </div>
@@ -582,7 +582,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right">
                   <div className="font-medium">$8,750.00</div>
-                  <div className="text-xs text-blue-600">+3.5%</div>
+                  <div className="text-xs text-green-600">+3.5%</div>
                 </div>
               </div>
               <div className="flex justify-between items-center">
@@ -594,7 +594,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right">
                   <div className="font-medium">$3,200.00</div>
-                  <div className="text-xs text-blue-600">+2.1%</div>
+                  <div className="text-xs text-green-600">+2.1%</div>
                 </div>
               </div>
             </div>
@@ -615,7 +615,7 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold text-black">Stocks</h1>
             <p className="text-gray-600">Total Stock Value: $38,520.00</p>
           </div>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
             <Plus className="h-4 w-4 mr-2" />
             Buy Stocks
           </Button>
@@ -629,11 +629,11 @@ export default function Dashboard() {
               <div className="text-sm text-gray-600">Market Value</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">+$1,240</div>
+              <div className="text-2xl font-bold text-green-600">+$1,240</div>
               <div className="text-sm text-gray-600">Today's Return</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">+$4,820</div>
+              <div className="text-2xl font-bold text-green-600">+$4,820</div>
               <div className="text-sm text-gray-600">Total Return</div>
             </div>
             <div className="text-center">
@@ -666,11 +666,11 @@ export default function Dashboard() {
               <div key={asset.symbol} className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center overflow-hidden">
                       {asset.logo ? (
                         <img src={asset.logo} alt={asset.symbol} className="w-8 h-8 object-contain" />
                       ) : (
-                        <span className="text-sm font-bold text-blue-600">{asset.symbol}</span>
+                        <span className="text-sm font-bold text-green-600">{asset.symbol}</span>
                       )}
                     </div>
                     <div>
@@ -681,7 +681,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right">
                     <div className="font-medium text-black">${asset.price.toFixed(2)}</div>
-                    <div className={`text-sm ${asset.change >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                     </div>
                   </div>
@@ -689,7 +689,7 @@ export default function Dashboard() {
                     <div className="font-bold text-black">
                       ${(asset.price * (Math.floor(Math.random() * 50) + 1)).toLocaleString()}
                     </div>
-                    <div className={`text-sm ${asset.change >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {asset.change >= 0 ? '+' : ''}${((asset.price * (Math.floor(Math.random() * 50) + 1)) * asset.change / 100).toFixed(2)}
                     </div>
                   </div>
@@ -706,8 +706,8 @@ export default function Dashboard() {
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">NVDA</div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-bold text-green-600">NVDA</div>
                 <div className="text-sm text-gray-600">+4.85%</div>
                 <div className="text-xs text-gray-500">Top Gainer</div>
               </div>
@@ -716,8 +716,8 @@ export default function Dashboard() {
                 <div className="text-sm text-gray-600">-1.25%</div>
                 <div className="text-xs text-gray-500">Top Loser</div>
               </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">AAPL</div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-bold text-green-600">AAPL</div>
                 <div className="text-sm text-gray-600">$185.60</div>
                 <div className="text-xs text-gray-500">Most Active</div>
               </div>
@@ -738,7 +738,7 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold text-black">Crypto</h1>
             <p className="text-gray-600">Total Crypto Value: $18,250.00</p>
           </div>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white">
+          <Button className="bg-green-500 hover:bg-green-600 text-white">
             <Plus className="h-4 w-4 mr-2" />
             Buy Crypto
           </Button>
@@ -752,11 +752,11 @@ export default function Dashboard() {
               <div className="text-sm text-gray-600">Market Value</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">+$850</div>
+              <div className="text-2xl font-bold text-green-600">+$850</div>
               <div className="text-sm text-gray-600">Today's Return</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">+$3,250</div>
+              <div className="text-2xl font-bold text-green-600">+$3,250</div>
               <div className="text-sm text-gray-600">Total Return</div>
             </div>
             <div className="text-center">
@@ -808,7 +808,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right">
                     <div className="font-medium text-black">${asset.price.toFixed(asset.price > 1000 ? 2 : asset.price > 1 ? 2 : 4)}</div>
-                    <div className={`text-sm ${asset.change >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                     </div>
                   </div>
@@ -816,7 +816,7 @@ export default function Dashboard() {
                     <div className="font-bold text-black">
                       ${(asset.price * (Math.random() * 100)).toLocaleString()}
                     </div>
-                    <div className={`text-sm ${asset.change >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                    <div className={`text-sm ${asset.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {asset.change >= 0 ? '+' : ''}${((asset.price * (Math.random() * 100)) * asset.change / 100).toFixed(2)}
                     </div>
                   </div>
@@ -833,8 +833,8 @@ export default function Dashboard() {
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">SOL</div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-bold text-green-600">SOL</div>
                 <div className="text-sm text-gray-600">+4.12%</div>
                 <div className="text-xs text-gray-500">Top Gainer</div>
               </div>
@@ -843,8 +843,8 @@ export default function Dashboard() {
                 <div className="text-sm text-gray-600">-2.15%</div>
                 <div className="text-xs text-gray-500">Top Loser</div>
               </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">BTC</div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-bold text-green-600">BTC</div>
                 <div className="text-sm text-gray-600">$43,250</div>
                 <div className="text-xs text-gray-500">Most Active</div>
               </div>
@@ -858,7 +858,7 @@ export default function Dashboard() {
             <h3 className="text-lg font-medium text-black">Fear & Greed Index</h3>
           </div>
           <div className="p-6 text-center">
-            <div className="text-4xl font-bold text-blue-600 mb-2">72</div>
+            <div className="text-4xl font-bold text-green-600 mb-2">72</div>
             <div className="text-lg font-medium text-black mb-1">Greed</div>
             <div className="text-sm text-gray-600">Market sentiment indicates buying opportunity</div>
           </div>
@@ -896,12 +896,12 @@ export default function Dashboard() {
           <h2 className="text-2xl font-bold text-black slide-in-left">Live Trading</h2>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${liveTrading ? 'bg-blue-500 animate-pulse' : 'bg-gray-400'}`}></div>
+              <div className={`w-3 h-3 rounded-full ${liveTrading ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
               <span className="text-sm font-medium">{liveTrading ? 'Live' : 'Offline'}</span>
             </div>
             <Button
               onClick={() => setLiveTrading(!liveTrading)}
-              className={`${liveTrading ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white hover-scale transition-all duration-300`}
+              className={`${liveTrading ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white hover-scale transition-all duration-300`}
               disabled={isIOS}
             >
               {liveTrading ? <Square className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
@@ -955,7 +955,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-black">${asset.price.toFixed(asset.price > 1000 ? 2 : asset.price > 1 ? 2 : 4)}</div>
-                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
+                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                         {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                       </div>
                     </div>
@@ -963,7 +963,7 @@ export default function Dashboard() {
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-blue-500 hover:bg-blue-600"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
                       disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
@@ -1014,11 +1014,11 @@ export default function Dashboard() {
                 <div key={asset.symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center overflow-hidden">
                         {asset.logo ? (
                           <img src={asset.logo} alt={asset.symbol} className="w-6 h-6 object-contain" />
                         ) : (
-                          <span className="text-xs font-bold text-blue-600">{asset.symbol.slice(0, 3)}</span>
+                          <span className="text-xs font-bold text-green-600">{asset.symbol.slice(0, 3)}</span>
                         )}
                       </div>
                       <div>
@@ -1028,7 +1028,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-black">${asset.price.toFixed(2)}</div>
-                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
+                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                         {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                       </div>
                     </div>
@@ -1036,7 +1036,7 @@ export default function Dashboard() {
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-blue-500 hover:bg-blue-600"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
                       disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
@@ -1087,11 +1087,11 @@ export default function Dashboard() {
                 <div key={asset.symbol} className="border border-gray-200 rounded-lg p-4 hover-scale transition-all duration-300">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 ${asset.type === 'crypto' ? 'bg-orange-100' : 'bg-blue-100'} rounded-full flex items-center justify-center overflow-hidden`}>
+                      <div className={`w-10 h-10 ${asset.type === 'crypto' ? 'bg-orange-100' : 'bg-green-100'} rounded-full flex items-center justify-center overflow-hidden`}>
                         {asset.logo ? (
                           <img src={asset.logo} alt={asset.symbol} className="w-6 h-6 object-contain" />
                         ) : (
-                          <span className={`text-xs font-bold ${asset.type === 'crypto' ? 'text-orange-600' : 'text-blue-600'}`}>{asset.symbol.slice(0, 3)}</span>
+                          <span className={`text-xs font-bold ${asset.type === 'crypto' ? 'text-orange-600' : 'text-green-600'}`}>{asset.symbol.slice(0, 3)}</span>
                         )}
                       </div>
                       <div>
@@ -1101,7 +1101,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold text-black">${asset.price.toFixed(asset.price > 1000 ? 2 : asset.price > 1 ? 2 : 4)}</div>
-                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}>
+                      <div className={`text-sm font-medium px-2 py-1 rounded ${asset.change >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                         {asset.change >= 0 ? '+' : ''}{asset.change.toFixed(2)}%
                       </div>
                     </div>
@@ -1109,7 +1109,7 @@ export default function Dashboard() {
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-blue-500 hover:bg-blue-600"
+                      className="flex-1 bg-green-500 hover:bg-green-600"
                       disabled={!liveTrading || placeTradeMutation.isPending}
                       onClick={() => {
                         placeTradeMutation.mutate({
@@ -1160,7 +1160,7 @@ export default function Dashboard() {
                 {trades.slice(0, 5).map((trade) => (
                   <div key={trade.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover-scale transition-all duration-300">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${trade.type === 'buy' ? 'bg-blue-500' : 'bg-red-500'}`}></div>
+                      <div className={`w-2 h-2 rounded-full ${trade.type === 'buy' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                       <div>
                         <div className="font-medium text-black">{trade.pair}</div>
                         <div className="text-sm text-gray-600">{trade.createdAt ? new Date(trade.createdAt).toLocaleTimeString() : 'N/A'}</div>
@@ -1168,7 +1168,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <div className="font-medium text-black">${trade.entryPrice}</div>
-                      <div className={`text-sm ${trade.type === 'buy' ? 'text-blue-600' : 'text-red-600'}`}>
+                      <div className={`text-sm ${trade.type === 'buy' ? 'text-green-600' : 'text-red-600'}`}>
                         {trade.type.toUpperCase()} {trade.volume || '1'}
                       </div>
                     </div>
