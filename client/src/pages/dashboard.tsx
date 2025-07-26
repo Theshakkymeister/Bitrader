@@ -27,26 +27,28 @@ const portfolioData = [
 ];
 
 export default function Dashboard() {
-  const [balance, setBalance] = useState(25234.56);
+  const [balance, setBalance] = useState(0.00);
   const [showBalance, setShowBalance] = useState(true);
-  const [portfolioValue, setPortfolioValue] = useState(25234);
+  const [portfolioValue, setPortfolioValue] = useState(0);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  // Real-time portfolio simulation
+  // Real-time portfolio simulation - only when user has funds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPortfolioValue(prev => {
-        const change = (Math.random() - 0.5) * 10;
-        const newValue = Math.max(prev + change, 20000);
-        return newValue;
-      });
-      setLastUpdate(new Date());
-    }, 5000);
+    if (portfolioValue > 0) {
+      const interval = setInterval(() => {
+        setPortfolioValue(prev => {
+          const change = (Math.random() - 0.5) * 10;
+          const newValue = Math.max(prev + change, 0);
+          return newValue;
+        });
+        setLastUpdate(new Date());
+      }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [portfolioValue]);
 
-  const todayPLPercent = 1.48;
+  const todayPLPercent = portfolioValue > 0 ? 1.48 : 0;
   const todayPL = portfolioValue * (todayPLPercent / 100);
 
   // Holdings data with real market data
@@ -61,13 +63,13 @@ export default function Dashboard() {
   };
 
   const holdings = [
-    getHolding('AAPL', 32),
-    getHolding('MSFT', 12),
-    getHolding('TSLA', 15),
-    getHolding('GOOGL', 23),
-    getHolding('BTC', 0.1234),
-    getHolding('ETH', 1.2567),
-    getHolding('SOL', 15.67)
+    getHolding('AAPL', 0),
+    getHolding('MSFT', 0),
+    getHolding('TSLA', 0),
+    getHolding('GOOGL', 0),
+    getHolding('BTC', 0),
+    getHolding('ETH', 0),
+    getHolding('SOL', 0)
   ].filter(h => h !== null);
 
   const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
@@ -84,17 +86,28 @@ export default function Dashboard() {
               ${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </div>
             <div className="flex items-center text-sm space-x-4">
-              <div className="flex items-center">
-                <span className={`font-medium ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {todayPL >= 0 ? '+' : ''}${todayPL.toLocaleString('en-US', {minimumFractionDigits: 2})}
-                </span>
-                <span className={`ml-1 ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ({todayPL >= 0 ? '+' : ''}{todayPLPercent}%) Today
-                </span>
-              </div>
-              <div className="text-gray-600">
-                All Time: <span className="text-green-600 font-medium">+$4,123.45 (+20.17%)</span>
-              </div>
+              {portfolioValue > 0 ? (
+                <>
+                  <div className="flex items-center">
+                    <span className={`font-medium ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {todayPL >= 0 ? '+' : ''}${todayPL.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    </span>
+                    <span className={`ml-1 ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      ({todayPL >= 0 ? '+' : ''}{todayPLPercent}%) Today
+                    </span>
+                  </div>
+                  <div className="text-gray-600">
+                    All Time: <span className="text-green-600 font-medium">+$0.00 (+0.00%)</span>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400 mt-4">
+                  <p className="text-sm text-blue-700 font-medium">Welcome to Live Trading!</p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Your portfolio is ready. Deposit funds via Wallets to start trading stocks, crypto, and ETFs.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <div className="text-right">

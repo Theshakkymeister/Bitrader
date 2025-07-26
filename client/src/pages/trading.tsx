@@ -331,9 +331,9 @@ function TradeHistory() {
                 <div key={trade.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h4 className="font-semibold">{trade.symbol}</h4>
+                      <h4 className="font-semibold">{trade.symbol || 'Unknown Asset'}</h4>
                       <p className="text-sm text-muted-foreground">
-                        {trade.type.toUpperCase()} • {trade.orderType.toUpperCase()} • {trade.assetType.toUpperCase()}
+                        {trade.type?.toUpperCase() || 'BUY'} • {trade.orderType?.toUpperCase() || 'MARKET'} • {trade.assetType?.toUpperCase() || 'STOCK'}
                       </p>
                     </div>
                     <TradeStatusBadge status={trade.status} adminApproval={trade.adminApproval} />
@@ -341,15 +341,15 @@ function TradeHistory() {
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                       <p className="text-muted-foreground">Quantity</p>
-                      <p className="font-medium">{parseFloat(trade.quantity).toLocaleString()}</p>
+                      <p className="font-medium">{trade.quantity ? parseFloat(trade.quantity).toLocaleString() : '0'}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Price</p>
-                      <p className="font-medium">${parseFloat(trade.price).toFixed(2)}</p>
+                      <p className="font-medium">${trade.price ? parseFloat(trade.price).toFixed(2) : '0.00'}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Total</p>
-                      <p className="font-medium">${parseFloat(trade.totalAmount).toFixed(2)}</p>
+                      <p className="font-medium">${trade.totalAmount ? parseFloat(trade.totalAmount).toFixed(2) : '0.00'}</p>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
@@ -360,7 +360,11 @@ function TradeHistory() {
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              No trades placed yet. Start by placing your first trade order.
+              <div className="mb-4">
+                <p className="text-lg font-medium">No trades yet</p>
+                <p className="text-sm">Your trading activity will appear here once you place orders.</p>
+                <p className="text-sm mt-2 text-blue-600">💡 All trades require admin approval before execution</p>
+              </div>
             </div>
           )}
         </ScrollArea>
