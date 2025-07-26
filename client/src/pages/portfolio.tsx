@@ -361,10 +361,12 @@ export default function Portfolio() {
             
             {/* Chart value display - centered with the green line */}
             <div className="absolute top-16 left-1/2 transform -translate-x-1/2 translate-x-8 text-center portfolio-value-display">
-              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-6 shadow-lg border-2 border-green-200">
-                <div className="text-center space-y-2">
-                  {/* Total Portfolio Value */}
-                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Portfolio Value</div>
+              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-5 shadow-lg border-2 border-green-200">
+                <div className="text-center space-y-3">
+                  {/* Portfolio Value Label */}
+                  <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Portfolio Value</div>
+                  
+                  {/* Current Value */}
                   <div className="text-3xl font-bold text-green-600">$25,235.99</div>
                   
                   {/* Today's Performance */}
