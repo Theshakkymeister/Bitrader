@@ -617,29 +617,29 @@ export default function Wallets() {
 
       {/* Send Modal */}
       <Dialog open={sendModalOpen} onOpenChange={setSendModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+            <DialogTitle className="flex items-center space-x-2 text-gray-900">
               <Send className="h-5 w-5 text-blue-600" />
-              <span>Send {selectedWallet?.symbol}</span>
+              <span className="text-gray-900">Send {selectedWallet?.symbol}</span>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600">
               Send {selectedWallet?.name} to another wallet address
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="recipient">Recipient Address</Label>
+              <Label htmlFor="recipient" className="text-gray-700 font-medium">Recipient Address</Label>
               <Input
                 id="recipient"
                 value={recipientAddress}
                 onChange={(e) => setRecipientAddress(e.target.value)}
                 placeholder="Enter wallet address..."
-                className="font-mono text-sm"
+                className="font-mono text-sm border-gray-300 text-gray-900 bg-white"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount" className="text-gray-700 font-medium">Amount</Label>
               <div className="relative">
                 <Input
                   id="amount"
@@ -649,29 +649,30 @@ export default function Wallets() {
                   placeholder="0.0000"
                   step="0.0001"
                   min="0"
+                  className="border-gray-300 text-gray-900 bg-white"
                 />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 font-medium">
                   {selectedWallet?.symbol}
                 </div>
               </div>
             </div>
-            <div className="bg-yellow-50 p-3 rounded-lg">
+            <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
               <p className="text-sm text-yellow-800">
                 <AlertCircle className="h-4 w-4 inline mr-1" />
                 Transactions cannot be reversed. Please verify the recipient address carefully.
               </p>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 pt-2">
               <Button 
                 variant="outline" 
                 onClick={() => setSendModalOpen(false)}
-                className="flex-1"
+                className="flex-1 text-gray-700 border-gray-300"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={executeSend}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Send {selectedWallet?.symbol}
               </Button>
@@ -682,33 +683,33 @@ export default function Wallets() {
 
       {/* Receive Modal */}
       <Dialog open={receiveModalOpen} onOpenChange={setReceiveModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+            <DialogTitle className="flex items-center space-x-2 text-gray-900">
               <Download className="h-5 w-5 text-green-600" />
-              <span>Receive {selectedWallet?.symbol}</span>
+              <span className="text-gray-900">Receive {selectedWallet?.symbol}</span>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600">
               Share this address to receive {selectedWallet?.name}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Your {selectedWallet?.symbol} Address</Label>
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <code className="text-sm font-mono break-all">
+              <Label className="text-gray-700 font-medium">Your {selectedWallet?.symbol} Address</Label>
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <code className="text-sm font-mono break-all text-gray-900">
                   {selectedWallet?.address}
                 </code>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 pt-2">
               <Button
                 variant="outline"
                 onClick={() => copyAddress(selectedWallet?.address || "")}
-                className="flex-1"
+                className="flex-1 text-gray-700 border-gray-300"
               >
                 <Copy className="h-4 w-4 mr-2" />
-                Copy Address
+                <span className="text-gray-700">Copy Address</span>
               </Button>
               <Button
                 variant="outline"
@@ -716,13 +717,13 @@ export default function Wallets() {
                   setReceiveModalOpen(false);
                   handleQrCode(selectedWallet!);
                 }}
-                className="flex-1"
+                className="flex-1 text-gray-700 border-gray-300"
               >
                 <QrCode className="h-4 w-4 mr-2" />
-                Show QR Code
+                <span className="text-gray-700">Show QR Code</span>
               </Button>
             </div>
-            <div className="bg-blue-50 p-3 rounded-lg">
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-800">
                 <CheckCircle className="h-4 w-4 inline mr-1" />
                 Only send {selectedWallet?.symbol} to this address. Sending other currencies may result in permanent loss.
@@ -734,46 +735,49 @@ export default function Wallets() {
 
       {/* QR Code Modal */}
       <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+            <DialogTitle className="flex items-center space-x-2 text-gray-900">
               <QrCode className="h-5 w-5 text-purple-600" />
-              <span>{selectedWallet?.symbol} QR Code</span>
+              <span className="text-gray-900">{selectedWallet?.symbol} QR Code</span>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600">
               Scan this QR code to get the wallet address
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex justify-center">
-              <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
-                <div className="text-center space-y-2">
-                  {generateQRCode(selectedWallet?.address || "")}
+              <div className="p-4 bg-white border-2 border-gray-300 rounded-lg shadow-sm">
+                <div className="text-center space-y-1">
+                  <div className="text-xs text-gray-500 mb-2">QR Code</div>
+                  <div className="text-black leading-none">
+                    {generateQRCode(selectedWallet?.address || "")}
+                  </div>
                 </div>
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Wallet Address</Label>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <code className="text-xs font-mono break-all">
+              <Label className="text-gray-700 font-medium">Wallet Address</Label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <code className="text-xs font-mono break-all text-gray-900">
                   {selectedWallet?.address}
                 </code>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 pt-2">
               <Button
                 variant="outline"
                 onClick={() => copyAddress(selectedWallet?.address || "")}
-                className="flex-1"
+                className="flex-1 text-gray-700 border-gray-300"
               >
                 <Copy className="h-4 w-4 mr-2" />
-                Copy Address
+                <span className="text-gray-700">Copy Address</span>
               </Button>
               <Button
                 onClick={() => setQrModalOpen(false)}
-                className="flex-1"
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
               >
-                Close
+                <span className="text-white">Close</span>
               </Button>
             </div>
           </div>
