@@ -34,7 +34,7 @@ import {
   type InsertAdminLog,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -52,6 +52,12 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(userData: Omit<UpsertUser, 'id'>): Promise<User>;
   upsertUser(userData: UpsertUser): Promise<User>;
+  // Admin user management operations
+  getAllUsers(limit?: number, offset?: number): Promise<User[]>;
+  getUserCount(): Promise<number>;
+  getUsersRegisteredToday(): Promise<number>;
+  getUsersActiveToday(): Promise<number>;
+  updateUserLastLogin(id: string, ipAddress: string): Promise<User>;
   
   // Portfolio operations
   getPortfolio(userId: string): Promise<Portfolio | undefined>;
@@ -424,6 +430,50 @@ export class DatabaseStorage implements IStorage {
       .where(eq(trades.adminApproval, "pending"))
       .orderBy(desc(trades.createdAt));
     return pendingTrades;
+  }
+
+  // Admin user management operations
+  async getAllUsers(limit = 50, offset = 0): Promise<User[]> {
+    return await db.select().from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getUserCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+    return result[0]?.count || 0;
+  }
+
+  async getUsersRegisteredToday(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.createdAt} >= ${today}`);
+    return result[0]?.count || 0;
+  }
+
+  async getUsersActiveToday(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(sql`${users.lastLoginAt} >= ${today}`);
+    return result[0]?.count || 0;
+  }
+
+  async updateUserLastLogin(id: string, ipAddress: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        lastLoginAt: new Date(), 
+        lastLoginIp: ipAddress,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
 }
 

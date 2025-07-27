@@ -61,6 +61,28 @@ interface WebsiteSetting {
   updatedAt: string;
 }
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  registrationIp: string;
+  lastLoginIp: string;
+  lastLoginAt: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AdminStats {
+  totalUsers: number;
+  usersRegisteredToday: number;
+  usersActiveToday: number;
+  activeAlgorithms: number;
+  pendingTrades: number;
+}
+
 const menuItems = [
   { id: 'overview', label: 'Overview', icon: Home, color: 'text-blue-600' },
   { id: 'crypto', label: 'Crypto Addresses', icon: Wallet, color: 'text-green-600' },
@@ -92,6 +114,18 @@ export default function AdminDashboard() {
   // Get website settings
   const { data: websiteSettings = [] } = useQuery<WebsiteSetting[]>({
     queryKey: ["/api/admin/settings"],
+  });
+
+  // Get admin stats
+  const { data: adminStats } = useQuery<AdminStats>({
+    queryKey: ["/api/admin/stats"],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Get users for user management
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ["/api/admin/users"],
+    enabled: activeSection === 'users',
   });
 
   // Admin logout
@@ -437,8 +471,8 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-600 text-sm font-medium">Total Users</p>
-                  <p className="text-2xl font-bold text-green-900">1,247</p>
-                  <p className="text-xs text-green-600 mt-1">+23 this week</p>
+                  <p className="text-2xl font-bold text-green-900">{adminStats?.totalUsers || 0}</p>
+                  <p className="text-xs text-green-600 mt-1">Platform registered</p>
                 </div>
                 <Users className="h-8 w-8 text-green-600" />
               </div>
@@ -452,8 +486,8 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-600 text-sm font-medium">Active Today</p>
-                  <p className="text-2xl font-bold text-blue-900">342</p>
-                  <p className="text-xs text-blue-600 mt-1">27% of total</p>
+                  <p className="text-2xl font-bold text-blue-900">{adminStats?.usersActiveToday || 0}</p>
+                  <p className="text-xs text-blue-600 mt-1">{adminStats?.totalUsers ? Math.round((adminStats.usersActiveToday / adminStats.totalUsers) * 100) : 0}% of total</p>
                 </div>
                 <Activity className="h-8 w-8 text-blue-600" />
               </div>
@@ -467,8 +501,8 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-600 text-sm font-medium">New Signups</p>
-                  <p className="text-2xl font-bold text-purple-900">89</p>
-                  <p className="text-xs text-purple-600 mt-1">Last 7 days</p>
+                  <p className="text-2xl font-bold text-purple-900">{adminStats?.usersRegisteredToday || 0}</p>
+                  <p className="text-xs text-purple-600 mt-1">Today</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-purple-600" />
               </div>
@@ -481,43 +515,67 @@ export default function AdminDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Users className="h-5 w-5 text-blue-600" />
-            <span>Recent User Activity</span>
+            <span>User Directory ({users.length} users)</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              { name: "Sarah Johnson", email: "sarah.j@email.com", action: "Logged in", time: "2 min ago", status: "online" },
-              { name: "Mike Chen", email: "mike.chen@email.com", action: "Updated portfolio", time: "5 min ago", status: "online" },
-              { name: "Emma Wilson", email: "emma.w@email.com", action: "Made deposit", time: "12 min ago", status: "offline" },
-              { name: "David Lee", email: "david.lee@email.com", action: "Registered", time: "1 hour ago", status: "offline" },
-              { name: "Lisa Rodriguez", email: "lisa.r@email.com", action: "Changed password", time: "2 hours ago", status: "offline" }
-            ].map((user, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">{user.name.split(' ').map(n => n[0]).join('')}</span>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {usersLoading ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p>Loading users...</p>
+              </div>
+            ) : !users || users.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No users registered yet</p>
+              </div>
+            ) : (
+              users.map((user, index) => (
+                <motion.div
+                  key={user.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {user.firstName && user.lastName 
+                          ? `${user.firstName[0]}${user.lastName[0]}` 
+                          : user.username[0]?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {user.firstName && user.lastName 
+                          ? `${user.firstName} ${user.lastName}` 
+                          : user.username}
+                      </p>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                      <div className="flex items-center space-x-4 text-xs text-gray-400 mt-1">
+                        <span>Reg IP: {user.registrationIp || 'N/A'}</span>
+                        <span>Last IP: {user.lastLoginIp || 'N/A'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{user.name}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                  <div className="text-right flex items-center space-x-3">
+                    <div>
+                      <p className="text-sm text-gray-900">
+                        Joined {new Date(user.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {user.lastLoginAt 
+                          ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}` 
+                          : 'Never logged in'}
+                      </p>
+                    </div>
+                    <div className={`w-3 h-3 rounded-full ${user.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
                   </div>
-                </div>
-                <div className="text-right flex items-center space-x-3">
-                  <div>
-                    <p className="text-sm text-gray-900">{user.action}</p>
-                    <p className="text-xs text-gray-500">{user.time}</p>
-                  </div>
-                  <div className={`w-3 h-3 rounded-full ${user.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

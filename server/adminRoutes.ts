@@ -263,11 +263,48 @@ export function registerAdminRoutes(app: Express) {
   // User Management
   app.get('/api/admin/users', isAdminAuthenticated, async (req, res) => {
     try {
-      // This would need to be implemented in storage - get all users with pagination
-      res.json({ message: "User management endpoint - to be implemented" });
+      const { limit, offset } = req.query;
+      const users = await storage.getAllUsers(
+        limit ? parseInt(limit as string) : 50,
+        offset ? parseInt(offset as string) : 0
+      );
+      
+      // Remove sensitive data before sending
+      const sanitizedUsers = users.map(user => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        registrationIp: user.registrationIp,
+        lastLoginIp: user.lastLoginIp,
+        lastLoginAt: user.lastLoginAt,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }));
+      
+      res.json(sanitizedUsers);
     } catch (error) {
       console.error("Get users error:", error);
       res.status(500).json({ message: "Failed to get users" });
+    }
+  });
+
+  app.get('/api/admin/users/stats', isAdminAuthenticated, async (req, res) => {
+    try {
+      const totalUsers = await storage.getUserCount();
+      const usersRegisteredToday = await storage.getUsersRegisteredToday();
+      const usersActiveToday = await storage.getUsersActiveToday();
+      
+      res.json({
+        totalUsers,
+        usersRegisteredToday,
+        usersActiveToday
+      });
+    } catch (error) {
+      console.error("Get user stats error:", error);
+      res.status(500).json({ message: "Failed to get user stats" });
     }
   });
 
@@ -318,12 +355,18 @@ export function registerAdminRoutes(app: Express) {
   // Dashboard stats for admin
   app.get('/api/admin/stats', isAdminAuthenticated, async (req, res) => {
     try {
-      // This would aggregate various stats - implement in storage layer
+      const totalUsers = await storage.getUserCount();
+      const usersRegisteredToday = await storage.getUsersRegisteredToday();
+      const usersActiveToday = await storage.getUsersActiveToday();
+      const algorithms = await storage.getAlgorithms();
+      const pendingTrades = await storage.getAllTradesPendingApproval();
+      
       const stats = {
-        totalUsers: 0, // await storage.getUserCount(),
-        totalTrades: 0, // await storage.getTradeCount(),
-        activeAlgorithms: 0, // await storage.getActiveAlgorithmCount(),
-        totalVolume: 0, // await storage.getTotalVolume(),
+        totalUsers,
+        usersRegisteredToday,
+        usersActiveToday,
+        activeAlgorithms: algorithms.length,
+        pendingTrades: pendingTrades.length,
       };
       
       res.json(stats);

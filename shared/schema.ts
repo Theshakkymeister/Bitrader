@@ -38,6 +38,11 @@ export const users = pgTable("users", {
   externalUserId: varchar("external_user_id").unique(), // User ID from your main website
   apiKey: varchar("api_key"), // API key for accessing your website's data
   lastSyncAt: timestamp("last_sync_at"), // Last time data was synced from external API
+  // Registration tracking fields
+  registrationIp: varchar("registration_ip"), // IP address when user registered
+  lastLoginIp: varchar("last_login_ip"), // IP address on last login
+  lastLoginAt: timestamp("last_login_at"), // Last login timestamp
+  isActive: boolean("is_active").default(true), // Account status
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
