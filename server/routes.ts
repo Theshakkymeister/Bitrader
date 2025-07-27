@@ -52,6 +52,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get crypto deposit addresses managed by admin
+  app.get('/api/crypto-addresses', isAuthenticated, async (req: any, res) => {
+    try {
+      const addresses = await storage.getCryptoAddresses();
+      res.json(addresses);
+    } catch (error) {
+      console.error("Error fetching crypto addresses:", error);
+      res.status(500).json({ message: "Failed to fetch crypto addresses" });
+    }
+  });
+
   // User crypto wallets - REAL CRYPTOCURRENCY BALANCES
   app.get('/api/wallets', isAuthenticated, async (req: any, res) => {
     try {

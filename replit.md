@@ -14,6 +14,9 @@ This is a full-stack AI-powered trading platform built with modern web technolog
 - **NEW: Live Trading System**: Implemented Robinhood-style trading interface with admin approval workflow
 - Users start with $0 balances - deposits via wallets require admin approval before trading
 - All trade orders (stocks, crypto, ETFs, options) require admin approval before execution
+- **LATEST: Enhanced Order History**: Redesigned with detailed professional layout, smart decimal formatting
+- **LATEST: Admin-Managed Crypto Addresses**: Wallet modals now properly handle admin-controlled deposit addresses
+- Fixed text visibility issues in all wallet modals (Send, Receive, QR Code)
 - System fully tested and ready for deployment
 
 ## User Preferences

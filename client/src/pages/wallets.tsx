@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,10 +29,18 @@ interface WalletData {
   name: string;
   balance: number;
   usdValue: number;
-  address: string;
+  address?: string;
   icon: React.ComponentType<any>;
   color: string;
   change24h: number;
+}
+
+interface CryptoAddress {
+  id: string;
+  symbol: string;
+  address: string;
+  qrCode?: string;
+  isActive: boolean;
 }
 
 export default function Wallets() {
@@ -48,6 +57,11 @@ export default function Wallets() {
   const [recipientAddress, setRecipientAddress] = useState("");
   const { toast } = useToast();
 
+  // Fetch admin-managed crypto addresses
+  const { data: cryptoAddresses = [] } = useQuery<CryptoAddress[]>({
+    queryKey: ['/api/crypto-addresses'],
+  });
+
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
     const asset = allAssets.find(a => a.symbol === symbol);
@@ -61,7 +75,7 @@ export default function Wallets() {
       name: "Bitcoin",
       balance: 0.00,
       usdValue: 0.00,
-      address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+      address: cryptoAddresses.find(addr => addr.symbol === 'BTC')?.address,
       icon: SiBitcoin,
       color: "text-orange-500",
       change24h: 0.00
@@ -71,7 +85,7 @@ export default function Wallets() {
       name: "Ethereum",
       balance: 0.00,
       usdValue: 0.00,
-      address: "0x742d35Cc6C4C8532DC6efB5b9e3B4a8b5d73f123",
+      address: cryptoAddresses.find(addr => addr.symbol === 'ETH')?.address,
       icon: SiEthereum,
       color: "text-blue-500",
       change24h: 0.00
@@ -81,7 +95,7 @@ export default function Wallets() {
       name: "Tether USD",
       balance: 0.00,
       usdValue: 0.00,
-      address: "0x742d35Cc6C4C8532DC6efB5b9e3B4a8b5d73f456",
+      address: cryptoAddresses.find(addr => addr.symbol === 'USDT')?.address,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-green-500 rounded-full flex items-center justify-center text-white font-bold`}>
           T
@@ -95,7 +109,7 @@ export default function Wallets() {
       name: "Solana",
       balance: 0.00,
       usdValue: 0.00,
-      address: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      address: cryptoAddresses.find(addr => addr.symbol === 'SOL')?.address,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-purple-500 rounded-full flex items-center justify-center text-white font-bold`}>
           S
@@ -109,7 +123,7 @@ export default function Wallets() {
       name: "USD Coin",
       balance: 0.00,
       usdValue: 0.00,
-      address: "0x742d35Cc6C4C8532DC6efB5b9e3B4a8b5d73f789",
+      address: cryptoAddresses.find(addr => addr.symbol === 'USDC')?.address,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-blue-600 rounded-full flex items-center justify-center text-white font-bold`}>
           C
@@ -694,41 +708,59 @@ export default function Wallets() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Your {selectedWallet?.symbol} Address</Label>
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <code className="text-sm font-mono break-all text-gray-900">
-                  {selectedWallet?.address}
-                </code>
+            {selectedWallet?.address ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-gray-700 font-medium">Your {selectedWallet?.symbol} Address</Label>
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <code className="text-sm font-mono break-all text-gray-900">
+                      {selectedWallet?.address}
+                    </code>
+                  </div>
+                </div>
+                <div className="flex space-x-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => copyAddress(selectedWallet?.address || "")}
+                    className="flex-1 text-gray-700 border-gray-300"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    <span className="text-gray-700">Copy Address</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setReceiveModalOpen(false);
+                      handleQrCode(selectedWallet!);
+                    }}
+                    className="flex-1 text-gray-700 border-gray-300"
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    <span className="text-gray-700">Show QR Code</span>
+                  </Button>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                    Only send {selectedWallet?.symbol} to this address. Sending other currencies may result in permanent loss.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Address Not Available</h3>
+                <p className="text-gray-600 mb-4">
+                  The deposit address for {selectedWallet?.symbol} hasn't been set up yet by the administrator.
+                </p>
+                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-yellow-800">
+                    <AlertCircle className="h-4 w-4 inline mr-1" />
+                    Please contact support or check back later when the deposit address is available.
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex space-x-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => copyAddress(selectedWallet?.address || "")}
-                className="flex-1 text-gray-700 border-gray-300"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                <span className="text-gray-700">Copy Address</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setReceiveModalOpen(false);
-                  handleQrCode(selectedWallet!);
-                }}
-                className="flex-1 text-gray-700 border-gray-300"
-              >
-                <QrCode className="h-4 w-4 mr-2" />
-                <span className="text-gray-700">Show QR Code</span>
-              </Button>
-            </div>
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800">
-                <CheckCircle className="h-4 w-4 inline mr-1" />
-                Only send {selectedWallet?.symbol} to this address. Sending other currencies may result in permanent loss.
-              </p>
-            </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -746,40 +778,66 @@ export default function Wallets() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex justify-center">
-              <div className="p-4 bg-white border-2 border-gray-300 rounded-lg shadow-sm">
-                <div className="text-center space-y-1">
-                  <div className="text-xs text-gray-500 mb-2">QR Code</div>
-                  <div className="text-black leading-none">
-                    {generateQRCode(selectedWallet?.address || "")}
+            {selectedWallet?.address ? (
+              <>
+                <div className="flex justify-center">
+                  <div className="p-4 bg-white border-2 border-gray-300 rounded-lg shadow-sm">
+                    <div className="text-center space-y-1">
+                      <div className="text-xs text-gray-500 mb-2">QR Code</div>
+                      <div className="text-black leading-none">
+                        {generateQRCode(selectedWallet?.address || "")}
+                      </div>
+                    </div>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label className="text-gray-700 font-medium">Wallet Address</Label>
+                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <code className="text-xs font-mono break-all text-gray-900">
+                      {selectedWallet?.address}
+                    </code>
+                  </div>
+                </div>
+                <div className="flex space-x-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => copyAddress(selectedWallet?.address || "")}
+                    className="flex-1 text-gray-700 border-gray-300"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    <span className="text-gray-700">Copy Address</span>
+                  </Button>
+                  <Button
+                    onClick={() => setQrModalOpen(false)}
+                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                  >
+                    <span className="text-white">Close</span>
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">QR Code Not Available</h3>
+                <p className="text-gray-600 mb-4">
+                  Cannot generate QR code because the deposit address for {selectedWallet?.symbol} hasn't been configured by the administrator.
+                </p>
+                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-yellow-800">
+                    <AlertCircle className="h-4 w-4 inline mr-1" />
+                    Please contact support to set up the deposit address for this cryptocurrency.
+                  </p>
+                </div>
+                <div className="pt-4">
+                  <Button
+                    onClick={() => setQrModalOpen(false)}
+                    className="w-full bg-gray-600 hover:bg-gray-700 text-white"
+                  >
+                    <span className="text-white">Close</span>
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Wallet Address</Label>
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <code className="text-xs font-mono break-all text-gray-900">
-                  {selectedWallet?.address}
-                </code>
-              </div>
-            </div>
-            <div className="flex space-x-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => copyAddress(selectedWallet?.address || "")}
-                className="flex-1 text-gray-700 border-gray-300"
-              >
-                <Copy className="h-4 w-4 mr-2" />
-                <span className="text-gray-700">Copy Address</span>
-              </Button>
-              <Button
-                onClick={() => setQrModalOpen(false)}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
-              >
-                <span className="text-white">Close</span>
-              </Button>
-            </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
