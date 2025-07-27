@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -24,7 +26,16 @@ import {
   Zap,
   DollarSign,
   Clock,
-  Activity
+  Activity,
+  MoreVertical,
+  X,
+  Plus,
+  Minus,
+  Info,
+  ExternalLink,
+  Calendar,
+  TrendingDown as TrendingDownIcon,
+  TrendingUp as TrendingUpIcon
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -52,6 +63,8 @@ export default function Portfolio() {
   const [timeframe, setTimeframe] = useState("1d");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedHoldings, setExpandedHoldings] = useState<Set<string>>(new Set());
+  const [selectedHolding, setSelectedHolding] = useState<any>(null);
+  const [showHoldingDetails, setShowHoldingDetails] = useState(false);
   const { user } = useAuth();
 
   // Get real-time portfolio data
@@ -453,29 +466,168 @@ export default function Portfolio() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredHoldings.length > 0 ? filteredHoldings.map((holding) => (
-                  <div key={holding.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
-                    <div className="flex items-center space-x-4">
-                      <holding.icon className={`h-10 w-10 ${holding.color}`} />
-                      <div>
-                        <div className="font-medium">{holding.symbol}</div>
-                        <div className="text-sm text-gray-500">{holding.name}</div>
-                        <div className="text-xs text-gray-400">
-                          {formatShares(holding.shares, holding.symbol)} {holding.type === 'stock' ? 'shares' : 'coins'}
+                  <motion.div 
+                    key={holding.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="border rounded-xl bg-white hover:bg-gray-50 transition-all duration-300 overflow-hidden"
+                  >
+                    {/* Main holding row - clickable */}
+                    <div 
+                      className="flex items-center justify-between p-4 cursor-pointer"
+                      onClick={() => {
+                        setSelectedHolding(holding);
+                        setShowHoldingDetails(true);
+                      }}
+                    >
+                      <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                        <div className="flex-shrink-0">
+                          <holding.icon className={`h-8 w-8 sm:h-10 sm:w-10 ${holding.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <div className="font-semibold text-gray-900 text-sm sm:text-base">{holding.symbol}</div>
+                            <Badge variant={holding.type === 'crypto' ? 'default' : 'secondary'} className="text-xs">
+                              {holding.type === 'crypto' ? 'Crypto' : 'Stock'}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-600 truncate">{holding.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {formatShares(holding.shares, holding.symbol)} {holding.type === 'stock' ? 'shares' : 'coins'}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">{formatCurrency(holding.value)}</div>
-                      <div className={`text-sm ${holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {showValues ? `${holding.changePercent >= 0 ? '+' : ''}${holding.changePercent.toFixed(2)}%` : "••••••••"}
+                      
+                      <div className="text-right flex-shrink-0">
+                        <div className="font-semibold text-gray-900 text-sm sm:text-base">
+                          {showValues ? formatCurrency(holding.value) : "••••••••"}
+                        </div>
+                        <div className={`text-sm flex items-center justify-end space-x-1 ${
+                          holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {holding.changePercent >= 0 ? (
+                            <TrendingUpIcon className="h-3 w-3" />
+                          ) : (
+                            <TrendingDownIcon className="h-3 w-3" />
+                          )}
+                          <span>
+                            {showValues ? `${holding.changePercent >= 0 ? '+' : ''}${holding.changePercent.toFixed(2)}%` : "••••••••"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Avg: {showValues ? formatCurrency(holding.avgPrice) : "••••••••"}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        Avg: {formatCurrency(holding.avgPrice)}
+                      
+                      <div className="ml-2 flex-shrink-0">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedHolding(holding);
+                              setShowHoldingDetails(true);
+                            }}>
+                              <Info className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setLocation('/trading');
+                            }}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Buy More
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setLocation('/trading');
+                            }}>
+                              <Minus className="h-4 w-4 mr-2" />
+                              Sell Position
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`https://finance.yahoo.com/quote/${holding.symbol}`, '_blank');
+                            }}>
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              View Chart
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
-                  </div>
+                    
+                    {/* Expandable details section */}
+                    {expandedHoldings.has(holding.symbol) && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="border-t bg-gray-50 px-4 py-3"
+                      >
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                          <div>
+                            <div className="text-gray-500 font-medium">Current Price</div>
+                            <div className="font-semibold">{formatCurrency(holding.currentPrice)}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500 font-medium">Day Change</div>
+                            <div className={`font-semibold ${holding.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {showValues ? formatCurrency(Math.abs(holding.change)) : "••••••••"}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500 font-medium">Total Return</div>
+                            <div className={`font-semibold ${holding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {showValues ? formatCurrency(Math.abs(holding.change * holding.shares)) : "••••••••"}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500 font-medium">Entry Date</div>
+                            <div className="font-semibold">
+                              {new Date(holding.entryDate || Date.now()).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-xs"
+                            onClick={() => setLocation('/trading')}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Buy More
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-xs"
+                            onClick={() => setLocation('/trading')}
+                          >
+                            <Minus className="h-3 w-3 mr-1" />
+                            Sell
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-xs"
+                            onClick={() => window.open(`https://finance.yahoo.com/quote/${holding.symbol}`, '_blank')}
+                          >
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Chart
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.div>
                 )) : (
                   <div className="text-center py-8 text-gray-500">
                     <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -508,11 +660,22 @@ export default function Portfolio() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredStockHoldings.length > 0 ? filteredStockHoldings.map((holding) => (
-                  <div key={holding.id} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
-                    {/* Main holding info */}
-                    <div className="flex items-center justify-between p-4">
+                  <motion.div 
+                    key={holding.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="border rounded-xl bg-white hover:bg-gray-50 transition-all duration-300 overflow-hidden"
+                  >
+                    {/* Main holding info - clickable */}
+                    <div 
+                      className="flex items-center justify-between p-4 cursor-pointer"
+                      onClick={() => {
+                        setSelectedHolding(holding);
+                        setShowHoldingDetails(true);
+                      }}
+                    >
                       <div className="flex items-center space-x-4">
                         <holding.icon className={`h-12 w-12 ${holding.color}`} />
                         <div>
@@ -611,7 +774,7 @@ export default function Portfolio() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )) : (
                   <div className="text-center py-8 text-gray-500">
                     <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -818,6 +981,222 @@ export default function Portfolio() {
           </Card>
         </motion.div>
       )}
+
+      {/* Detailed Holdings Modal */}
+      <Dialog open={showHoldingDetails} onOpenChange={setShowHoldingDetails}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedHolding && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center space-x-3">
+                  <selectedHolding.icon className={`h-10 w-10 ${selectedHolding.color}`} />
+                  <div>
+                    <DialogTitle className="text-xl">{selectedHolding.symbol} Details</DialogTitle>
+                    <DialogDescription>{selectedHolding.name}</DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <div className="text-xs text-gray-500 font-medium">Current Price</div>
+                    <div className="text-lg font-bold">{formatCurrency(selectedHolding.currentPrice)}</div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <div className="text-xs text-gray-500 font-medium">Holdings</div>
+                    <div className="text-lg font-bold">
+                      {formatShares(selectedHolding.shares, selectedHolding.symbol)}
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <div className="text-xs text-gray-500 font-medium">Total Value</div>
+                    <div className="text-lg font-bold">{showValues ? formatCurrency(selectedHolding.value) : "••••••••"}</div>
+                  </div>
+                  <div className={`text-center p-3 rounded-lg ${
+                    selectedHolding.changePercent >= 0 ? 'bg-green-50' : 'bg-red-50'
+                  }`}>
+                    <div className="text-xs text-gray-500 font-medium">Today's Change</div>
+                    <div className={`text-lg font-bold ${
+                      selectedHolding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {showValues ? `${selectedHolding.changePercent >= 0 ? '+' : ''}${selectedHolding.changePercent.toFixed(2)}%` : "••••••••"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Performance Metrics */}
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Performance Metrics
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-500">Average Cost</div>
+                      <div className="font-semibold">{showValues ? formatCurrency(selectedHolding.avgPrice) : "••••••••"}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Total Return</div>
+                      <div className={`font-semibold ${selectedHolding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {showValues ? formatCurrency(Math.abs(selectedHolding.change * selectedHolding.shares)) : "••••••••"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Entry Date</div>
+                      <div className="font-semibold">
+                        {new Date(selectedHolding.entryDate || Date.now()).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Position Type</div>
+                      <div className="font-semibold capitalize">{selectedHolding.tradeType || 'Long'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Info for Stocks */}
+                {selectedHolding.type === 'stock' && (
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <Info className="h-4 w-4 mr-2" />
+                      Stock Information
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-500">Market Cap</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'AAPL' && '$3.5T'}
+                          {selectedHolding.symbol === 'TSLA' && '$800.2B'}
+                          {selectedHolding.symbol === 'GOOGL' && '$2.1T'}
+                          {selectedHolding.symbol === 'MSFT' && '$3.1T'}
+                          {!['AAPL', 'TSLA', 'GOOGL', 'MSFT'].includes(selectedHolding.symbol) && 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">P/E Ratio</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'AAPL' && '29.85'}
+                          {selectedHolding.symbol === 'TSLA' && '65.12'}
+                          {selectedHolding.symbol === 'GOOGL' && '23.47'}
+                          {selectedHolding.symbol === 'MSFT' && '35.29'}
+                          {!['AAPL', 'TSLA', 'GOOGL', 'MSFT'].includes(selectedHolding.symbol) && 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">52W High</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'AAPL' && '$237.23'}
+                          {selectedHolding.symbol === 'TSLA' && '$278.98'}
+                          {selectedHolding.symbol === 'GOOGL' && '$191.75'}
+                          {selectedHolding.symbol === 'MSFT' && '$468.35'}
+                          {!['AAPL', 'TSLA', 'GOOGL', 'MSFT'].includes(selectedHolding.symbol) && 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">52W Low</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'AAPL' && '$164.08'}
+                          {selectedHolding.symbol === 'TSLA' && '$138.80'}
+                          {selectedHolding.symbol === 'GOOGL' && '$129.40'}
+                          {selectedHolding.symbol === 'MSFT' && '$309.45'}
+                          {!['AAPL', 'TSLA', 'GOOGL', 'MSFT'].includes(selectedHolding.symbol) && 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Info for Crypto */}
+                {selectedHolding.type === 'crypto' && (
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <Info className="h-4 w-4 mr-2" />
+                      Cryptocurrency Information
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-500">Market Cap</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'BTC' && '$1.97T'}
+                          {selectedHolding.symbol === 'ETH' && '$415.2B'}
+                          {selectedHolding.symbol === 'SOL' && '$114.8B'}
+                          {selectedHolding.symbol === 'USDT' && '$137.4B'}
+                          {selectedHolding.symbol === 'USDC' && '$37.2B'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">24h Volume</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'BTC' && '$28.4B'}
+                          {selectedHolding.symbol === 'ETH' && '$18.7B'}
+                          {selectedHolding.symbol === 'SOL' && '$4.2B'}
+                          {selectedHolding.symbol === 'USDT' && '$56.8B'}
+                          {selectedHolding.symbol === 'USDC' && '$12.1B'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">All-Time High</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'BTC' && '$69,045'}
+                          {selectedHolding.symbol === 'ETH' && '$4,891'}
+                          {selectedHolding.symbol === 'SOL' && '$260'}
+                          {selectedHolding.symbol === 'USDT' && '$1.32'}
+                          {selectedHolding.symbol === 'USDC' && '$1.17'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-500">Technology</div>
+                        <div className="font-semibold">
+                          {selectedHolding.symbol === 'BTC' && 'Proof of Work'}
+                          {selectedHolding.symbol === 'ETH' && 'Proof of Stake'}
+                          {selectedHolding.symbol === 'SOL' && 'Proof of History'}
+                          {selectedHolding.symbol === 'USDT' && 'Stablecoin'}
+                          {selectedHolding.symbol === 'USDC' && 'Stablecoin'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button 
+                    className="flex-1"
+                    onClick={() => {
+                      setShowHoldingDetails(false);
+                      setLocation('/trading');
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Buy More
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => {
+                      setShowHoldingDetails(false);
+                      setLocation('/trading');
+                    }}
+                  >
+                    <Minus className="h-4 w-4 mr-2" />
+                    Sell Position
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="flex-1"
+                    onClick={() => window.open(`https://finance.yahoo.com/quote/${selectedHolding.symbol}`, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Chart
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
