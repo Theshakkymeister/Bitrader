@@ -220,7 +220,14 @@ export default function Dashboard() {
     ...stockPositions.map(position => getHolding(position.symbol, position)),
     // Add crypto wallets with balances > 0
     ...cryptoSymbols.map(symbol => getHolding(symbol)).filter(h => h !== null)
-  ].filter(h => h !== null && h.value > 0); // Only show holdings with actual value
+  ].filter(h => h !== null && h.value > 0)
+   .reduce((unique: any[], holding: any) => {
+     // Remove duplicates by symbol
+     if (!unique.find(h => h.symbol === holding.symbol)) {
+       unique.push(holding);
+     }
+     return unique;
+   }, []); // Only show holdings with actual value and no duplicates
 
   const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
@@ -443,8 +450,8 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="space-y-3">
-            {holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol || '')).map((holding) => (
-              <div key={holding.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            {holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol || '')).map((holding, index) => (
+              <div key={`${holding.symbol}-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div className="flex items-center space-x-3">
                   {holding.symbol === 'AAPL' && <SiApple className="h-8 w-8 text-gray-700" />}
                   {holding.symbol === 'TSLA' && <SiTesla className="h-8 w-8 text-red-500" />}
@@ -465,6 +472,17 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+          
+          {/* Add Position Button */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <Button 
+              onClick={() => setLocation('/trading')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Position</span>
+            </Button>
           </div>
         </div>
       </div>
