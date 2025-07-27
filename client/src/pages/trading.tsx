@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,32 @@ export default function TradingPage() {
   const [entryPrice, setEntryPrice] = useState("");
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
+
+  // Pre-fill form from URL parameters (portfolio integration)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSymbol = urlParams.get('symbol');
+    const urlType = urlParams.get('type') as 'buy' | 'sell';
+    const urlAssetType = urlParams.get('assetType') as 'stock' | 'crypto';
+    const urlQuantity = urlParams.get('quantity');
+    
+    if (urlSymbol) {
+      setSymbol(urlSymbol);
+      toast({
+        title: "Trade Form Pre-filled",
+        description: `Ready to ${urlType || 'trade'} ${urlSymbol}`,
+        variant: "default"
+      });
+    }
+    if (urlType) setTradeType(urlType);
+    if (urlAssetType) setAssetType(urlAssetType);
+    if (urlQuantity) setQuantity(urlQuantity);
+    
+    // Clear URL parameters after pre-filling
+    if (urlSymbol || urlType || urlAssetType || urlQuantity) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [toast]);
 
   // Get user wallets data for buying power calculation
   const { data: wallets = [] } = useQuery({

@@ -120,7 +120,7 @@ export default function Portfolio() {
   };
 
   // Convert trades to holdings format for display
-  const activePositions = trades
+  const activePositions = (trades as any[])
     .filter((trade: any) => trade.adminApproval === 'approved' && trade.isOpen)
     .map((trade: any) => ({
       id: trade.id,
@@ -140,14 +140,14 @@ export default function Portfolio() {
       color: getAssetColor(trade.symbol)
     }));
 
-  const portfolioValue = portfolio?.totalBalance ? parseFloat(portfolio.totalBalance) : 0;
-  const totalUnrealizedPL = activePositions.reduce((sum, pos) => sum + pos.change, 0);
+  const portfolioValue = (portfolio as any)?.totalBalance ? parseFloat((portfolio as any).totalBalance) : 0;
+  const totalUnrealizedPL = activePositions.reduce((sum: number, pos: any) => sum + pos.change, 0);
   
   // Check if user has any actual holdings
   const hasHoldings = activePositions.length > 0;
 
-  const stockPositions = activePositions.filter(p => p.type === 'stock');
-  const cryptoPositions = activePositions.filter(p => p.type === 'crypto');
+  const stockPositions = activePositions.filter((p: any) => p.type === 'stock');
+  const cryptoPositions = activePositions.filter((p: any) => p.type === 'crypto');
   
   // Filter positions based on search query
   const filterPositions = (positionsArray: any[]) => {
@@ -539,14 +539,18 @@ export default function Portfolio() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
-                              setLocation('/trading');
+                              // Pre-fill trading form with buy order for this holding
+                              const tradingUrl = `/trading?symbol=${holding.symbol}&type=buy&assetType=${holding.type}&name=${encodeURIComponent(holding.name)}`;
+                              setLocation(tradingUrl);
                             }}>
                               <Plus className="h-4 w-4 mr-2" />
                               Buy More
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
-                              setLocation('/trading');
+                              // Pre-fill trading form with sell order for this holding
+                              const tradingUrl = `/trading?symbol=${holding.symbol}&type=sell&assetType=${holding.type}&name=${encodeURIComponent(holding.name)}&quantity=${holding.shares}`;
+                              setLocation(tradingUrl);
                             }}>
                               <Minus className="h-4 w-4 mr-2" />
                               Sell Position
@@ -1166,7 +1170,8 @@ export default function Portfolio() {
                     className="flex-1"
                     onClick={() => {
                       setShowHoldingDetails(false);
-                      setLocation('/trading');
+                      const tradingUrl = `/trading?symbol=${selectedHolding.symbol}&type=buy&assetType=${selectedHolding.type}&name=${encodeURIComponent(selectedHolding.name)}`;
+                      setLocation(tradingUrl);
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -1177,7 +1182,8 @@ export default function Portfolio() {
                     className="flex-1"
                     onClick={() => {
                       setShowHoldingDetails(false);
-                      setLocation('/trading');
+                      const tradingUrl = `/trading?symbol=${selectedHolding.symbol}&type=sell&assetType=${selectedHolding.type}&name=${encodeURIComponent(selectedHolding.name)}&quantity=${selectedHolding.shares}`;
+                      setLocation(tradingUrl);
                     }}
                   >
                     <Minus className="h-4 w-4 mr-2" />
