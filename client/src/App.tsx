@@ -15,6 +15,8 @@ import Dashboard from "@/pages/dashboard";
 import Wallets from "@/pages/wallets";
 import Portfolio from "@/pages/portfolio";
 import TradingPage from "@/pages/trading";
+import MarketsPage from "@/pages/markets";
+import OrdersPage from "@/pages/orders";
 import SettingsPage from "@/pages/settings";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -33,9 +35,9 @@ function MobileNav() {
   ];
 
   const tradingOptions = [
-    { href: "/trading?tab=markets", label: "Markets", icon: BarChart3 },
-    { href: "/trading?tab=trade", label: "Trade", icon: TrendingUp },
-    { href: "/trading?tab=orders", label: "My Orders", icon: PieChart },
+    { href: "/markets", label: "Markets", icon: BarChart3 },
+    { href: "/trading", label: "Trade", icon: TrendingUp },
+    { href: "/orders", label: "My Orders", icon: PieChart },
   ];
 
   const handleNavClick = () => {
@@ -71,7 +73,7 @@ function MobileNav() {
               <button
                 onClick={() => setShowTradeOptions(!showTradeOptions)}
                 className={`w-full flex items-center justify-between space-x-3 p-3 rounded-lg transition-all duration-200 ease-in-out ${
-                  location === "/trading" ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+                  ['/trading', '/markets', '/orders'].includes(location) ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
                 } hover:scale-105`}
               >
                 <div className="flex items-center space-x-3">
@@ -125,9 +127,9 @@ function DesktopNav() {
   ];
 
   const tradingOptions = [
-    { href: "/trading", label: "Markets" },
+    { href: "/markets", label: "Markets" },
     { href: "/trading", label: "Trade" },
-    { href: "/trading", label: "My Orders" },
+    { href: "/orders", label: "My Orders" },
   ];
 
   return (
@@ -147,7 +149,7 @@ function DesktopNav() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out ${
-            location === "/trading" ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+            ['/trading', '/markets', '/orders'].includes(location) ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
           } hover:scale-105`}>
             <PieChart className="h-4 w-4" />
             <span className="font-medium text-sm">Live Trade</span>
@@ -159,7 +161,7 @@ function DesktopNav() {
           className="w-40 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"
         >
           <DropdownMenuItem asChild className="cursor-pointer hover:bg-green-50 transition-colors">
-            <Link href="/trading?tab=markets">
+            <Link href="/markets">
               <span className="flex items-center space-x-2">
                 <BarChart3 className="h-4 w-4" />
                 <span>Markets</span>
@@ -167,7 +169,7 @@ function DesktopNav() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer hover:bg-green-50 transition-colors">
-            <Link href="/trading?tab=trade">
+            <Link href="/trading">
               <span className="flex items-center space-x-2">
                 <TrendingUp className="h-4 w-4" />
                 <span>Trade</span>
@@ -175,7 +177,7 @@ function DesktopNav() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer hover:bg-green-50 transition-colors">
-            <Link href="/trading?tab=orders">
+            <Link href="/orders">
               <span className="flex items-center space-x-2">
                 <PieChart className="h-4 w-4" />
                 <span>My Orders</span>
@@ -278,6 +280,8 @@ function Router() {
               <Route path="/" component={Dashboard} />
               <Route path="/wallets" component={Wallets} />
               <Route path="/trading" component={TradingPage} />
+              <Route path="/markets" component={MarketsPage} />
+              <Route path="/orders" component={OrdersPage} />
               <Route path="/portfolio" component={Portfolio} />
               <Route path="/settings" component={SettingsPage} />
             </main>
