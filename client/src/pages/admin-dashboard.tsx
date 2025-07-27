@@ -43,7 +43,8 @@ import {
   UserCheck,
   X,
   Check,
-  Loader2
+  Loader2,
+  Clock
 } from "lucide-react";
 
 interface AdminUser {
@@ -439,23 +440,34 @@ export default function AdminDashboard() {
 
   const handleViewHistory = async (userId: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/history`);
-      if (!response.ok) throw new Error("Failed to fetch user history");
+      // Use the existing userDetails data instead of making a separate API call
+      if (!userDetails) {
+        toast({ 
+          title: "History Unavailable", 
+          description: "User details are not loaded yet.",
+          variant: "destructive"
+        });
+        return;
+      }
       
-      const history = await response.json();
+      // Create a detailed history summary from userDetails
+      const tradeCount = userDetails.trades?.length || 0;
+      const depositCount = userDetails.depositRequests?.length || 0;
+      const accountAge = Math.floor((Date.now() - new Date(userDetails.user?.createdAt || '').getTime()) / (1000 * 60 * 60 * 24));
+      const lastActivity = userDetails.user?.lastLoginAt ? new Date(userDetails.user.lastLoginAt).toLocaleString() : 'N/A';
       
-      // Create a detailed history modal content
       const historyContent = `
-User Activity History:
-- Login History: ${history.loginCount || 0} total logins
-- Trade History: ${history.tradeCount || 0} total trades  
-- Deposit History: ${history.depositCount || 0} total deposits
-- Last Activity: ${history.lastActivity || 'N/A'}
-- Account Age: ${Math.floor((Date.now() - new Date(selectedUser?.createdAt || '').getTime()) / (1000 * 60 * 60 * 24))} days
+User Activity Summary:
+- Trade History: ${tradeCount} total trades
+- Deposit History: ${depositCount} total deposit requests  
+- Last Login: ${lastActivity}
+- Account Age: ${accountAge} days
+- Portfolio Value: $${userDetails.portfolio?.totalValue?.toFixed(2) || '0.00'}
+- Win Rate: ${userDetails.analytics?.winRate || '0.00'}%
       `;
       
       toast({ 
-        title: "User History", 
+        title: "User History Overview", 
         description: historyContent,
         variant: "default"
       });
@@ -1134,10 +1146,92 @@ User Activity History:
                   <CardTitle className="flex items-center space-x-2">
                     <DollarSign className="h-4 w-4" />
                     <span>Deposit History</span>
+                    <Badge variant="outline">
+                      {userDetails?.depositRequests?.length || 0} Total
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-500">Deposit history will be displayed here when available</p>
+                  {userDetailsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      <span className="ml-2 text-gray-600">Loading deposit history...</span>
+                    </div>
+                  ) : !userDetails?.depositRequests?.length ? (
+                    <div className="text-center py-8">
+                      <DollarSign className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm">No deposit requests found</p>
+                      <p className="text-gray-400 text-xs mt-1">User hasn't made any deposit requests yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {userDetails.depositRequests.map((deposit: any, index: number) => (
+                        <motion.div
+                          key={deposit.id || index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="font-semibold text-gray-900">
+                                {deposit.amount} {deposit.cryptoSymbol}
+                              </span>
+                              <Badge 
+                                variant={
+                                  deposit.status === 'approved' ? 'default' : 
+                                  deposit.status === 'pending' ? 'secondary' : 'destructive'
+                                }
+                              >
+                                {deposit.status}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div className="flex items-center space-x-4">
+                                <span>USD Value: ${deposit.usdValue || '0.00'}</span>
+                                <span>Network: {deposit.network || 'N/A'}</span>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Requested: {new Date(deposit.createdAt).toLocaleString()}
+                                {deposit.approvedAt && (
+                                  <span className="ml-4">
+                                    Processed: {new Date(deposit.approvedAt).toLocaleString()}
+                                  </span>
+                                )}
+                              </div>
+                              {deposit.transactionHash && (
+                                <div className="text-xs text-gray-500">
+                                  Tx Hash: {deposit.transactionHash.slice(0, 16)}...
+                                </div>
+                              )}
+                              {deposit.rejectionReason && (
+                                <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                                  Rejection Reason: {deposit.rejectionReason}
+                                </div>
+                              )}
+                              {deposit.notes && (
+                                <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                                  Admin Notes: {deposit.notes}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 ml-4">
+                            {deposit.status === 'approved' && (
+                              <CheckCircle className="h-6 w-6 text-green-600" />
+                            )}
+                            {deposit.status === 'pending' && (
+                              <Clock className="h-6 w-6 text-orange-600" />
+                            )}
+                            {deposit.status === 'rejected' && (
+                              <XCircle className="h-6 w-6 text-red-600" />
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
