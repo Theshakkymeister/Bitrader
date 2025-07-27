@@ -385,6 +385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         limitPrice: req.body.limitPrice || null,
         stopPrice: req.body.stopPrice || null,
         totalAmount: req.body.totalAmount,
+        currentPrice: req.body.price, // Set current price to entry price initially
         status: req.body.status || 'pending_approval',
         adminApproval: req.body.adminApproval || 'pending',
         isOpen: true

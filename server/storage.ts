@@ -280,9 +280,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTrade(trade: InsertTrade): Promise<Trade> {
-    // Remove current_price field if it exists to avoid schema errors
-    const { ...tradeData } = trade;
-    const [newTrade] = await db.insert(trades).values(tradeData).returning();
+    console.log("STORAGE: Creating trade with data:", trade);
+    const [newTrade] = await db.insert(trades).values(trade).returning();
+    console.log("STORAGE: Trade created successfully:", newTrade);
     return newTrade;
   }
 
