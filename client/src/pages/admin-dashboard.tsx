@@ -43,12 +43,12 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [balanceAction, setBalanceAction] = useState({ type: 'add', amount: '' });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const handleSectionChange = (sectionId) => {
+  const handleSectionChange = (sectionId: string) => {
     if (sectionId === activeSection) return;
     setIsTransitioning(true);
     setTimeout(() => {
@@ -84,34 +84,34 @@ export default function AdminDashboard() {
     }
   };
 
-  const { data: stats, refetch: statsRefetch } = useQuery({
+  const { data: stats = {}, refetch: statsRefetch } = useQuery({
     queryKey: ["/api/admin/stats"],
     enabled: isAuthenticated,
   });
 
-  const { data: users, refetch: usersRefetch } = useQuery({
+  const { data: users = [], refetch: usersRefetch } = useQuery({
     queryKey: ["/api/admin/users"],
     enabled: isAuthenticated,
   });
 
-  const { data: trades, refetch: tradesRefetch } = useQuery({
+  const { data: trades = [], refetch: tradesRefetch } = useQuery({
     queryKey: ["/api/admin/trades"],
     enabled: isAuthenticated,
   });
 
-  const { data: userDetails } = useQuery({
+  const { data: userDetails = {} } = useQuery({
     queryKey: ["/api/admin/user", selectedUser?.id],
     enabled: !!selectedUser?.id && isAuthenticated,
   });
 
-  const { data: depositRequests } = useQuery({
+  const { data: depositRequests = [] } = useQuery({
     queryKey: ["/api/admin/deposit-requests"],
     enabled: isAuthenticated,
   });
 
   // Balance adjustment mutation with profit tracking
   const adjustBalanceMutation = useMutation({
-    mutationFn: async ({ userId, amount, type }) => {
+    mutationFn: async ({ userId, amount, type }: { userId: string; amount: number; type: string }) => {
       const response = await fetch(`/api/admin/users/${userId}/balance`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
 
   // Approve trades mutation
   const approveTradesMutation = useMutation({
-    mutationFn: async ({ userId, tradeIds }) => {
+    mutationFn: async ({ userId, tradeIds }: { userId: string; tradeIds: string[] }) => {
       const response = await fetch(`/api/admin/user/${userId}/trades/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
 
   // Add more interactive mutations
   const approveSingleTradeMutation = useMutation({
-    mutationFn: async (tradeId) => {
+    mutationFn: async (tradeId: string) => {
       const response = await fetch(`/api/admin/trades/${tradeId}/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
   });
 
   const rejectTradeMutation = useMutation({
-    mutationFn: async (tradeId) => {
+    mutationFn: async (tradeId: string) => {
       const response = await fetch(`/api/admin/trades/${tradeId}/reject`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
   });
 
   const deactivateUserMutation = useMutation({
-    mutationFn: async (userId) => {
+    mutationFn: async (userId: string) => {
       const response = await fetch(`/api/admin/users/${userId}/deactivate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
 
   // Deposit approval mutations
   const approveDepositMutation = useMutation({
-    mutationFn: async ({ depositId, notes }) => {
+    mutationFn: async ({ depositId, notes }: { depositId: string; notes?: string }) => {
       const response = await fetch(`/api/admin/deposit-requests/${depositId}/approve`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
   });
 
   const rejectDepositMutation = useMutation({
-    mutationFn: async ({ depositId, rejectionReason, notes }) => {
+    mutationFn: async ({ depositId, rejectionReason, notes }: { depositId: string; rejectionReason: string; notes?: string }) => {
       const response = await fetch(`/api/admin/deposit-requests/${depositId}/reject`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -269,8 +269,8 @@ export default function AdminDashboard() {
     );
   }
 
-  const pendingTrades = Array.isArray(trades) ? trades.filter(t => t.adminApproval === 'pending') : [];
-  const approvedTrades = Array.isArray(trades) ? trades.filter(t => t.adminApproval === 'approved') : [];
+  const pendingTrades = Array.isArray(trades) ? trades.filter((t: any) => t.adminApproval === 'pending') : [];
+  const approvedTrades = Array.isArray(trades) ? trades.filter((t: any) => t.adminApproval === 'approved') : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-blue-100 text-xs sm:text-sm font-medium">Total Users</p>
-                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold">{stats?.totalUsers || 0}</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold">{(stats as any)?.totalUsers || 0}</p>
                           </div>
                           <Users className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-200" />
                         </div>
@@ -358,7 +358,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-green-100 text-xs sm:text-sm font-medium">Total Revenue</p>
-                            <p className="text-lg sm:text-xl lg:text-2xl font-bold">${stats?.totalRevenue || '0'}</p>
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold">${(stats as any)?.totalRevenue || '0'}</p>
                           </div>
                           <DollarSign className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-green-200" />
                         </div>
@@ -409,19 +409,19 @@ export default function AdminDashboard() {
                       <div className="space-y-4">
                         <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
                           <span className="text-sm font-medium text-blue-800">Total Registered Users</span>
-                          <span className="text-2xl font-bold text-blue-600">{stats?.totalUsers || '0'}</span>
+                          <span className="text-2xl font-bold text-blue-600">{(stats as any)?.totalUsers || '0'}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
                           <span className="text-sm font-medium text-green-800">New Users Today</span>
-                          <span className="text-2xl font-bold text-green-600">{stats?.usersRegisteredToday || '0'}</span>
+                          <span className="text-2xl font-bold text-green-600">{(stats as any)?.usersRegisteredToday || '0'}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
                           <span className="text-sm font-medium text-purple-800">Active Users Today</span>
-                          <span className="text-2xl font-bold text-purple-600">{stats?.usersActiveToday || '0'}</span>
+                          <span className="text-2xl font-bold text-purple-600">{(stats as any)?.usersActiveToday || '0'}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg">
                           <span className="text-sm font-medium text-teal-800">Platform Revenue</span>
-                          <span className="text-2xl font-bold text-teal-600">${stats?.totalRevenue || '0'}</span>
+                          <span className="text-2xl font-bold text-teal-600">${(stats as any)?.totalRevenue || '0'}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -451,7 +451,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
                           <span className="text-sm font-medium text-purple-800">Pending Deposits</span>
-                          <span className="text-2xl font-bold text-purple-600">{stats?.pendingDeposits || '0'}</span>
+                          <span className="text-2xl font-bold text-purple-600">{(stats as any)?.pendingDeposits || '0'}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -473,7 +473,7 @@ export default function AdminDashboard() {
                           <Users className="h-6 w-6 text-blue-600" />
                           <span className="text-sm font-medium text-blue-800">Database Users</span>
                         </div>
-                        <div className="text-3xl font-bold text-blue-600 mb-1">{stats?.totalUsers || '0'}</div>
+                        <div className="text-3xl font-bold text-blue-600 mb-1">{(stats as any)?.totalUsers || '0'}</div>
                         <div className="text-xs text-blue-500">Real registered accounts</div>
                       </div>
                       
@@ -482,7 +482,7 @@ export default function AdminDashboard() {
                           <DollarSign className="h-6 w-6 text-green-600" />
                           <span className="text-sm font-medium text-green-800">Total Revenue</span>
                         </div>
-                        <div className="text-3xl font-bold text-green-600 mb-1">${stats?.totalRevenue || '0'}</div>
+                        <div className="text-3xl font-bold text-green-600 mb-1">${(stats as any)?.totalRevenue || '0'}</div>
                         <div className="text-xs text-green-500">From user portfolios</div>
                       </div>
                       
@@ -491,7 +491,7 @@ export default function AdminDashboard() {
                           <TrendingUp className="h-6 w-6 text-purple-600" />
                           <span className="text-sm font-medium text-purple-800">Active Trades</span>
                         </div>
-                        <div className="text-3xl font-bold text-purple-600 mb-1">{stats?.activeTrades || '0'}</div>
+                        <div className="text-3xl font-bold text-purple-600 mb-1">{(stats as any)?.activeTrades || '0'}</div>
                         <div className="text-xs text-purple-500">Live database trades</div>
                       </div>
                     </div>
