@@ -15,11 +15,12 @@ const marketPrices: Record<string, MarketPrice> = {
   'GOOGL': { symbol: 'GOOGL', price: 140.50, change: 0, changePercent: 0, lastUpdate: new Date() },
   'MSFT': { symbol: 'MSFT', price: 431.25, change: 0, changePercent: 0, lastUpdate: new Date() },
   'SPY': { symbol: 'SPY', price: 485.75, change: 0, changePercent: 0, lastUpdate: new Date() },
+  'INTC': { symbol: 'INTC', price: 24.00, change: 0, changePercent: 0, lastUpdate: new Date() },
   
-  // Cryptocurrencies
-  'BTC': { symbol: 'BTC', price: 42000.00, change: 0, changePercent: 0, lastUpdate: new Date() },
-  'ETH': { symbol: 'ETH', price: 2850.00, change: 0, changePercent: 0, lastUpdate: new Date() },
-  'SOL': { symbol: 'SOL', price: 95.50, change: 0, changePercent: 0, lastUpdate: new Date() },
+  // Cryptocurrencies - realistic current prices
+  'BTC': { symbol: 'BTC', price: 98500.00, change: 0, changePercent: 0, lastUpdate: new Date() },
+  'ETH': { symbol: 'ETH', price: 3450.00, change: 0, changePercent: 0, lastUpdate: new Date() },
+  'SOL': { symbol: 'SOL', price: 245.50, change: 0, changePercent: 0, lastUpdate: new Date() },
   'USDT': { symbol: 'USDT', price: 1.00, change: 0, changePercent: 0, lastUpdate: new Date() },
   'USDC': { symbol: 'USDC', price: 1.00, change: 0, changePercent: 0, lastUpdate: new Date() },
 };
@@ -31,9 +32,10 @@ const basePrices: Record<string, number> = {
   'GOOGL': 140.50,
   'MSFT': 431.25,
   'SPY': 485.75,
-  'BTC': 42000.00,
-  'ETH': 2850.00,
-  'SOL': 95.50,
+  'INTC': 24.00,
+  'BTC': 98500.00,
+  'ETH': 3450.00,
+  'SOL': 245.50,
   'USDT': 1.00,
   'USDC': 1.00,
 };

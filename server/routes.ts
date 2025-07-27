@@ -505,7 +505,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const trades = await storage.getTrades(userId);
-      res.json(trades);
+      
+      // Enhance trades with real-time market prices
+      const tradesWithLivePrices = trades.map(trade => {
+        const currentPrice = getCurrentPrice(trade.symbol);
+        if (currentPrice && trade.quantity) {
+          const quantity = parseFloat(trade.quantity);
+          const currentValue = quantity * currentPrice.price;
+          const originalValue = parseFloat(trade.totalAmount || '0');
+          const profitLoss = currentValue - originalValue;
+          const profitLossPercentage = originalValue > 0 ? (profitLoss / originalValue) * 100 : 0;
+
+          return {
+            ...trade,
+            currentPrice: currentPrice.price.toString(),
+            currentValue: currentValue.toString(),
+            profitLoss: profitLoss.toString(),
+            profitLossPercentage: profitLossPercentage.toString()
+          };
+        }
+        return trade;
+      });
+      
+      res.json(tradesWithLivePrices);
     } catch (error) {
       console.error("Error fetching trades:", error);
       res.status(500).json({ message: "Failed to fetch trades" });
