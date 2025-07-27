@@ -626,6 +626,211 @@ export default function AdminMobile() {
               </Card>
             )}
 
+            {activeSection === 'users' && (
+              <Card className="shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-orange-50 to-yellow-50 border-b">
+                  <CardTitle className="flex items-center text-xl">
+                    <Users className="h-6 w-6 mr-3 text-orange-600" />
+                    User Management System
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {Array.isArray(users) && users.length > 0 ? (
+                      users.map((user: any) => (
+                        <motion.div
+                          key={user.id}
+                          whileHover={{ scale: 1.01 }}
+                          className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-all"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-2">
+                                <span className="font-bold text-lg text-gray-900">{user.firstName} {user.lastName}</span>
+                                <Badge variant={user.isActive ? 'default' : 'destructive'} className="text-xs">
+                                  {user.isActive ? 'Active' : 'Inactive'}
+                                </Badge>
+                                {user.isAdmin && (
+                                  <Badge variant="outline" className="text-orange-700 border-orange-300">
+                                    Admin
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <p><span className="font-medium">Email:</span> {user.email}</p>
+                                <p><span className="font-medium">Username:</span> {user.username}</p>
+                                <p><span className="font-medium">Joined:</span> {new Date(user.createdAt).toLocaleDateString()}</p>
+                                <p><span className="font-medium">Last Login:</span> {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2"
+                                    onClick={() => setSelectedUser(user)}
+                                  >
+                                    <Edit2 className="h-4 w-4 mr-1" />
+                                    Manage
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl border-4 border-orange-200">
+                                  <DialogHeader className="bg-gradient-to-r from-orange-100 to-yellow-100 -m-6 mb-6 p-6 border-b-2 border-orange-200">
+                                    <DialogTitle className="text-2xl font-bold text-orange-800 flex items-center">
+                                      <Users className="h-6 w-6 mr-3" />
+                                      Manage User: {user.firstName} {user.lastName}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  
+                                  {userDetails && (
+                                    <div className="space-y-6">
+                                      {/* User Info Section */}
+                                      <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border-2 border-gray-200">
+                                        <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center">
+                                          <Users className="h-5 w-5 mr-2 text-orange-600" />
+                                          User Information
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                          <div>
+                                            <span className="font-medium text-gray-600">Email:</span>
+                                            <p className="font-semibold text-gray-900">{userDetails.email}</p>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium text-gray-600">Username:</span>
+                                            <p className="font-semibold text-gray-900">{userDetails.username}</p>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium text-gray-600">Registration IP:</span>
+                                            <p className="font-mono text-gray-800">{userDetails.registrationIp || 'N/A'}</p>
+                                          </div>
+                                          <div>
+                                            <span className="font-medium text-gray-600">Last Login IP:</span>
+                                            <p className="font-mono text-gray-800">{userDetails.lastLoginIp || 'N/A'}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Balance Management Section */}
+                                      <div className="bg-gradient-to-r from-green-50 to-emerald-100 p-6 rounded-xl border-2 border-green-200">
+                                        <h3 className="font-bold text-lg text-green-800 mb-4 flex items-center">
+                                          <DollarSign className="h-5 w-5 mr-2" />
+                                          Balance Management
+                                        </h3>
+                                        <div className="space-y-4">
+                                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="bg-white p-4 rounded-lg border border-green-300">
+                                              <p className="text-sm text-green-600 font-medium">Current Balance</p>
+                                              <p className="text-2xl font-bold text-green-800">
+                                                ${parseFloat(userDetails.portfolio?.totalBalance || '0').toLocaleString()}
+                                              </p>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-lg border border-green-300">
+                                              <p className="text-sm text-green-600 font-medium">Total Deposits</p>
+                                              <p className="text-lg font-semibold text-green-700">
+                                                ${parseFloat(userDetails.portfolio?.totalDeposits || '0').toLocaleString()}
+                                              </p>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-lg border border-green-300">
+                                              <p className="text-sm text-green-600 font-medium">Total Profit</p>
+                                              <p className="text-lg font-semibold text-green-700">
+                                                ${parseFloat(userDetails.portfolio?.totalProfit || '0').toLocaleString()}
+                                              </p>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Balance Adjustment Controls */}
+                                          <div className="flex flex-wrap gap-3 p-4 bg-white rounded-lg border-2 border-green-300">
+                                            <div className="flex space-x-2 flex-1 min-w-64">
+                                              <select
+                                                value={balanceAction.type}
+                                                onChange={(e) => setBalanceAction({ ...balanceAction, type: e.target.value })}
+                                                className="px-3 py-2 border border-green-300 rounded-md bg-white text-sm font-medium"
+                                              >
+                                                <option value="add">Add Balance</option>
+                                                <option value="subtract">Subtract Balance</option>
+                                                <option value="profit">Add Profit</option>
+                                              </select>
+                                              <Input
+                                                type="number"
+                                                placeholder="Amount"
+                                                value={balanceAction.amount}
+                                                onChange={(e) => setBalanceAction({ ...balanceAction, amount: e.target.value })}
+                                                className="flex-1 border-green-300 focus:border-green-500"
+                                              />
+                                              <Button
+                                                onClick={() => adjustBalanceMutation.mutate({
+                                                  userId: user.id,
+                                                  amount: parseFloat(balanceAction.amount),
+                                                  type: balanceAction.type
+                                                })}
+                                                disabled={adjustBalanceMutation.isPending || !balanceAction.amount}
+                                                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4"
+                                              >
+                                                {adjustBalanceMutation.isPending ? (
+                                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                  balanceAction.type === 'add' ? <Plus className="h-4 w-4" /> :
+                                                  balanceAction.type === 'subtract' ? <Minus className="h-4 w-4" /> :
+                                                  <TrendingUp className="h-4 w-4" />
+                                                )}
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* User's Recent Trades */}
+                                      <div className="bg-gradient-to-r from-blue-50 to-indigo-100 p-6 rounded-xl border-2 border-blue-200">
+                                        <h3 className="font-bold text-lg text-blue-800 mb-4 flex items-center">
+                                          <BarChart3 className="h-5 w-5 mr-2" />
+                                          Recent Trading Activity
+                                        </h3>
+                                        <div className="space-y-3 max-h-64 overflow-y-auto">
+                                          {userDetails.trades && userDetails.trades.length > 0 ? (
+                                            userDetails.trades.slice(0, 5).map((trade: any) => (
+                                              <div key={trade.id} className="bg-white p-3 rounded-lg border border-blue-200 shadow-sm">
+                                                <div className="flex items-center justify-between">
+                                                  <div className="flex items-center space-x-3">
+                                                    <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'} className="text-xs">
+                                                      {trade.type}
+                                                    </Badge>
+                                                    <span className="font-semibold">{trade.symbol}</span>
+                                                    <span className="text-sm text-gray-600">{trade.quantity} shares</span>
+                                                  </div>
+                                                  <div className="text-right">
+                                                    <p className="font-semibold">${parseFloat(trade.totalAmount || '0').toFixed(2)}</p>
+                                                    <p className={`text-xs ${parseFloat(trade.profitLoss || '0') >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                      P&L: ${parseFloat(trade.profitLoss || '0').toFixed(2)}
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ))
+                                          ) : (
+                                            <p className="text-center text-blue-600 py-4">No recent trades found</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No users found</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {activeSection === 'crypto' && (
               <Card className="shadow-xl">
                 <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
