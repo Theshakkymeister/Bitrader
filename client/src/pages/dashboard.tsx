@@ -34,6 +34,12 @@ export default function Dashboard() {
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
+  // Get all trades for profit/loss calculation
+  const { data: trades = [] } = useQuery({
+    queryKey: ['/api/trades'],
+    refetchInterval: 5000,
+  });
+
   // Get user wallets data
   const { data: wallets = [] } = useQuery({
     queryKey: ['/api/wallets'],
@@ -176,6 +182,22 @@ export default function Dashboard() {
   
   // Calculate available buying power from real wallet balances
   const buyingPower = totalWalletValue; // Available balance for trading
+  
+  // Calculate total return from all trades
+  const totalProfitLoss = trades.reduce((sum, trade) => {
+    return sum + parseFloat(trade.profitLoss || '0');
+  }, 0);
+  
+  // Calculate total invested amount (entry cost of all trades)
+  const totalInvested = trades.reduce((sum, trade) => {
+    if (trade.status === 'executed') {
+      return sum + (parseFloat(trade.price || '0') * parseFloat(trade.quantity || '0'));
+    }
+    return sum;
+  }, 0);
+  
+  // Calculate percentage return
+  const totalReturnPercentage = totalInvested > 0 ? (totalProfitLoss / totalInvested) * 100 : 0;
   
   return (
     <div className="space-y-6 fade-in">
@@ -417,11 +439,15 @@ export default function Dashboard() {
             <div className="text-xs text-gray-500 font-medium">All Time</div>
           </div>
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-gray-600">$0.00</div>
+            <div className={`text-2xl font-bold ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {totalProfitLoss >= 0 ? '+' : ''}${Math.abs(totalProfitLoss).toFixed(2)}
+            </div>
             <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-600 font-medium">0.00%</div>
+              <div className={`text-sm font-medium ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {totalProfitLoss >= 0 ? '+' : ''}{totalReturnPercentage.toFixed(2)}%
+              </div>
               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full">
-                {portfolioValue === 0 ? 'No Growth Yet' : 'Portfolio Growth'}
+                {totalProfitLoss === 0 ? 'No Change Yet' : totalProfitLoss > 0 ? 'Profit' : 'Loss'}
               </div>
             </div>
           </div>

@@ -299,21 +299,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stockHoldingsCount: stockHoldings.length
       });
       
+      // Calculate total profit/loss from all trades
+      const allTrades = await storage.getTrades(userId);
+      const totalProfitLoss = allTrades.reduce((sum, trade) => {
+        return sum + parseFloat(trade.profitLoss?.toString() || '0');
+      }, 0);
+      
+      // Calculate win rate
+      const completedTrades = allTrades.filter(t => t.status === 'closed' && t.profitLoss);
+      const winningTrades = completedTrades.filter(t => parseFloat(t.profitLoss?.toString() || '0') > 0);
+      const winRate = completedTrades.length > 0 ? (winningTrades.length / completedTrades.length) * 100 : 0;
+      
       // Enhance portfolio with calculated values
       const enhancedPortfolio = portfolio ? {
         ...portfolio,
         totalBalance: parseFloat(portfolio.totalBalance?.toString() || '0'),
-        totalProfitLoss: parseFloat(portfolio.totalProfitLoss?.toString() || '0'),
+        totalProfitLoss: totalProfitLoss,
         todayPL: parseFloat(portfolio.todayPL?.toString() || '0'),
-        winRate: parseFloat(portfolio.winRate?.toString() || '0'),
+        winRate: winRate,
         totalValue: totalValue,
         walletValue: totalWalletValue,
         stockValue: totalStockValue
       } : {
         totalBalance: 0,
-        totalProfitLoss: 0,
+        totalProfitLoss: totalProfitLoss,
         todayPL: 0,
-        winRate: 0,
+        winRate: winRate,
         totalValue: totalValue,
         walletValue: totalWalletValue,
         stockValue: totalStockValue,
