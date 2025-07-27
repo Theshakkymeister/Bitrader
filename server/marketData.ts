@@ -17,10 +17,10 @@ const marketPrices: Record<string, MarketPrice> = {
   'SPY': { symbol: 'SPY', price: 485.75, change: 0, changePercent: 0, lastUpdate: new Date() },
   'INTC': { symbol: 'INTC', price: 24.00, change: 0, changePercent: 0, lastUpdate: new Date() },
   
-  // Cryptocurrencies - realistic current prices
-  'BTC': { symbol: 'BTC', price: 98500.00, change: 0, changePercent: 0, lastUpdate: new Date() },
-  'ETH': { symbol: 'ETH', price: 3450.00, change: 0, changePercent: 0, lastUpdate: new Date() },
-  'SOL': { symbol: 'SOL', price: 245.50, change: 0, changePercent: 0, lastUpdate: new Date() },
+  // Cryptocurrencies - realistic current prices (fixed)
+  'BTC': { symbol: 'BTC', price: 100000.00, change: 1500.00, changePercent: 1.52, lastUpdate: new Date() },
+  'ETH': { symbol: 'ETH', price: 3450.00, change: 45.50, changePercent: 1.34, lastUpdate: new Date() },
+  'SOL': { symbol: 'SOL', price: 245.50, change: 3.20, changePercent: 1.32, lastUpdate: new Date() },
   'USDT': { symbol: 'USDT', price: 1.00, change: 0, changePercent: 0, lastUpdate: new Date() },
   'USDC': { symbol: 'USDC', price: 1.00, change: 0, changePercent: 0, lastUpdate: new Date() },
 };
@@ -33,7 +33,7 @@ const basePrices: Record<string, number> = {
   'MSFT': 431.25,
   'SPY': 485.75,
   'INTC': 24.00,
-  'BTC': 98500.00,
+  'BTC': 100000.00,
   'ETH': 3450.00,
   'SOL': 245.50,
   'USDT': 1.00,
@@ -79,7 +79,7 @@ function updateMarketPrices() {
 }
 
 // Update prices every 30 seconds with very small changes
-setInterval(updateMarketPrices, 30000);
+// setInterval(updateMarketPrices, 30000); // Disabled to prevent price drift
 
 export function getCurrentPrice(symbol: string): MarketPrice | null {
   return marketPrices[symbol] || null;
