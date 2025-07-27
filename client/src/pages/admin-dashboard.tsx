@@ -393,27 +393,27 @@ User Activity History:
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Developer Dashboard</h2>
-          <p className="text-gray-600 mt-2">System overview and quick stats</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Developer Dashboard</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">System overview and quick stats</p>
         </div>
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 self-start sm:self-center">
           <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
           System Online
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
           <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-600 text-sm font-medium">Crypto Addresses</p>
-                  <p className="text-2xl font-bold text-blue-900">{cryptoAddresses.length}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-900">{cryptoAddresses.length}</p>
                 </div>
-                <Wallet className="h-8 w-8 text-blue-600" />
+                <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -421,13 +421,13 @@ User Activity History:
 
         <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
           <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-600 text-sm font-medium">Website Settings</p>
-                  <p className="text-2xl font-bold text-green-900">{websiteSettings.length}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-900">{websiteSettings.length}</p>
                 </div>
-                <Settings className="h-8 w-8 text-green-600" />
+                <Settings className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -435,13 +435,13 @@ User Activity History:
 
         <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
           <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-600 text-sm font-medium">Active Users</p>
-                  <p className="text-2xl font-bold text-purple-900">1,247</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-900">1,247</p>
                 </div>
-                <Users className="h-8 w-8 text-purple-600" />
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
@@ -1070,31 +1070,34 @@ User Activity History:
 
                   <Separator />
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleVerifyAccount(selectedUser.id)}
                       disabled={selectedUser.isActive}
+                      className="w-full"
                     >
                       <AlertTriangle className="h-4 w-4 mr-1" />
-                      {selectedUser.isActive ? 'Verified' : 'Verify Account'}
+                      <span className="text-xs sm:text-sm">{selectedUser.isActive ? 'Verified' : 'Verify Account'}</span>
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleViewHistory(selectedUser.id)}
+                      className="w-full"
                     >
                       <History className="h-4 w-4 mr-1" />
-                      View Full History
+                      <span className="text-xs sm:text-sm">View Full History</span>
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleActivityLog(selectedUser.id)}
+                      className="w-full"
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      Activity Log
+                      <span className="text-xs sm:text-sm">Activity Log</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -1513,17 +1516,17 @@ User Activity History:
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Terminal className="h-5 w-5 text-white" />
+                <Terminal className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 font-mono">Developer Portal</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900 font-mono">Developer Portal</h1>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-900">{adminUser?.firstName} {adminUser?.lastName}</p>
                 <p className="text-xs text-gray-500">{adminUser?.role}</p>
               </div>
@@ -1534,16 +1537,41 @@ User Activity History:
                 className="text-gray-600 hover:text-red-600"
               >
                 <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Navigation */}
-          <div className="lg:w-64 flex-shrink-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+          {/* Mobile Navigation */}
+          <div className="lg:hidden mb-4">
+            <Card className="shadow-sm border-0">
+              <CardContent className="p-4">
+                <ScrollArea className="w-full">
+                  <div className="flex space-x-2 pb-2">
+                    {menuItems.map((item) => (
+                      <Button
+                        key={item.id}
+                        variant={activeSection === item.id ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setActiveSection(item.id)}
+                        className="flex-shrink-0"
+                      >
+                        <item.icon className="h-4 w-4 mr-1" />
+                        <span className="text-xs">{item.label}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Desktop Sidebar Navigation */}
+          <div className="hidden lg:block lg:w-64 flex-shrink-0">
             <Card className="shadow-lg border-0 sticky top-8">
               <CardContent className="p-0">
                 <ScrollArea className="h-[calc(100vh-200px)]">
