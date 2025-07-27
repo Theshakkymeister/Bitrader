@@ -298,9 +298,16 @@ export default function Portfolio() {
                 <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
               </line>
               
-              {/* Data points */}
+              {/* Small circle markers on the line to show exact connection points */}
+              <circle cx="740" cy="95" r="3" fill="#059669" opacity="0.6" />
+              <circle cx="680" cy="108" r="2" fill="#059669" opacity="0.6" />
+              <circle cx="520" cy="132" r="2" fill="#059669" opacity="0.6" />
+              <circle cx="360" cy="152" r="2" fill="#059669" opacity="0.6" />
+              <circle cx="200" cy="178" r="2" fill="#059669" opacity="0.6" />
+              
+              {/* Data points - positioned exactly on the curve path */}
               {[
-                {x: 200, y: 180}, {x: 360, y: 155}, {x: 520, y: 130}, {x: 680, y: 110}
+                {x: 200, y: 178}, {x: 360, y: 152}, {x: 520, y: 132}, {x: 680, y: 108}
               ].map((point, index) => (
                 <g key={index}>
                   <circle 
