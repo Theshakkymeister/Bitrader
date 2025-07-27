@@ -753,7 +753,10 @@ User Activity History:
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setSelectedUser(user)}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowUserModal(true);
+                          }}
                           className="hover:bg-blue-50 hover:text-blue-600 h-8 px-2"
                         >
                           <Eye className="h-4 w-4" />
