@@ -181,9 +181,8 @@ export default function TradingPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Get URL parameter to determine which tab to show
-  const urlParams = new URLSearchParams(window.location.search);
-  const activeTab = urlParams.get('tab') || 'markets';
+  // State to manage active tab
+  const [activeTab, setActiveTab] = useState<'trade' | 'markets' | 'orders'>('trade');
   
   const [symbol, setSymbol] = useState("");
   const [assetType, setAssetType] = useState("stock");
@@ -267,8 +266,20 @@ export default function TradingPage() {
     return <div className="flex items-center justify-center min-h-screen">Please log in to access trading.</div>;
   }
 
-  // Markets Page
-  if (activeTab === 'markets') {
+  // Main container with navigation
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'markets':
+        return renderMarketsPage();
+      case 'orders':
+        return renderOrdersPage();
+      default:
+        return renderTradePage();
+    }
+  };
+
+  const renderMarketsPage = () => {
+
     // Filter market data based on search query
     const filteredMarketData = mockMarketData.filter((data) => 
       data.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -359,10 +370,9 @@ export default function TradingPage() {
         </div>
       </motion.div>
     );
-  }
+  };
 
-  // My Orders Page - Comprehensive Robinhood-style orders interface
-  if (activeTab === 'orders') {
+  const renderOrdersPage = () => {
     return (
       <motion.div 
         className="min-h-screen bg-gray-50 p-4"
@@ -538,10 +548,10 @@ export default function TradingPage() {
         </div>
       </motion.div>
     );
-  }
+  };
 
-  // Trade Page (default) - Robinhood-style comprehensive trading interface
-  return (
+  const renderTradePage = () => {
+    return (
     <motion.div 
       className="min-h-screen bg-gray-50 p-4"
       initial={{ opacity: 0 }}
@@ -915,6 +925,82 @@ export default function TradingPage() {
             </Card>
           </div>
         </div>
+      </div>
+    </motion.div>
+    );
+  };
+
+  // Main render with navigation
+  return (
+    <motion.div 
+      className="min-h-screen bg-gray-50 p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          className="mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Trading Platform</h1>
+          <p className="text-gray-600">Professional trading with real-time market data</p>
+        </motion.div>
+
+        {/* Navigation Tabs */}
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg max-w-md relative">
+            <motion.div
+              className="absolute h-full bg-white rounded-md shadow-sm"
+              initial={false}
+              animate={{
+                x: activeTab === 'trade' ? 0 : activeTab === 'markets' ? '33.33%' : '66.66%',
+                width: '33.33%',
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+            {[
+              { key: 'trade', label: 'Trade' },
+              { key: 'markets', label: 'Markets' },
+              { key: 'orders', label: 'My Orders' }
+            ].map((tab) => (
+              <motion.button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors relative z-10 ${
+                  activeTab === tab.key
+                    ? 'text-gray-900'
+                    : 'text-gray-700 hover:text-gray-900'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {tab.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderContent()}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </motion.div>
   );
