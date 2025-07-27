@@ -11,6 +11,26 @@
   display: none;
 }
 
+/* Mobile Touch Improvements */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 640px) {
+  .mobile-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .mobile-text-xs {
+    font-size: 0.75rem;
+  }
+  
+  .mobile-p-2 {
+    padding: 0.5rem;
+  }
+}
+
 @keyframes slideInLeft {
   from {
     opacity: 0;

@@ -181,30 +181,30 @@ export default function AdminTest() {
         </div>
       </div>
 
-      {/* Navigation Menu - Horizontal with Touch Gestures */}
+      {/* Mobile-Friendly Navigation Menu */}
       <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex overflow-x-auto scrollbar-hide py-2 space-x-2">
+        <div className="w-full px-2 sm:px-4 lg:px-8">
+          <div className="flex overflow-x-auto scrollbar-hide py-3 space-x-1 sm:space-x-2">
             {menuItems.map((item) => (
               <motion.button
                 key={item.id}
                 onClick={() => handleSectionChange(item.id)}
-                className={`flex items-center space-x-2 px-4 py-3 rounded-lg whitespace-nowrap transition-all ${
+                className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 sm:py-3 rounded-lg whitespace-nowrap transition-all min-w-fit touch-manipulation ${
                   activeSection === item.id 
-                    ? 'bg-blue-50 border-2 border-blue-200 text-blue-700' 
-                    : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                    ? 'bg-blue-50 border-2 border-blue-200 text-blue-700 shadow-sm' 
+                    : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900 border-2 border-transparent'
                 }`}
                 whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: menuItems.indexOf(item) * 0.05 }}
               >
-                <item.icon className={`h-5 w-5 ${activeSection === item.id ? 'text-blue-600' : item.color}`} />
-                <span className="font-medium text-sm">{item.label}</span>
+                <item.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${activeSection === item.id ? 'text-blue-600' : item.color}`} />
+                <span className="font-medium text-xs sm:text-sm">{item.label}</span>
                 {activeSection === item.id && (
                   <motion.div
-                    className="w-2 h-2 bg-blue-600 rounded-full"
+                    className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-600 rounded-full"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: 0.2 }}
@@ -216,7 +216,7 @@ export default function AdminTest() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSection}
@@ -224,63 +224,63 @@ export default function AdminTest() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="space-y-8"
+            className="space-y-4 sm:space-y-6 lg:space-y-8"
           >
             {activeSection === 'overview' && (
               <>
-                {/* Stats Overview */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                {/* Mobile-Optimized Stats Overview */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
                     <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
-                      <CardContent className="p-6">
+                      <CardContent className="p-3 sm:p-4 lg:p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-blue-100 text-sm font-medium">Total Users</p>
-                            <p className="text-3xl font-bold">{stats?.totalUsers || 0}</p>
+                            <p className="text-blue-100 text-xs sm:text-sm font-medium">Total Users</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold">{stats?.totalUsers || 0}</p>
                           </div>
-                          <Users className="h-8 w-8 text-blue-200" />
+                          <Users className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-200" />
                         </div>
                       </CardContent>
                     </Card>
                   </motion.div>
 
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
                     <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
-                      <CardContent className="p-6">
+                      <CardContent className="p-3 sm:p-4 lg:p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-green-100 text-sm font-medium">Total Revenue</p>
-                            <p className="text-2xl font-bold">${stats?.totalRevenue || '0'}</p>
+                            <p className="text-green-100 text-xs sm:text-sm font-medium">Total Revenue</p>
+                            <p className="text-lg sm:text-xl lg:text-2xl font-bold">${stats?.totalRevenue || '0'}</p>
                           </div>
-                          <DollarSign className="h-8 w-8 text-green-200" />
+                          <DollarSign className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-green-200" />
                         </div>
                       </CardContent>
                     </Card>
                   </motion.div>
 
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
                     <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
-                      <CardContent className="p-6">
+                      <CardContent className="p-3 sm:p-4 lg:p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-orange-100 text-sm font-medium">Pending Trades</p>
-                            <p className="text-3xl font-bold">{pendingTrades.length}</p>
+                            <p className="text-orange-100 text-xs sm:text-sm font-medium">Pending Trades</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold">{pendingTrades.length}</p>
                           </div>
-                          <Clock className="h-8 w-8 text-orange-200" />
+                          <Clock className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-orange-200" />
                         </div>
                       </CardContent>
                     </Card>
                   </motion.div>
 
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
                     <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
-                      <CardContent className="p-6">
+                      <CardContent className="p-3 sm:p-4 lg:p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-purple-100 text-sm font-medium">Active Trades</p>
-                            <p className="text-3xl font-bold">{approvedTrades.length}</p>
+                            <p className="text-purple-100 text-xs sm:text-sm font-medium">Active Trades</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold">{approvedTrades.length}</p>
                           </div>
-                          <TrendingUp className="h-8 w-8 text-purple-200" />
+                          <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-purple-200" />
                         </div>
                       </CardContent>
                     </Card>
@@ -291,24 +291,27 @@ export default function AdminTest() {
 
             {activeSection === 'trades' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <TrendingUp className="h-6 w-6 mr-2 text-red-600" />
-                    Trade Management ({Array.isArray(trades) ? trades.length : 0} trades)
+                <CardHeader className="bg-gray-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-red-600" />
+                    <span className="hidden sm:inline">Trade Management</span>
+                    <span className="sm:hidden">Trades</span>
+                    <span className="ml-1">({Array.isArray(trades) ? trades.length : 0})</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <div className="space-y-3 sm:space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
                     {Array.isArray(trades) && trades.slice(0, 10).map((trade) => (
                       <motion.div
                         key={trade.id}
                         whileHover={{ scale: 1.01 }}
-                        className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border transition-colors"
+                        whileTap={{ scale: 0.99 }}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border transition-colors"
                       >
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="font-semibold">{trade.symbol}</h3>
-                            <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'}>
+                          <div className="flex items-center space-x-2 mb-2 sm:mb-1">
+                            <h3 className="font-semibold text-sm sm:text-base">{trade.symbol}</h3>
+                            <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'} className="text-xs">
                               {trade.type.toUpperCase()}
                             </Badge>
                             <Badge 
@@ -316,24 +319,25 @@ export default function AdminTest() {
                                 trade.adminApproval === 'pending' ? 'outline' :
                                 trade.adminApproval === 'approved' ? 'default' : 'destructive'
                               }
+                              className="text-xs"
                             >
                               {trade.adminApproval}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600 mb-1">
                             Qty: {parseFloat(trade.quantity).toFixed(4)} @ ${parseFloat(trade.price || '0').toFixed(2)}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mb-1">
                             User: {trade.userId.substring(0, 8)}... • {new Date(trade.createdAt).toLocaleDateString()}
                           </p>
                           {trade.profitLoss && (
-                            <p className={`text-sm font-semibold ${parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={`text-xs sm:text-sm font-semibold ${parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                               P&L: ${parseFloat(trade.profitLoss).toFixed(2)}
                             </p>
                           )}
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-gray-900">
+                        <div className="text-right mt-2 sm:mt-0 sm:ml-4">
+                          <p className="text-base sm:text-lg font-bold text-gray-900">
                             ${parseFloat(trade.totalAmount || '0').toFixed(2)}
                           </p>
                         </div>
@@ -346,28 +350,31 @@ export default function AdminTest() {
 
             {activeSection === 'users' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <Users className="h-6 w-6 mr-2 text-blue-600" />
-                    User Management ({Array.isArray(users) ? users.length : 0} users)
+                <CardHeader className="bg-gray-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <Users className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-blue-600" />
+                    <span className="hidden sm:inline">User Management</span>
+                    <span className="sm:hidden">Users</span>
+                    <span className="ml-1">({Array.isArray(users) ? users.length : 0})</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid gap-4">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <div className="grid gap-3 sm:gap-4">
                     {Array.isArray(users) && users.slice(0, 6).map((user) => (
                       <motion.div
                         key={user.id}
                         whileHover={{ scale: 1.01 }}
-                        className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border transition-colors"
+                        whileTap={{ scale: 0.99 }}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border transition-colors"
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-1">
-                            <h3 className="font-semibold text-gray-900">{user.username}</h3>
-                            <Badge variant={user.isActive ? "default" : "secondary"}>
+                        <div className="flex-1 mb-3 sm:mb-0">
+                          <div className="flex items-center space-x-2 sm:space-x-3 mb-1">
+                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{user.username}</h3>
+                            <Badge variant={user.isActive ? "default" : "secondary"} className="text-xs">
                               {user.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{user.email}</p>
                           <p className="text-xs text-gray-500">
                             Registered: {new Date(user.createdAt).toLocaleDateString()}
                           </p>
@@ -379,7 +386,7 @@ export default function AdminTest() {
                               variant="outline" 
                               size="sm"
                               onClick={() => setSelectedUser(user)}
-                              className="hover:bg-blue-50 hover:border-blue-300"
+                              className="hover:bg-blue-50 hover:border-blue-300 w-full sm:w-auto"
                             >
                               <Edit2 className="h-4 w-4 mr-1" />
                               Manage
