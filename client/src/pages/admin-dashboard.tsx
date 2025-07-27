@@ -117,6 +117,7 @@ interface AdminStats {
 
 const menuItems = [
   { id: 'overview', label: 'Overview', icon: Home, color: 'text-blue-600' },
+  { id: 'trades', label: 'Trade Management', icon: TrendingUp, color: 'text-red-600' },
   { id: 'crypto', label: 'Crypto Addresses', icon: Wallet, color: 'text-green-600' },
   { id: 'settings', label: 'Website Settings', icon: Settings, color: 'text-purple-600' },
   { id: 'users', label: 'User Management', icon: Users, color: 'text-orange-600' },
@@ -135,6 +136,8 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [balanceAction, setBalanceAction] = useState<{type: 'add' | 'remove', amount: string}>({type: 'add', amount: ''});
+  const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
+  const [tradeFilter, setTradeFilter] = useState('all');
   
   // All hooks in consistent order
   const { toast } = useToast();
@@ -174,6 +177,21 @@ export default function AdminDashboard() {
     enabled: activeSection === 'deposits',
     refetchInterval: 5000,
   });
+
+  // Fetch all trades for admin management
+  const { data: allTrades = [], isLoading: loadingTrades } = useQuery({
+    queryKey: ["/api/admin/trades"],
+    enabled: activeSection === 'trades',
+    refetchInterval: 5000,
+  });
+
+  // Filter trades based on status
+  const filteredTrades = allTrades.filter((trade: any) => {
+    if (tradeFilter === 'pending') return trade.adminApproval === 'pending';
+    if (tradeFilter === 'approved') return trade.adminApproval === 'approved';
+    if (tradeFilter === 'rejected') return trade.adminApproval === 'rejected';
+    return true; // 'all'
+  }) || [];
 
   // All mutations defined at top level to ensure consistent hook order
   const approveDepositMutation = useMutation({
@@ -256,10 +274,59 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
       toast({ title: "Trades approved successfully" });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to approve trades", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Individual trade approval/rejection
+  const approveTradeMutation = useMutation({
+    mutationFn: async ({ tradeId, approval, rejectionReason }: { tradeId: string; approval: string; rejectionReason?: string }) => {
+      const response = await fetch(`/api/admin/trades/${tradeId}/approve`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approval, rejectionReason })
+      });
+      if (!response.ok) throw new Error("Failed to update trade");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setSelectedTrades([]);
+      toast({ title: "Trade updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update trade", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Bulk approve selected trades
+  const bulkApproveTradesMutation = useMutation({
+    mutationFn: async (tradeIds: string[]) => {
+      const promises = tradeIds.map(tradeId => 
+        fetch(`/api/admin/trades/${tradeId}/approve`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approval: "approved" })
+        })
+      );
+      const responses = await Promise.all(promises);
+      const failed = responses.filter(r => !r.ok);
+      if (failed.length > 0) throw new Error(`Failed to approve ${failed.length} trades`);
+      return responses;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setSelectedTrades([]);
+      toast({ title: "All selected trades approved successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Bulk approval failed", description: error.message, variant: "destructive" });
     }
   });
 
@@ -1741,6 +1808,294 @@ User Activity History:
     );
   };
 
+  const renderTradeManagement = () => {
+    const pendingCount = filteredTrades.filter((t: any) => t.adminApproval === 'pending').length;
+    const approvedCount = filteredTrades.filter((t: any) => t.adminApproval === 'approved').length;
+    const rejectedCount = filteredTrades.filter((t: any) => t.adminApproval === 'rejected').length;
+
+    const handleSelectAll = () => {
+      if (selectedTrades.length === filteredTrades.length) {
+        setSelectedTrades([]);
+      } else {
+        setSelectedTrades(filteredTrades.map((t: any) => t.id));
+      }
+    };
+
+    const handleSelectTrade = (tradeId: string) => {
+      setSelectedTrades(prev => 
+        prev.includes(tradeId) 
+          ? prev.filter(id => id !== tradeId)
+          : [...prev, tradeId]
+      );
+    };
+
+    const calculateProfitLoss = (trade: any) => {
+      if (!trade.currentPrice || !trade.price) return { pnl: 0, pnlPercent: 0 };
+      
+      const openPrice = parseFloat(trade.price);
+      const currentPrice = parseFloat(trade.currentPrice);
+      const quantity = parseFloat(trade.quantity);
+      
+      if (trade.type === 'buy') {
+        const pnl = (currentPrice - openPrice) * quantity;
+        const pnlPercent = ((currentPrice - openPrice) / openPrice) * 100;
+        return { pnl, pnlPercent };
+      } else {
+        const pnl = (openPrice - currentPrice) * quantity;
+        const pnlPercent = ((openPrice - currentPrice) / openPrice) * 100;
+        return { pnl, pnlPercent };
+      }
+    };
+
+    if (loadingTrades) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      );
+    }
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Trade Management</h2>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Review and approve pending trades</p>
+          </div>
+          <Badge variant="outline" className="self-start sm:self-center">
+            {allTrades.length} Total Trades
+          </Badge>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="border-0 shadow-md bg-gradient-to-r from-orange-50 to-orange-100">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-orange-600 text-sm font-medium">Pending Approval</p>
+                    <p className="text-2xl font-bold text-orange-900">{pendingCount}</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-600 text-sm font-medium">Approved</p>
+                    <p className="text-2xl font-bold text-green-900">{approvedCount}</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="border-0 shadow-md bg-gradient-to-r from-red-50 to-red-100">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-red-600 text-sm font-medium">Rejected</p>
+                    <p className="text-2xl font-bold text-red-900">{rejectedCount}</p>
+                  </div>
+                  <XCircle className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Filters and Bulk Actions */}
+        <Card className="shadow-lg border-0">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {['all', 'pending', 'approved', 'rejected'].map((filter) => (
+                  <Button
+                    key={filter}
+                    variant={tradeFilter === filter ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTradeFilter(filter)}
+                    className="text-xs capitalize"
+                  >
+                    {filter} {filter === 'pending' && pendingCount > 0 && `(${pendingCount})`}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Bulk Actions */}
+              {selectedTrades.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{selectedTrades.length} selected</span>
+                  <Button
+                    size="sm"
+                    onClick={() => bulkApproveTradesMutation.mutate(selectedTrades)}
+                    disabled={bulkApproveTradesMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Approve All
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedTrades([])}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Trades List */}
+        {!filteredTrades.length ? (
+          <Card className="shadow-md border-0">
+            <CardContent className="py-12 text-center">
+              <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No trades found for the selected filter</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="shadow-lg border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span>Trades ({filteredTrades.length})</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedTrades.length === filteredTrades.length && filteredTrades.length > 0}
+                    onChange={handleSelectAll}
+                    className="rounded"
+                  />
+                  <span className="text-sm text-gray-600">Select All</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {filteredTrades.map((trade: any, index: number) => {
+                  const { pnl, pnlPercent } = calculateProfitLoss(trade);
+                  const isSelected = selectedTrades.includes(trade.id);
+                  
+                  return (
+                    <motion.div
+                      key={trade.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                        isSelected 
+                          ? 'border-blue-300 bg-blue-50' 
+                          : 'border-gray-100 bg-gray-50 hover:border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        {/* Trade Info */}
+                        <div className="flex items-center space-x-3 flex-1">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleSelectTrade(trade.id)}
+                            className="rounded"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-semibold text-gray-900">{trade.symbol}</span>
+                              <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'}>
+                                {trade.type.toUpperCase()}
+                              </Badge>
+                              <Badge 
+                                variant={
+                                  trade.adminApproval === 'approved' ? 'default' : 
+                                  trade.adminApproval === 'pending' ? 'secondary' : 'destructive'
+                                }
+                              >
+                                {trade.adminApproval}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                                <span>Qty: {parseFloat(trade.quantity).toFixed(2)}</span>
+                                <span>Price: ${parseFloat(trade.price).toFixed(2)}</span>
+                                <span>Total: ${parseFloat(trade.totalAmount || '0').toFixed(2)}</span>
+                              </div>
+                              {trade.currentPrice && (
+                                <div className="flex items-center space-x-4">
+                                  <span>Current: ${parseFloat(trade.currentPrice).toFixed(2)}</span>
+                                  <span className={`font-medium ${pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    P&L: {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} ({pnlPercent >= 0 ? '+' : ''}{pnlPercent.toFixed(2)}%)
+                                  </span>
+                                </div>
+                              )}
+                              <div className="text-xs text-gray-500">
+                                User: {trade.userId} • {new Date(trade.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        {trade.adminApproval === 'pending' && (
+                          <div className="flex items-center space-x-2 ml-4">
+                            <Button
+                              size="sm"
+                              onClick={() => approveTradeMutation.mutate({ 
+                                tradeId: trade.id, 
+                                approval: "approved" 
+                              })}
+                              disabled={approveTradeMutation.isPending}
+                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1"
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => approveTradeMutation.mutate({ 
+                                tradeId: trade.id, 
+                                approval: "rejected",
+                                rejectionReason: "Risk management decision"
+                              })}
+                              disabled={approveTradeMutation.isPending}
+                              className="text-red-600 border-red-600 hover:bg-red-50 px-3 py-1"
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </motion.div>
+    );
+  };
+
   const handleSectionChange = async (sectionId: string) => {
     if (sectionId === activeSection) return;
     
@@ -1766,6 +2121,8 @@ User Activity History:
           return renderUserManagement();
         case 'analytics':
           return renderAnalytics();
+        case 'trades':
+          return renderTradeManagement();
         case 'deposits':
           return renderDepositRequests();
         case 'system':

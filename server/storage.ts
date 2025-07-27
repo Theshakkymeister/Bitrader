@@ -95,6 +95,8 @@ export interface IStorage {
   getUserPositions(userId: string): Promise<Trade[]>;
   createTrade(trade: InsertTrade): Promise<Trade>;
   updateTrade(id: string, updates: Partial<InsertTrade>): Promise<Trade>;
+  getAllTradesForAdmin(status?: string, limit?: number): Promise<Trade[]>;
+  getAllTradesPendingApproval(): Promise<any[]>;
   
   // Performance metrics operations
   getPerformanceMetrics(userId: string, algorithmId?: string): Promise<PerformanceMetric[]>;
@@ -670,6 +672,46 @@ export class DatabaseStorage implements IStorage {
       .where(eq(trades.adminApproval, "pending"))
       .orderBy(desc(trades.createdAt));
     return pendingTrades;
+  }
+
+  async getAllTradesForAdmin(status?: string, limit = 100): Promise<any[]> {
+    let query = db.select({
+      id: trades.id,
+      userId: trades.userId,
+      symbol: trades.symbol,
+      type: trades.type,
+      quantity: trades.quantity,
+      price: trades.price,
+      totalAmount: trades.totalAmount,
+      status: trades.status,
+      adminApproval: trades.adminApproval,
+      approvedBy: trades.approvedBy,
+      approvedAt: trades.approvedAt,
+      rejectionReason: trades.rejectionReason,
+      createdAt: trades.createdAt,
+      updatedAt: trades.updatedAt,
+      currentPrice: trades.currentPrice,
+      profitLoss: trades.profitLoss,
+      assetType: trades.assetType,
+      pair: trades.pair
+    }).from(trades);
+
+    // Add status filter if provided
+    if (status && status !== 'all') {
+      if (status === 'pending') {
+        query = query.where(eq(trades.adminApproval, "pending"));
+      } else if (status === 'approved') {
+        query = query.where(eq(trades.adminApproval, "approved"));
+      } else if (status === 'rejected') {
+        query = query.where(eq(trades.adminApproval, "rejected"));
+      }
+    }
+
+    const allTrades = await query
+      .orderBy(desc(trades.createdAt))
+      .limit(limit);
+    
+    return allTrades;
   }
 
   async getTotalPlatformRevenue(): Promise<string> {

@@ -683,6 +683,17 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Trade approval routes
+  app.get('/api/admin/trades', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { status, limit = 100 } = req.query;
+      const allTrades = await storage.getAllTradesForAdmin(status as string, parseInt(limit as string));
+      res.json(allTrades);
+    } catch (error) {
+      console.error("Error fetching all trades:", error);
+      res.status(500).json({ message: "Failed to fetch trades" });
+    }
+  });
+
   app.get('/api/admin/trades/pending', isAdminAuthenticated, async (req, res) => {
     try {
       const pendingTrades = await storage.getAllTradesPendingApproval();
