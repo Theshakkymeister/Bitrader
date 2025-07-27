@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TrendingUp, TrendingDown, Plus, DollarSign, BarChart3, PieChart, Activity, Eye, EyeOff } from "lucide-react";
 import { SiApple, SiBitcoin, SiTesla, SiGoogle, SiEthereum } from "react-icons/si";
 import { allAssets } from "@/lib/marketData";
+import { useLocation } from "wouter";
 
 // Portfolio performance data
 const portfolioData = [
@@ -27,6 +28,7 @@ const portfolioData = [
 ];
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
   const [balance, setBalance] = useState(0.00);
   const [showBalance, setShowBalance] = useState(true);
   const [portfolioValue, setPortfolioValue] = useState(0);
@@ -396,7 +398,12 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-black">Holdings</h3>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setLocation("/trading")}
+              className="hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-colors"
+            >
               <Plus className="h-4 w-4 mr-1" />
               Add Position
             </Button>
