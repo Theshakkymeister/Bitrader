@@ -141,8 +141,21 @@ export default function Portfolio() {
     setExpandedHoldings(newExpanded);
   };
 
+  // If not authenticated, show login message
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
+          <p className="text-gray-600 mb-6">You need to log in to view your portfolio.</p>
+          <Button onClick={() => setLocation('/auth')}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-white p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
