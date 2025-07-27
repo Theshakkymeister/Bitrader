@@ -74,6 +74,38 @@ export default function Portfolio() {
     return asset ? asset.price : 0;
   };
 
+  // Get icon and color for a symbol
+  const getAssetIcon = (symbol: string) => {
+    const iconMap: { [key: string]: React.ComponentType<any> } = {
+      'AAPL': SiApple,
+      'TSLA': SiTesla,
+      'GOOGL': SiGoogle,
+      'MSFT': DollarSign,
+      'BTC': SiBitcoin,
+      'ETH': SiEthereum,
+      'SOL': DollarSign,
+      'USDT': DollarSign,
+      'USDC': DollarSign,
+      'INTC': Activity,
+    };
+    return iconMap[symbol] || DollarSign;
+  };
+
+  const getAssetColor = (symbol: string) => {
+    const colorMap: { [key: string]: string } = {
+      'AAPL': 'text-gray-600',
+      'TSLA': 'text-red-600',
+      'GOOGL': 'text-blue-600',
+      'MSFT': 'text-blue-500',
+      'BTC': 'text-orange-500',
+      'ETH': 'text-blue-600',
+      'SOL': 'text-purple-600',
+      'USDT': 'text-green-600',
+      'USDC': 'text-blue-600',
+    };
+    return colorMap[symbol] || 'text-gray-500';
+  };
+
   // Convert trades to holdings format for display
   const activePositions = trades
     .filter((trade: any) => trade.adminApproval === 'approved' && trade.isOpen)
@@ -90,7 +122,9 @@ export default function Portfolio() {
       type: trade.assetType,
       tradeType: trade.type,
       entryDate: trade.executedAt || trade.createdAt,
-      status: trade.status
+      status: trade.status,
+      icon: getAssetIcon(trade.symbol),
+      color: getAssetColor(trade.symbol)
     }));
 
   const portfolioValue = portfolio?.totalBalance ? parseFloat(portfolio.totalBalance) : 0;
@@ -114,6 +148,11 @@ export default function Portfolio() {
   const filteredPositions = filterPositions(activePositions);
   const filteredStockPositions = filterPositions(stockPositions);
   const filteredCryptoPositions = filterPositions(cryptoPositions);
+  
+  // Define the variables used in the JSX
+  const filteredHoldings = filteredPositions;
+  const filteredStockHoldings = filteredStockPositions;
+  const filteredCryptoHoldings = filteredCryptoPositions;
   
   const totalStockValue = filteredStockPositions.reduce((sum, p) => sum + p.value, 0);
   const totalCryptoValue = filteredCryptoPositions.reduce((sum, p) => sum + p.value, 0);
@@ -416,7 +455,7 @@ export default function Portfolio() {
             <CardContent>
               <div className="space-y-4">
                 {filteredHoldings.length > 0 ? filteredHoldings.map((holding) => (
-                  <div key={holding.symbol} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
+                  <div key={holding.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover">
                     <div className="flex items-center space-x-4">
                       <holding.icon className={`h-10 w-10 ${holding.color}`} />
                       <div>
@@ -471,7 +510,7 @@ export default function Portfolio() {
             <CardContent>
               <div className="space-y-4">
                 {filteredStockHoldings.length > 0 ? filteredStockHoldings.map((holding) => (
-                  <div key={holding.symbol} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
+                  <div key={holding.id} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
                     {/* Main holding info */}
                     <div className="flex items-center justify-between p-4">
                       <div className="flex items-center space-x-4">
@@ -607,7 +646,7 @@ export default function Portfolio() {
             <CardContent>
               <div className="space-y-4">
                 {filteredCryptoHoldings.length > 0 ? filteredCryptoHoldings.map((holding) => (
-                  <div key={holding.symbol} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
+                  <div key={holding.id} className="border rounded-lg hover:bg-gray-50 transition-all duration-300 card-hover overflow-hidden">
                     {/* Main holding info */}
                     <div className="flex items-center justify-between p-4">
                       <div className="flex items-center space-x-4">
