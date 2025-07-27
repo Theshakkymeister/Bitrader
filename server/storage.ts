@@ -787,6 +787,31 @@ export class DatabaseStorage implements IStorage {
       totalBalance: newBalance.toString()
     });
   }
+
+  async updateTradeApproval(id: string, status: 'approved' | 'rejected'): Promise<Trade> {
+    const [updatedTrade] = await db
+      .update(trades)
+      .set({ 
+        adminApproval: status,
+        status: status === 'approved' ? 'approved' : 'rejected',
+        updatedAt: new Date()
+      })
+      .where(eq(trades.id, id))
+      .returning();
+    return updatedTrade;
+  }
+
+  async updateUserStatus(userId: string, isActive: boolean): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        isActive,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
+  }
 }
 
 export const storage = new DatabaseStorage();

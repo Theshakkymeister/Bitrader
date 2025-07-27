@@ -644,6 +644,54 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Individual trade approval
+  app.post('/api/admin/trades/:tradeId/approve', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { tradeId } = req.params;
+      const adminId = req.adminUser.id;
+
+      const trade = await storage.updateTradeApproval(tradeId, 'approved');
+      await logAdminActivity(adminId, 'UPDATE', 'TRADE', tradeId, { action: 'approve' }, req);
+
+      res.json({ message: "Trade approved successfully", trade });
+    } catch (error) {
+      console.error("Approve trade error:", error);
+      res.status(500).json({ message: "Failed to approve trade" });
+    }
+  });
+
+  // Individual trade rejection
+  app.post('/api/admin/trades/:tradeId/reject', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { tradeId } = req.params;
+      const adminId = req.adminUser.id;
+
+      const trade = await storage.updateTradeApproval(tradeId, 'rejected');
+      await logAdminActivity(adminId, 'UPDATE', 'TRADE', tradeId, { action: 'reject' }, req);
+
+      res.json({ message: "Trade rejected successfully", trade });
+    } catch (error) {
+      console.error("Reject trade error:", error);
+      res.status(500).json({ message: "Failed to reject trade" });
+    }
+  });
+
+  // User deactivation
+  app.post('/api/admin/users/:userId/deactivate', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const adminId = req.adminUser.id;
+
+      const user = await storage.updateUserStatus(userId, false);
+      await logAdminActivity(adminId, 'UPDATE', 'USER', userId, { action: 'deactivate' }, req);
+
+      res.json({ message: "User deactivated successfully", user });
+    } catch (error) {
+      console.error("Deactivate user error:", error);
+      res.status(500).json({ message: "Failed to deactivate user" });
+    }
+  });
+
   // Admin Activity Logs
   app.get('/api/admin/logs', isAdminAuthenticated, async (req, res) => {
     try {

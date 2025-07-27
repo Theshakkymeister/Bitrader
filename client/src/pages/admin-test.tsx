@@ -24,7 +24,8 @@ import {
   Settings,
   Activity,
   Home,
-  ChevronRight
+  ChevronRight,
+  X
 } from "lucide-react";
 
 const menuItems = [
@@ -147,6 +148,64 @@ export default function AdminTest() {
     },
     onError: () => {
       toast({ title: "Failed to approve trades", variant: "destructive" });
+    }
+  });
+
+  // Add more interactive mutations
+  const approveSingleTradeMutation = useMutation({
+    mutationFn: async (tradeId) => {
+      const response = await fetch(`/api/admin/trades/${tradeId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error("Failed to approve trade");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Trade approved successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to approve trade", variant: "destructive" });
+    }
+  });
+
+  const rejectTradeMutation = useMutation({
+    mutationFn: async (tradeId) => {
+      const response = await fetch(`/api/admin/trades/${tradeId}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error("Failed to reject trade");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Trade rejected successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to reject trade", variant: "destructive" });
+    }
+  });
+
+  const deactivateUserMutation = useMutation({
+    mutationFn: async (userId) => {
+      const response = await fetch(`/api/admin/users/${userId}/deactivate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error("Failed to deactivate user");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "User deactivated successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to deactivate user", variant: "destructive" });
     }
   });
 
@@ -339,10 +398,39 @@ export default function AdminTest() {
                             </p>
                           )}
                         </div>
-                        <div className="text-right mt-2 sm:mt-0 sm:ml-4">
+                        <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mt-2 sm:mt-0 sm:ml-4">
                           <p className="text-base sm:text-lg font-bold text-gray-900">
                             ${parseFloat(trade.totalAmount || '0').toFixed(2)}
                           </p>
+                          {trade.adminApproval === 'pending' && (
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                onClick={() => approveSingleTradeMutation.mutate(trade.id)}
+                                disabled={approveSingleTradeMutation.isPending}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1"
+                              >
+                                {approveSingleTradeMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="h-3 w-3" />
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => rejectTradeMutation.mutate(trade.id)}
+                                disabled={rejectTradeMutation.isPending}
+                                className="px-3 py-1"
+                              >
+                                {rejectTradeMutation.isPending ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <X className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     ))}
@@ -381,20 +469,59 @@ export default function AdminTest() {
                           <p className="text-xs text-gray-500">
                             Registered: {new Date(user.createdAt).toLocaleDateString()}
                           </p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge variant="outline" className="text-xs">
+                              Balance: ${parseFloat(user.balance || '0').toFixed(2)}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs text-green-600">
+                              Profit: ${parseFloat(user.totalProfit || '0').toFixed(2)}
+                            </Badge>
+                          </div>
                         </div>
                         
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => setSelectedUser(user)}
-                              className="hover:bg-blue-50 hover:border-blue-300 w-full sm:w-auto"
-                            >
-                              <Edit2 className="h-4 w-4 mr-1" />
-                              Manage
-                            </Button>
-                          </DialogTrigger>
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => adjustBalanceMutation.mutate({
+                              userId: user.id,
+                              amount: 1000,
+                              type: 'add'
+                            })}
+                            disabled={adjustBalanceMutation.isPending}
+                            className="hover:bg-green-50 hover:border-green-300 text-xs"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            +$1K
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => adjustBalanceMutation.mutate({
+                              userId: user.id,
+                              amount: 500,
+                              type: 'profit'
+                            })}
+                            disabled={adjustBalanceMutation.isPending}
+                            className="hover:bg-blue-50 hover:border-blue-300 text-xs"
+                          >
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            Profit
+                          </Button>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedUser(user)}
+                                className="hover:bg-blue-50 hover:border-blue-300 text-xs"
+                              >
+                                <Edit2 className="h-3 w-3 mr-1" />
+                                Manage
+                              </Button>
+                            </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
                             <DialogHeader className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 -mx-6 -mt-6 mb-6 border-b">
                               <DialogTitle className="flex items-center text-xl text-blue-900">
@@ -692,6 +819,7 @@ export default function AdminTest() {
                             </div>
                           </DialogContent>
                         </Dialog>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
