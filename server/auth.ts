@@ -100,6 +100,20 @@ export function setupAuth(app: Express) {
         }
         
         console.log("Login successful for user:", user.username);
+        
+        // Check if this user is also an admin
+        try {
+          const adminUser = await storage.getAdminByEmail(user.email.toLowerCase());
+          if (adminUser && adminUser.isActive) {
+            console.log("User is also an admin:", user.email);
+            // We'll set admin session in the login route
+            (user as any).isAdmin = true;
+            (user as any).adminData = adminUser;
+          }
+        } catch (error) {
+          console.log("Admin check error (non-critical):", error);
+        }
+        
         return done(null, user);
       } catch (error) {
         console.error("Login error:", error);
@@ -177,6 +191,12 @@ export function setupAuth(app: Express) {
           return res.status(500).json({ message: "Login failed" });
         }
         
+        // If user is also an admin, set admin session
+        if ((user as any).isAdmin && (user as any).adminData) {
+          req.session.adminUser = (user as any).adminData;
+          console.log("Admin session also set for:", user.email);
+        }
+        
         console.log("User logged in successfully:", user.email);
         res.status(200).json(user);
       });
@@ -184,13 +204,20 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
+    // Clear admin session if it exists
+    if (req.session.adminUser) {
+      req.session.adminUser = null;
+      console.log("Admin session cleared");
+    }
+    
     req.logout((err) => {
       if (err) return next(err);
+      console.log("User logged out successfully");
       res.sendStatus(200);
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user", async (req, res) => {
     console.log("GET /api/user - Session ID:", req.sessionID);
     console.log("GET /api/user - Is authenticated:", req.isAuthenticated());
     console.log("GET /api/user - User:", req.user ? req.user.username : "none");
@@ -201,7 +228,18 @@ export function setupAuth(app: Express) {
       return res.status(401).json({ message: "Unauthorized" });
     }
     
+    // Add admin status to user data
+    const userData = { ...req.user };
+    try {
+      const adminUser = await storage.getAdminByEmail(req.user.email.toLowerCase());
+      if (adminUser && adminUser.isActive) {
+        (userData as any).isAdmin = true;
+      }
+    } catch (error) {
+      console.log("Admin check error (non-critical):", error);
+    }
+    
     console.log("Returning user data:", req.user?.username);
-    res.json(req.user);
+    res.json(userData);
   });
 }

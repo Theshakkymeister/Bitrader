@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, TrendingUp, PieChart, Settings, User, Menu, ChevronDown, BarChart3 } from "lucide-react";
+import { Home, TrendingUp, PieChart, Settings, User, Menu, ChevronDown, BarChart3, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -29,6 +29,7 @@ function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const [showTradeOptions, setShowTradeOptions] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -143,6 +144,20 @@ function MobileNav() {
               </div>
             </div>
 
+            {/* Admin Section */}
+            {isAdmin && (
+              <div>
+                <Link href="/admin/dashboard" onClick={handleNavClick}>
+                  <div className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                    location.startsWith('/admin') ? 'bg-red-100 text-red-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`}>
+                    <Shield className="h-5 w-5" />
+                    <span className="font-medium">Admin</span>
+                  </div>
+                </Link>
+              </div>
+            )}
+
             <div className="border-t pt-4">
               <Button
                 variant="ghost"
@@ -162,6 +177,7 @@ function MobileNav() {
 
 function DesktopNav() {
   const [location] = useLocation();
+  const { isAdmin } = useAuth();
   
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
@@ -230,6 +246,18 @@ function DesktopNav() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      
+      {/* Admin Section */}
+      {isAdmin && (
+        <Link href="/admin/dashboard">
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+            location.startsWith('/admin') ? 'bg-red-100 text-red-700' : 'text-gray-600 hover:bg-gray-100'
+          }`}>
+            <Shield className="h-4 w-4" />
+            <span className="font-medium text-sm">Admin</span>
+          </div>
+        </Link>
+      )}
     </nav>
   );
 }

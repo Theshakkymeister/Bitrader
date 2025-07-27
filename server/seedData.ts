@@ -1,4 +1,14 @@
 import { storage } from './storage';
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 // Seed data for algorithms
 const algorithmSeedData = [
@@ -190,8 +200,39 @@ export async function initializeUserPortfolio(userId: string) {
   }
 }
 
+// Function to create admin user account in the regular user system
+async function seedAdminUser() {
+  try {
+    const adminEmail = "ken.attwood@yahoo.com";
+    const adminPassword = "AdminPass2025!";
+    
+    // Check if admin user already exists
+    const existingUser = await storage.getUserByEmail(adminEmail);
+    if (!existingUser) {
+      console.log('Creating admin user account in regular user system...');
+      
+      // Create admin user in regular user system
+      const hashedPassword = await hashPassword(adminPassword);
+      await storage.createUser({
+        username: "ken.attwood",
+        email: adminEmail,
+        password: hashedPassword,
+        firstName: "Ken",
+        lastName: "Attwood",
+      });
+      
+      console.log('Admin user account created successfully');
+    } else {
+      console.log('Admin user account already exists');
+    }
+  } catch (error) {
+    console.error('Error creating admin user account:', error);
+  }
+}
+
 // Function to run all seed operations
 export async function runSeedOperations() {
   await seedAlgorithms();
+  await seedAdminUser();
 }
 
