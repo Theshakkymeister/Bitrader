@@ -45,10 +45,6 @@ export default function Dashboard() {
     refetchInterval: 5000,
   });
 
-  // Debug portfolio data
-  console.log('Dashboard portfolio data:', portfolio);
-  console.log('Dashboard wallets data:', wallets);
-
   // Calculate portfolio value from wallet data since API isn't returning calculated values
   const totalWalletValue = wallets.reduce((sum, wallet) => {
     return sum + parseFloat(wallet.usdValue || '0');
@@ -56,18 +52,12 @@ export default function Dashboard() {
   
   const portfolioValue = portfolio?.totalValue || portfolio?.walletValue || totalWalletValue;
   const balance = parseFloat(portfolio?.totalBalance || '0') || portfolioValue;
-  
-  console.log('Dashboard calculated values:', { portfolioValue, balance, totalWalletValue });
 
   // Real-time portfolio simulation - only when user has funds
   useEffect(() => {
     if (portfolioValue > 0) {
       const interval = setInterval(() => {
-        setPortfolioValue(prev => {
-          const change = (Math.random() - 0.5) * 10;
-          const newValue = Math.max(prev + change, 0);
-          return newValue;
-        });
+        // Update timestamp for real-time feel
         setLastUpdate(new Date());
       }, 5000);
 
