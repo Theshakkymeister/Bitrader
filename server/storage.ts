@@ -756,8 +756,18 @@ export class DatabaseStorage implements IStorage {
       // Get portfolio
       const portfolio = await this.getPortfolio(id);
 
-      // Get recent trades with proper type handling
-      const userTrades = await db.select().from(trades)
+      // Get recent trades with proper type handling - avoiding current_price column
+      const userTrades = await db.select({
+        id: trades.id,
+        symbol: trades.symbol,
+        quantity: trades.quantity,
+        price: trades.price,
+        type: trades.type,
+        status: trades.status,
+        totalAmount: trades.totalAmount,
+        profitLoss: trades.profitLoss,
+        createdAt: trades.createdAt
+      }).from(trades)
         .where(eq(trades.userId, id))
         .orderBy(desc(trades.createdAt))
         .limit(10);
