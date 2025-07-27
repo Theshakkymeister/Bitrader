@@ -648,17 +648,115 @@ export default function AdminTest() {
 
             {activeSection === 'deposits' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <DollarSign className="h-6 w-6 mr-2 text-yellow-600" />
-                    Deposit Requests
+                <CardHeader className="bg-yellow-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-yellow-600" />
+                    <span className="hidden sm:inline">Deposit Requests Management</span>
+                    <span className="sm:hidden">Deposits</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No pending deposit requests</p>
-                    <p className="text-sm text-gray-500 mt-2">User deposit requests will appear here for approval</p>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  {/* Deposit Stats */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-orange-100 text-xs sm:text-sm font-medium">Pending</p>
+                            <p className="text-xl sm:text-2xl font-bold">8</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-green-100 text-xs sm:text-sm font-medium">Approved</p>
+                            <p className="text-xl sm:text-2xl font-bold">42</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-red-100 text-xs sm:text-sm font-medium">Rejected</p>
+                            <p className="text-xl sm:text-2xl font-bold">2</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-blue-100 text-xs sm:text-sm font-medium">Total Value</p>
+                            <p className="text-lg sm:text-xl font-bold">$127K</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+
+                  {/* Recent Deposit Requests */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="font-semibold flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      Recent Deposit Requests
+                    </h4>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {[
+                        { id: 1, user: 'user_45547567', crypto: 'BTC', amount: '0.5', usd: '$32,500', status: 'pending', time: '2 mins ago' },
+                        { id: 2, user: 'user_78901234', crypto: 'ETH', amount: '15.2', usd: '$45,600', status: 'approved', time: '15 mins ago' },
+                        { id: 3, user: 'user_23456789', crypto: 'USDT', amount: '10,000', usd: '$10,000', status: 'pending', time: '1 hour ago' },
+                        { id: 4, user: 'user_34567890', crypto: 'SOL', amount: '250', usd: '$18,750', status: 'approved', time: '2 hours ago' }
+                      ].map((deposit) => (
+                        <motion.div
+                          key={deposit.id}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
+                        >
+                          <div className="flex-1 mb-2 sm:mb-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-sm">{deposit.crypto}</span>
+                              <Badge 
+                                variant={
+                                  deposit.status === 'pending' ? 'outline' :
+                                  deposit.status === 'approved' ? 'default' : 'destructive'
+                                }
+                                className="text-xs"
+                              >
+                                {deposit.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              {deposit.user} • {deposit.amount} {deposit.crypto} ({deposit.usd})
+                            </p>
+                            <p className="text-xs text-gray-500">{deposit.time}</p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-bold">{deposit.usd}</span>
+                            {deposit.status === 'pending' && (
+                              <div className="flex space-x-1">
+                                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-2 py-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="destructive" className="px-2 py-1">
+                                  <XCircle className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -666,17 +764,112 @@ export default function AdminTest() {
 
             {activeSection === 'crypto' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <Wallet className="h-6 w-6 mr-2 text-green-600" />
-                    Crypto Address Management
+                <CardHeader className="bg-green-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <Wallet className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-green-600" />
+                    <span className="hidden sm:inline">Crypto Address Management</span>
+                    <span className="sm:hidden">Crypto</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <Wallet className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Crypto address management</p>
-                    <p className="text-sm text-gray-500 mt-2">Manage cryptocurrency deposit addresses</p>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  {/* Crypto Stats */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-yellow-100 text-xs sm:text-sm font-medium">Active Addresses</p>
+                            <p className="text-xl sm:text-2xl font-bold">15</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-green-100 text-xs sm:text-sm font-medium">Supported Coins</p>
+                            <p className="text-xl sm:text-2xl font-bold">8</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-blue-100 text-xs sm:text-sm font-medium">Networks</p>
+                            <p className="text-xl sm:text-2xl font-bold">5</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-purple-100 text-xs sm:text-sm font-medium">Total Received</p>
+                            <p className="text-lg sm:text-xl font-bold">$2.3M</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+
+                  {/* Crypto Addresses */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold flex items-center">
+                        <Wallet className="h-4 w-4 mr-1" />
+                        Crypto Addresses
+                      </h4>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Address
+                      </Button>
+                    </div>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {[
+                        { coin: 'BTC', name: 'Bitcoin', address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', network: 'Bitcoin', status: 'active' },
+                        { coin: 'ETH', name: 'Ethereum', address: '0x742d35Cc6b19C69532A9b7B4E65Eb1123456789A', network: 'Ethereum', status: 'active' },
+                        { coin: 'USDT', name: 'Tether', address: 'TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7', network: 'TRC20', status: 'active' },
+                        { coin: 'SOL', name: 'Solana', address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU', network: 'Solana', status: 'active' },
+                        { coin: 'USDC', name: 'USD Coin', address: '0x8ba1f109551bD432803012645Hkg67JdDD13792C', network: 'Ethereum', status: 'active' }
+                      ].map((crypto, index) => (
+                        <motion.div
+                          key={index}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
+                        >
+                          <div className="flex-1 mb-2 sm:mb-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-sm">{crypto.coin}</span>
+                              <span className="text-xs text-gray-500">{crypto.name}</span>
+                              <Badge variant="default" className="text-xs">
+                                {crypto.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 font-mono">
+                              {crypto.address}
+                            </p>
+                            <p className="text-xs text-gray-500">Network: {crypto.network}</p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="px-2 py-1">
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="outline" className="px-2 py-1">
+                              <Settings className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -684,17 +877,95 @@ export default function AdminTest() {
 
             {activeSection === 'settings' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <Settings className="h-6 w-6 mr-2 text-purple-600" />
-                    Website Settings
+                <CardHeader className="bg-purple-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <Settings className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-purple-600" />
+                    <span className="hidden sm:inline">Website Settings</span>
+                    <span className="sm:hidden">Settings</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Website configuration</p>
-                    <p className="text-sm text-gray-500 mt-2">Configure global website settings</p>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  {/* Settings Categories */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="text-center">
+                            <Shield className="h-6 w-6 mx-auto mb-2" />
+                            <p className="text-purple-100 text-xs font-medium">Security</p>
+                            <p className="text-sm font-bold">12 Settings</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="text-center">
+                            <DollarSign className="h-6 w-6 mx-auto mb-2" />
+                            <p className="text-blue-100 text-xs font-medium">Trading</p>
+                            <p className="text-sm font-bold">8 Settings</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="text-center">
+                            <Settings className="h-6 w-6 mx-auto mb-2" />
+                            <p className="text-green-100 text-xs font-medium">General</p>
+                            <p className="text-sm font-bold">15 Settings</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+
+                  {/* Recent Settings */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="font-semibold flex items-center">
+                      <Settings className="h-4 w-4 mr-1" />
+                      Recent Configuration Changes
+                    </h4>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {[
+                        { key: 'max_trade_amount', value: '$50,000', category: 'Trading', changed: '2 hours ago', admin: 'ken.attwood' },
+                        { key: 'min_deposit_amount', value: '$100', category: 'Trading', changed: '1 day ago', admin: 'ken.attwood' },
+                        { key: 'session_timeout', value: '24 hours', category: 'Security', changed: '2 days ago', admin: 'ken.attwood' },
+                        { key: 'email_notifications', value: 'Enabled', category: 'General', changed: '3 days ago', admin: 'ken.attwood' }
+                      ].map((setting, index) => (
+                        <motion.div
+                          key={index}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
+                        >
+                          <div className="flex-1 mb-2 sm:mb-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-sm">{setting.key}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {setting.category}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              Value: {setting.value}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Changed by {setting.admin} • {setting.changed}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="px-2 py-1">
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -702,17 +973,103 @@ export default function AdminTest() {
 
             {activeSection === 'analytics' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <BarChart3 className="h-6 w-6 mr-2 text-pink-600" />
-                    Analytics Dashboard
+                <CardHeader className="bg-pink-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-pink-600" />
+                    <span className="hidden sm:inline">Analytics Dashboard</span>
+                    <span className="sm:hidden">Analytics</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Platform analytics</p>
-                    <p className="text-sm text-gray-500 mt-2">View detailed platform metrics and insights</p>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  {/* Analytics Overview */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-pink-500 to-pink-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-pink-100 text-xs sm:text-sm font-medium">Daily Revenue</p>
+                            <p className="text-xl sm:text-2xl font-bold">$12.5K</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-purple-100 text-xs sm:text-sm font-medium">Monthly Growth</p>
+                            <p className="text-xl sm:text-2xl font-bold">+24%</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-blue-100 text-xs sm:text-sm font-medium">Active Traders</p>
+                            <p className="text-xl sm:text-2xl font-bold">89</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-green-100 text-xs sm:text-sm font-medium">Success Rate</p>
+                            <p className="text-xl sm:text-2xl font-bold">94.2%</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+
+                  {/* Top Performance Metrics */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="font-semibold flex items-center">
+                      <BarChart3 className="h-4 w-4 mr-1" />
+                      Top Performance Metrics
+                    </h4>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {[
+                        { metric: 'BTC Trading Volume', value: '$2.3M', change: '+15.2%', period: 'Today', trend: 'up' },
+                        { metric: 'ETH Trading Volume', value: '$1.8M', change: '+8.7%', period: 'Today', trend: 'up' },
+                        { metric: 'User Registrations', value: '156', change: '+42%', period: 'This Week', trend: 'up' },
+                        { metric: 'Platform Uptime', value: '99.9%', change: '+0.1%', period: 'This Month', trend: 'up' }
+                      ].map((metric, index) => (
+                        <motion.div
+                          key={index}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
+                        >
+                          <div className="flex-1 mb-2 sm:mb-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-sm">{metric.metric}</span>
+                              <Badge 
+                                variant={metric.trend === 'up' ? 'default' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {metric.change}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              Current: {metric.value}
+                            </p>
+                            <p className="text-xs text-gray-500">Period: {metric.period}</p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg font-bold">{metric.value}</span>
+                            <TrendingUp className="h-4 w-4 text-green-500" />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -720,17 +1077,111 @@ export default function AdminTest() {
 
             {activeSection === 'system' && (
               <Card className="shadow-lg">
-                <CardHeader className="bg-gray-50 border-b">
-                  <CardTitle className="flex items-center text-xl">
-                    <Activity className="h-6 w-6 mr-2 text-indigo-600" />
-                    System Status
+                <CardHeader className="bg-indigo-50 border-b p-3 sm:p-4 lg:p-6">
+                  <CardTitle className="flex items-center text-lg sm:text-xl">
+                    <Activity className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-indigo-600" />
+                    <span className="hidden sm:inline">System Status Monitor</span>
+                    <span className="sm:hidden">System</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">System health monitoring</p>
-                    <p className="text-sm text-gray-500 mt-2">Monitor system performance and status</p>
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  {/* System Status Overview */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <div className="flex items-center justify-center mb-1">
+                              <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse mr-2"></div>
+                              <p className="text-green-100 text-xs sm:text-sm font-medium">Server Status</p>
+                            </div>
+                            <p className="text-xl sm:text-2xl font-bold">Online</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-blue-100 text-xs sm:text-sm font-medium">Uptime</p>
+                            <p className="text-xl sm:text-2xl font-bold">99.9%</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-purple-100 text-xs sm:text-sm font-medium">CPU Usage</p>
+                            <p className="text-xl sm:text-2xl font-bold">23%</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+                      <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="text-center">
+                            <p className="text-orange-100 text-xs sm:text-sm font-medium">Memory</p>
+                            <p className="text-xl sm:text-2xl font-bold">64%</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </div>
+
+                  {/* System Components */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <h4 className="font-semibold flex items-center">
+                      <Activity className="h-4 w-4 mr-1" />
+                      System Components Status
+                    </h4>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {[
+                        { component: 'Database', status: 'healthy', uptime: '15 days', response: '2ms' },
+                        { component: 'Trading Engine', status: 'healthy', uptime: '15 days', response: '1ms' },
+                        { component: 'Market Data API', status: 'healthy', uptime: '14 days', response: '45ms' },
+                        { component: 'Authentication Service', status: 'healthy', uptime: '15 days', response: '5ms' },
+                        { component: 'Notification Service', status: 'warning', uptime: '2 hours', response: '120ms' }
+                      ].map((component, index) => (
+                        <motion.div
+                          key={index}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
+                        >
+                          <div className="flex-1 mb-2 sm:mb-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="font-medium text-sm">{component.component}</span>
+                              <Badge 
+                                variant={
+                                  component.status === 'healthy' ? 'default' :
+                                  component.status === 'warning' ? 'outline' : 'destructive'
+                                }
+                                className="text-xs"
+                              >
+                                {component.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              Uptime: {component.uptime} • Response: {component.response}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-3 h-3 rounded-full ${
+                              component.status === 'healthy' ? 'bg-green-500 animate-pulse' :
+                              component.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}></div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
