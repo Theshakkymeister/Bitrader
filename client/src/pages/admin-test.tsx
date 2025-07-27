@@ -395,87 +395,138 @@ export default function AdminTest() {
                               Manage
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="flex items-center">
-                                <Users className="h-5 w-5 mr-2" />
-                                Manage {user.username}
+                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+                            <DialogHeader className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 -mx-6 -mt-6 mb-6 border-b">
+                              <DialogTitle className="flex items-center text-xl text-blue-900">
+                                <Users className="h-6 w-6 mr-3 text-blue-600" />
+                                User Management Dashboard
                               </DialogTitle>
-                              <DialogDescription>
-                                Complete user management dashboard with trade controls and profit tracking
+                              <DialogDescription className="text-blue-700 mt-2 text-lg">
+                                Complete control center for {user.username} - manage balance, profits, and trading activity
                               </DialogDescription>
                             </DialogHeader>
                             
-                            <div className="space-y-6">
-                              {/* User Overview */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                  <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
-                                    <Users className="h-4 w-4 mr-1" />
-                                    Account Info
-                                  </h4>
-                                  <div className="space-y-1 text-sm">
-                                    <p><span className="font-medium">Email:</span> {user.email}</p>
-                                    <p><span className="font-medium">Status:</span> 
-                                      <Badge variant={user.isActive ? "default" : "secondary"} className="ml-2">
+                            <div className="space-y-8">
+                              {/* User Profile Overview Cards */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-md">
+                                  <div className="flex items-center mb-4">
+                                    <div className="bg-blue-600 p-3 rounded-lg">
+                                      <Users className="h-5 w-5 text-white" />
+                                    </div>
+                                    <h4 className="font-bold text-blue-900 ml-3 text-lg">Account Details</h4>
+                                  </div>
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-blue-700 font-medium">Username:</span>
+                                      <span className="font-bold text-blue-900">{user.username}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-blue-700 font-medium">Email:</span>
+                                      <span className="font-semibold text-blue-900 text-sm truncate max-w-36">{user.email}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-blue-700 font-medium">Status:</span>
+                                      <Badge variant={user.isActive ? "default" : "secondary"} className="bg-blue-600 text-white">
                                         {user.isActive ? "Active" : "Inactive"}
                                       </Badge>
-                                    </p>
-                                    <p><span className="font-medium">Registered:</span> {new Date(user.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-blue-700 font-medium">Joined:</span>
+                                      <span className="font-semibold text-blue-900">{new Date(user.createdAt).toLocaleDateString()}</span>
+                                    </div>
                                   </div>
-                                </div>
-
-                                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                                  <h4 className="font-semibold text-green-800 mb-2 flex items-center">
-                                    <BarChart3 className="h-4 w-4 mr-1" />
-                                    Trading Stats
-                                  </h4>
-                                  <div className="space-y-1 text-sm">
-                                    <p><span className="font-medium">Total Trades:</span> {userDetails?.trades?.length || 0}</p>
-                                    <p><span className="font-medium">Pending:</span> {userDetails?.trades?.filter(t => t.adminApproval === 'pending').length || 0}</p>
-                                    <p><span className="font-medium">Approved:</span> {userDetails?.trades?.filter(t => t.adminApproval === 'approved').length || 0}</p>
+                                </motion.div>
+                                
+                                <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-md">
+                                  <div className="flex items-center mb-4">
+                                    <div className="bg-green-600 p-3 rounded-lg">
+                                      <DollarSign className="h-5 w-5 text-white" />
+                                    </div>
+                                    <h4 className="font-bold text-green-900 ml-3 text-lg">Financial Summary</h4>
                                   </div>
-                                </div>
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-green-700 font-medium">Trading Balance:</span>
+                                      <span className="font-bold text-green-900 text-lg">${parseFloat(user.balance || '0').toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-green-700 font-medium">Total Profit:</span>
+                                      <span className="font-bold text-green-900 text-lg">${parseFloat(user.totalProfit || '0').toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center border-t border-green-300 pt-3">
+                                      <span className="text-green-700 font-bold">Total Value:</span>
+                                      <span className="font-bold text-green-900 text-xl">${(parseFloat(user.balance || '0') + parseFloat(user.totalProfit || '0')).toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                                
+                                <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-md">
+                                  <div className="flex items-center mb-4">
+                                    <div className="bg-purple-600 p-3 rounded-lg">
+                                      <TrendingUp className="h-5 w-5 text-white" />
+                                    </div>
+                                    <h4 className="font-bold text-purple-900 ml-3 text-lg">Trading Activity</h4>
+                                  </div>
+                                  <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-purple-700 font-medium">Total Trades:</span>
+                                      <span className="font-bold text-purple-900 text-lg">{userDetails?.trades?.length || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-purple-700 font-medium">Pending:</span>
+                                      <span className="font-bold text-orange-600 text-lg">{userDetails?.trades?.filter(t => t.adminApproval === 'pending').length || 0}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-purple-700 font-medium">Approved:</span>
+                                      <span className="font-bold text-green-600 text-lg">{userDetails?.trades?.filter(t => t.adminApproval === 'approved').length || 0}</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
                               </div>
 
-                              {/* Quick Actions */}
-                              <div className="bg-gray-50 p-4 rounded-lg border">
-                                <h4 className="font-semibold mb-3 flex items-center">
-                                  <Settings className="h-4 w-4 mr-1" />
-                                  Quick Actions
-                                </h4>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {/* Quick Actions Panel */}
+                              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+                                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                  <div className="bg-gray-600 p-2 rounded-lg mr-3">
+                                    <DollarSign className="h-5 w-5 text-white" />
+                                  </div>
+                                  Balance & Profit Management Center
+                                </h3>
+                                
+                                {/* Preset Quick Actions */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="flex items-center justify-center p-2"
+                                    className="flex flex-col items-center justify-center h-16 p-3 hover:bg-blue-50 hover:border-blue-300"
                                     onClick={() => setBalanceAction({ type: 'add', amount: '1000' })}
                                   >
-                                    <Plus className="h-3 w-3 mr-1" />
-                                    +$1K
+                                    <Plus className="h-4 w-4 mb-1 text-blue-600" />
+                                    <span className="text-sm font-semibold">Add $1,000</span>
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="flex items-center justify-center p-2"
+                                    className="flex flex-col items-center justify-center h-16 p-3 hover:bg-blue-50 hover:border-blue-300"
                                     onClick={() => setBalanceAction({ type: 'add', amount: '5000' })}
                                   >
-                                    <Plus className="h-3 w-3 mr-1" />
-                                    +$5K
+                                    <Plus className="h-4 w-4 mb-1 text-blue-600" />
+                                    <span className="text-sm font-semibold">Add $5,000</span>
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="flex items-center justify-center p-2"
-                                    onClick={() => setBalanceAction({ type: 'add', amount: '500' })}
+                                    className="flex flex-col items-center justify-center h-16 p-3 hover:bg-green-50 hover:border-green-300"
+                                    onClick={() => setBalanceAction({ type: 'profit', amount: '500' })}
                                   >
-                                    <TrendingUp className="h-3 w-3 mr-1" />
-                                    Profit
+                                    <TrendingUp className="h-4 w-4 mb-1 text-green-600" />
+                                    <span className="text-sm font-semibold">Add $500 Profit</span>
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="flex items-center justify-center p-2"
+                                    className="flex flex-col items-center justify-center h-16 p-3 hover:bg-green-50 hover:border-green-300"
                                     onClick={() => {
                                       if (userDetails?.trades?.filter(t => t.adminApproval === 'pending').length > 0) {
                                         approveTradesMutation.mutate({
@@ -485,71 +536,73 @@ export default function AdminTest() {
                                       }
                                     }}
                                   >
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Approve
-                                  </Button>
-                                </div>
-                              </div>
-                              
-                              {/* Balance Management */}
-                              <div className="space-y-4">
-                                <h4 className="font-semibold flex items-center">
-                                  <DollarSign className="h-4 w-4 mr-1" />
-                                  Balance & Profit Management
-                                </h4>
-                                
-                                <div className="grid grid-cols-3 gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant={balanceAction.type === 'add' ? 'default' : 'outline'}
-                                    onClick={() => setBalanceAction(prev => ({ ...prev, type: 'add' }))}
-                                    className="flex items-center justify-center"
-                                  >
-                                    <Plus className="h-3 w-3 mr-1" />
-                                    Add Funds
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant={balanceAction.type === 'profit' ? 'default' : 'outline'}
-                                    onClick={() => setBalanceAction(prev => ({ ...prev, type: 'profit' }))}
-                                    className="flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
-                                  >
-                                    <TrendingUp className="h-3 w-3 mr-1" />
-                                    Add Profit
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant={balanceAction.type === 'remove' ? 'default' : 'outline'}
-                                    onClick={() => setBalanceAction(prev => ({ ...prev, type: 'remove' }))}
-                                    className="flex items-center justify-center"
-                                  >
-                                    <Minus className="h-3 w-3 mr-1" />
-                                    Remove
+                                    <CheckCircle className="h-4 w-4 mb-1 text-green-600" />
+                                    <span className="text-sm font-semibold">Approve All</span>
                                   </Button>
                                 </div>
                                 
-                                <div className="flex space-x-2">
-                                  <Input
-                                    placeholder={balanceAction.type === 'profit' ? 'Enter profit amount' : 'Enter amount'}
-                                    value={balanceAction.amount}
-                                    onChange={(e) => setBalanceAction(prev => ({ ...prev, amount: e.target.value }))}
-                                    className="flex-1"
-                                  />
-                                  <Button
-                                    onClick={() => adjustBalanceMutation.mutate({
-                                      userId: user.id,
-                                      amount: parseFloat(balanceAction.amount),
-                                      type: balanceAction.type
-                                    })}
-                                    disabled={!balanceAction.amount || adjustBalanceMutation.isPending}
-                                    className={balanceAction.type === 'profit' ? 'bg-green-600 hover:bg-green-700' : ''}
-                                  >
-                                    {adjustBalanceMutation.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      balanceAction.type === 'profit' ? 'Add Profit' : 'Apply'
-                                    )}
-                                  </Button>
+                                {/* Custom Amount Section */}
+                                <div className="bg-white p-4 rounded-lg border border-gray-300">
+                                  <h4 className="font-semibold mb-3 text-gray-800">Custom Amount</h4>
+                                  
+                                  {/* Action Type Selection with Clear Labels */}
+                                  <div className="grid grid-cols-3 gap-3 mb-4">
+                                    <Button
+                                      size="sm"
+                                      variant={balanceAction.type === 'add' ? 'default' : 'outline'}
+                                      onClick={() => setBalanceAction(prev => ({ ...prev, type: 'add' }))}
+                                      className="flex items-center justify-center h-12"
+                                    >
+                                      <Plus className="h-4 w-4 mr-2" />
+                                      Add Balance
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant={balanceAction.type === 'profit' ? 'default' : 'outline'}
+                                      onClick={() => setBalanceAction(prev => ({ ...prev, type: 'profit' }))}
+                                      className={`flex items-center justify-center h-12 ${balanceAction.type === 'profit' ? 'bg-green-600 hover:bg-green-700 text-white' : 'hover:bg-green-50 hover:border-green-300'}`}
+                                    >
+                                      <TrendingUp className="h-4 w-4 mr-2" />
+                                      Add Profit
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant={balanceAction.type === 'subtract' ? 'default' : 'outline'}
+                                      onClick={() => setBalanceAction(prev => ({ ...prev, type: 'subtract' }))}
+                                      className="flex items-center justify-center h-12"
+                                    >
+                                      <Minus className="h-4 w-4 mr-2" />
+                                      Remove Balance
+                                    </Button>
+                                  </div>
+                                  
+                                  <div className="flex space-x-3">
+                                    <Input
+                                      placeholder={`Enter ${balanceAction.type === 'profit' ? 'profit' : 'balance'} amount (e.g., 100.00)`}
+                                      value={balanceAction.amount}
+                                      onChange={(e) => setBalanceAction(prev => ({ ...prev, amount: e.target.value }))}
+                                      className="flex-1 h-12 text-lg"
+                                      type="number"
+                                      step="0.01"
+                                    />
+                                    <Button
+                                      onClick={() => adjustBalanceMutation.mutate({
+                                        userId: user.id,
+                                        amount: parseFloat(balanceAction.amount),
+                                        type: balanceAction.type
+                                      })}
+                                      disabled={!balanceAction.amount || adjustBalanceMutation.isPending}
+                                      className={`h-12 px-6 ${balanceAction.type === 'profit' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                    >
+                                      {adjustBalanceMutation.isPending ? (
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                      ) : (
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                      )}
+                                      {balanceAction.type === 'profit' ? 'Add Profit' : 
+                                       balanceAction.type === 'add' ? 'Add Balance' : 'Remove Balance'}
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
 
