@@ -276,6 +276,10 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      if (selectedUser?.id) {
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/users", selectedUser.id, "details"] });
+      }
       toast({ title: "Trades approved successfully" });
     },
     onError: (error: Error) => {
@@ -297,6 +301,10 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      if (selectedUser?.id) {
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/users", selectedUser.id, "details"] });
+      }
       setSelectedTrades([]);
       toast({ title: "Trade updated successfully" });
     },
@@ -1094,47 +1102,167 @@ User Activity Summary:
                     <div className="flex items-center space-x-2">
                       <History className="h-4 w-4" />
                       <span>Trading History</span>
+                      <Badge variant="outline">
+                        {userDetails?.trades?.length || 0} Total
+                      </Badge>
                     </div>
-                    <Button 
-                      onClick={() => approveTradesMutation.mutate({ 
-                        userId: selectedUser.id, 
-                        tradeIds: userDetails?.trades?.filter(t => t.adminApproval === 'pending').map(t => t.id) || []
-                      })}
-                      disabled={!userDetails?.trades?.some(t => t.adminApproval === 'pending')}
-                      size="sm"
-                    >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Approve All Pending
-                    </Button>
+                    {userDetails?.trades?.some(t => t.adminApproval === 'pending') && (
+                      <Button 
+                        onClick={() => approveTradesMutation.mutate({ 
+                          userId: selectedUser.id, 
+                          tradeIds: userDetails?.trades?.filter(t => t.adminApproval === 'pending').map(t => t.id) || []
+                        })}
+                        disabled={approveTradesMutation.isPending}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Approve All Pending ({userDetails?.trades?.filter(t => t.adminApproval === 'pending').length})
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="bg-white">
                   {userDetailsLoading ? (
                     <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      <span className="ml-2 text-gray-600">Loading trading history...</span>
                     </div>
-                  ) : userDetails?.trades?.length ? (
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {userDetails.trades.map((trade, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <p className="font-medium text-gray-900">{trade.symbol}</p>
-                            <p className="text-sm text-gray-600">{trade.type} • {trade.quantity} shares</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-gray-900">${typeof trade.price === 'number' ? trade.price.toFixed(2) : parseFloat(trade.price || '0').toFixed(2)}</p>
-                            <Badge variant={
-                              trade.adminApproval === 'approved' ? 'default' : 
-                              trade.adminApproval === 'pending' ? 'secondary' : 'destructive'
-                            }>
-                              {trade.adminApproval}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
+                  ) : !userDetails?.trades?.length ? (
+                    <div className="text-center py-8">
+                      <TrendingUp className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm">No trades found</p>
+                      <p className="text-gray-400 text-xs mt-1">User hasn't placed any trades yet</p>
                     </div>
                   ) : (
-                    <p className="text-gray-600">No trades found</p>
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {/* Trading Analytics Summary */}
+                      {userDetails.analytics && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-blue-50 rounded-lg mb-4">
+                          <div className="text-center">
+                            <p className="text-xs text-blue-600 font-medium">Total Trades</p>
+                            <p className="text-lg font-bold text-blue-900">{userDetails.analytics.totalTrades}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-green-600 font-medium">Win Rate</p>
+                            <p className="text-lg font-bold text-green-900">{userDetails.analytics.winRate}%</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-purple-600 font-medium">Total P&L</p>
+                            <p className={`text-lg font-bold ${parseFloat(userDetails.analytics.totalProfitLoss) >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+                              ${userDetails.analytics.totalProfitLoss}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-orange-600 font-medium">Avg Trade Size</p>
+                            <p className="text-lg font-bold text-orange-900">${userDetails.analytics.avgTradeSize}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Individual Trade Rows */}
+                      {userDetails.trades.map((trade, index) => {
+                        const profitLoss = typeof trade.profitLoss === 'number' ? trade.profitLoss : parseFloat(trade.profitLoss || '0');
+                        const quantity = typeof trade.quantity === 'number' ? trade.quantity : parseFloat(trade.quantity || '0');
+                        const price = typeof trade.price === 'number' ? trade.price : parseFloat(trade.price || '0');
+                        const totalAmount = typeof trade.totalAmount === 'number' ? trade.totalAmount : parseFloat(trade.totalAmount || '0');
+                        
+                        return (
+                          <motion.div
+                            key={trade.id || index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="p-4 bg-gray-50 rounded-lg border hover:border-gray-200 transition-all"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <span className="font-semibold text-gray-900 text-lg">{trade.symbol}</span>
+                                  <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'}>
+                                    {trade.type.toUpperCase()}
+                                  </Badge>
+                                  <Badge 
+                                    variant={
+                                      trade.adminApproval === 'approved' ? 'default' : 
+                                      trade.adminApproval === 'pending' ? 'secondary' : 'destructive'
+                                    }
+                                  >
+                                    {trade.adminApproval}
+                                  </Badge>
+                                  {trade.status && (
+                                    <Badge variant="outline">
+                                      {trade.status}
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-600">Quantity</p>
+                                    <p className="font-medium text-gray-900">{quantity.toFixed(2)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-600">Entry Price</p>
+                                    <p className="font-medium text-gray-900">${price.toFixed(2)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-600">Total Value</p>
+                                    <p className="font-medium text-gray-900">${totalAmount.toFixed(2)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-600">P&L</p>
+                                    <p className={`font-medium ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                      {profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="mt-3 text-xs text-gray-500">
+                                  <div className="flex items-center space-x-4">
+                                    <span>Created: {new Date(trade.createdAt).toLocaleString()}</span>
+                                    {trade.assetType && <span>Type: {trade.assetType}</span>}
+                                    {trade.pair && <span>Pair: {trade.pair}</span>}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons for Pending Trades */}
+                              {trade.adminApproval === 'pending' && (
+                                <div className="flex items-center space-x-2 ml-4">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => approveTradeMutation.mutate({ 
+                                      tradeId: trade.id, 
+                                      approval: "approved" 
+                                    })}
+                                    disabled={approveTradeMutation.isPending}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1"
+                                  >
+                                    <Check className="h-4 w-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => approveTradeMutation.mutate({ 
+                                      tradeId: trade.id, 
+                                      approval: "rejected",
+                                      rejectionReason: "Risk management decision"
+                                    })}
+                                    disabled={approveTradeMutation.isPending}
+                                    className="text-red-600 border-red-600 hover:bg-red-50 px-3 py-1"
+                                  >
+                                    <X className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   )}
                 </CardContent>
               </Card>
