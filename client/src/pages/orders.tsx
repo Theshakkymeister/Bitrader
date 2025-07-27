@@ -34,14 +34,40 @@ export default function OrdersPage() {
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [showTradeModal, setShowTradeModal] = useState(false);
 
-  const { data: trades = [], isLoading: tradesLoading } = useQuery<Trade[]>({
+  const { data: trades = [], isLoading: tradesLoading, error: tradesError } = useQuery<Trade[]>({
     queryKey: ['/api/trades'],
+    enabled: !!user, // Only run query if user is authenticated
   });
+
+  console.log("Orders page - trades loading:", tradesLoading, "error:", tradesError, "trades count:", trades.length);
 
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-gray-600">Please log in to view your orders.</p>
+      </div>
+    );
+  }
+
+  if (tradesLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your orders...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (tradesError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 mb-2">Failed to load orders</p>
+          <p className="text-gray-600 text-sm">{tradesError.message}</p>
+        </div>
       </div>
     );
   }
