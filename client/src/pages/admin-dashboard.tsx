@@ -175,6 +175,35 @@ export default function AdminDashboard() {
     refetchInterval: 5000,
   });
 
+  // All mutations defined at top level to ensure consistent hook order
+  const approveDepositMutation = useMutation({
+    mutationFn: async ({ id, notes }: { id: string; notes?: string }) => {
+      await apiRequest('PATCH', `/api/admin/deposit-requests/${id}/approve`, { notes });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/deposit-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({ title: "Success", description: "Deposit request approved successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const rejectDepositMutation = useMutation({
+    mutationFn: async ({ id, rejectionReason, notes }: { id: string; rejectionReason: string; notes?: string }) => {
+      await apiRequest('PATCH', `/api/admin/deposit-requests/${id}/reject`, { rejectionReason, notes });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/deposit-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({ title: "Success", description: "Deposit request rejected" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   // User management mutations
   const toggleUserStatusMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string, isActive: boolean }) => {
@@ -1549,34 +1578,6 @@ User Activity History:
   );
 
   const renderDepositRequests = () => {
-
-    const approveDepositMutation = useMutation({
-      mutationFn: async ({ id, notes }: { id: string; notes?: string }) => {
-        await apiRequest('PATCH', `/api/admin/deposit-requests/${id}/approve`, { notes });
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/deposit-requests'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
-        toast({ title: "Success", description: "Deposit request approved successfully" });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-      },
-    });
-
-    const rejectDepositMutation = useMutation({
-      mutationFn: async ({ id, rejectionReason, notes }: { id: string; rejectionReason: string; notes?: string }) => {
-        await apiRequest('PATCH', `/api/admin/deposit-requests/${id}/reject`, { rejectionReason, notes });
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/deposit-requests'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
-        toast({ title: "Success", description: "Deposit request rejected" });
-      },
-      onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-      },
-    });
 
     if (loadingDeposits) {
       return (
