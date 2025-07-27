@@ -1585,9 +1585,18 @@ User Activity History:
             <Card className="shadow-sm border-0 overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative">
-                  <ScrollArea className="w-full" style={{ scrollBehavior: 'smooth' }}>
+                  {/* Direct scrollable container for better touch support */}
+                  <div 
+                    className="overflow-x-auto scrollbar-hide"
+                    style={{ 
+                      scrollBehavior: 'smooth',
+                      WebkitOverflowScrolling: 'touch',
+                      msOverflowStyle: 'none',
+                      scrollbarWidth: 'none'
+                    }}
+                  >
                     <motion.div 
-                      className="flex space-x-3 p-4 pb-2 min-w-max"
+                      className="flex space-x-3 p-4 pb-2 w-max"
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.5 }}
@@ -1605,7 +1614,7 @@ User Activity History:
                             variant={activeSection === item.id ? "default" : "ghost"}
                             size="sm"
                             onClick={() => handleSectionChange(item.id)}
-                            className={`flex-shrink-0 transition-all duration-300 ${
+                            className={`flex-shrink-0 transition-all duration-300 whitespace-nowrap ${
                               activeSection === item.id 
                                 ? 'shadow-md bg-blue-600 text-white' 
                                 : 'hover:bg-gray-100 hover:shadow-sm'
@@ -1617,16 +1626,21 @@ User Activity History:
                         </motion.div>
                       ))}
                     </motion.div>
-                  </ScrollArea>
+                  </div>
                   
                   {/* Scroll indicators with enhanced visibility */}
-                  <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10"></div>
-                  <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10"></div>
+                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/90 to-transparent pointer-events-none z-10"></div>
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/90 to-transparent pointer-events-none z-10"></div>
                   
                   {/* Scroll hint arrows */}
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none animate-pulse">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                  <div className="absolute left-1 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none animate-pulse">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </div>
                 </div>
@@ -1649,14 +1663,15 @@ User Activity History:
                       <motion.button
                         key={item.id}
                         initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        animate={{ 
+                          opacity: 1, 
+                          x: 0,
+                          backgroundColor: activeSection === item.id ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255, 255, 255, 0)',
+                          borderColor: activeSection === item.id ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0)'
+                        }}
                         transition={{ delay: index * 0.05, duration: 0.3 }}
                         whileHover={{ scale: 1.02, x: 5 }}
                         whileTap={{ scale: 0.98 }}
-                        animate={{
-                          backgroundColor: activeSection === item.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                          borderColor: activeSection === item.id ? 'rgba(59, 130, 246, 0.3)' : 'transparent'
-                        }}
                         onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-300 ${
                           activeSection === item.id
