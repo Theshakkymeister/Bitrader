@@ -68,7 +68,7 @@ export const portfolios = pgTable("portfolios", {
 export const trades = pgTable("trades", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  algorithmId: varchar("algorithm_id").references(() => algorithms.id),
+  algorithmId: varchar("algorithm_id").references(() => algorithms.id), // nullable
   symbol: varchar("symbol").notNull(), // AAPL, BTC, SPY, etc.
   assetType: varchar("asset_type").notNull().default("stock"), // "stock" | "crypto" | "etf" | "option"
   type: varchar("type").notNull(), // "buy" | "sell"
@@ -85,12 +85,12 @@ export const trades = pgTable("trades", {
   rejectionReason: text("rejection_reason"),
   executedAt: timestamp("executed_at"),
   expiresAt: timestamp("expires_at"), // For limit orders
-  // Legacy fields for compatibility
+  // Legacy fields for compatibility - all nullable
   pair: varchar("pair"), // For backward compatibility
-  entryPrice: decimal("entry_price", { precision: 15, scale: 5 }),
-  exitPrice: decimal("exit_price", { precision: 15, scale: 5 }),
-  profitLoss: decimal("profit_loss", { precision: 15, scale: 2 }),
-  volume: decimal("volume", { precision: 15, scale: 5 }),
+  entryPrice: decimal("entry_price", { precision: 15, scale: 5 }), // nullable
+  exitPrice: decimal("exit_price", { precision: 15, scale: 5 }), // nullable
+  profitLoss: decimal("profit_loss", { precision: 15, scale: 2 }), // nullable
+  volume: decimal("volume", { precision: 15, scale: 5 }), // nullable
   duration: integer("duration"),
   externalTradeId: varchar("external_trade_id").unique(),
   closedAt: timestamp("closed_at"),
