@@ -252,23 +252,47 @@ export default function Dashboard() {
                 dataKey="value" 
                 stroke="#10b981" 
                 strokeWidth={3}
-                dot={false}
+                dot={(props) => {
+                  const { cx, cy, index, payload } = props;
+                  // Only show dot on the last data point
+                  const isLastPoint = index === portfolioChartData.length - 1;
+                  if (!isLastPoint) return null;
+                  
+                  return (
+                    <g>
+                      {/* Pulsing ring */}
+                      <circle 
+                        cx={cx} 
+                        cy={cy} 
+                        r="12" 
+                        fill="#10b981" 
+                        opacity="0.3"
+                        className="animate-ping"
+                      />
+                      {/* Outer ring */}
+                      <circle 
+                        cx={cx} 
+                        cy={cy} 
+                        r="8" 
+                        fill="#10b981" 
+                        opacity="0.5"
+                      />
+                      {/* Main dot */}
+                      <circle 
+                        cx={cx} 
+                        cy={cy} 
+                        r="5" 
+                        fill="#10b981" 
+                        stroke="#ffffff" 
+                        strokeWidth="2"
+                      />
+                    </g>
+                  );
+                }}
                 activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#ffffff' }}
               />
             </LineChart>
           </ResponsiveContainer>
-          
-          {/* Live indicator dot overlay - positioned at the end of the line */}
-          <div className="absolute top-[15%] right-[6%] transform -translate-x-1/2 -translate-y-1/2">
-            <div className="relative">
-              {/* Pulsing ring */}
-              <div className="absolute inset-0 w-5 h-5 bg-green-500 rounded-full animate-ping opacity-60"></div>
-              {/* Static outer ring */}
-              <div className="absolute inset-1 w-3 h-3 bg-green-500 rounded-full opacity-30"></div>
-              {/* Center dot */}
-              <div className="relative w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-lg"></div>
-            </div>
-          </div>
         </div>
       </div>
 
