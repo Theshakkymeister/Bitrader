@@ -66,8 +66,8 @@ export default function OrdersPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-          <p className="text-gray-600">Track your trading orders and their approval status</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Order History</h1>
+          <p className="text-gray-600">Detailed view of all your trading orders with comprehensive information</p>
         </motion.div>
 
         {/* Search Bar */}
@@ -167,7 +167,7 @@ export default function OrdersPage() {
                   </p>
                 </motion.div>
               ) : (
-                <ScrollArea className="h-96">
+                <ScrollArea className="h-[600px]">
                   <motion.div className="space-y-4">
                     <AnimatePresence>
                       {filteredTrades.map((trade, index) => (
@@ -180,67 +180,119 @@ export default function OrdersPage() {
                             duration: 0.3, 
                             delay: index * 0.05 
                           }}
-                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200"
-                          whileHover={{ scale: 1.01 }}
+                          className="border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 overflow-hidden"
+                          whileHover={{ scale: 1.005 }}
                         >
-                          {/* Left Side - Order Details */}
-                          <div className="flex items-center space-x-4">
-                            <div className={`p-2 rounded-full ${
-                              trade.type === 'buy' ? 'bg-green-100' : 'bg-red-100'
-                            }`}>
-                              {trade.type === 'buy' ? 
-                                <TrendingUp className="w-4 h-4 text-green-600" /> : 
-                                <TrendingDown className="w-4 h-4 text-red-600" />
-                              }
-                            </div>
-                            
-                            <div>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className={`text-sm font-medium ${
-                                  trade.type === 'buy' ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {trade.type.toUpperCase()}
-                                </span>
-                                <span className="text-gray-900 font-bold">{trade.symbol}</span>
-                                <Badge variant="outline" className="text-xs">
-                                  {trade.assetType}
-                                </Badge>
+                          {/* Header Section */}
+                          <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
+                            <div className="flex items-center space-x-3">
+                              <div className={`p-2 rounded-full ${
+                                trade.type === 'buy' ? 'bg-green-100' : 'bg-red-100'
+                              }`}>
+                                {trade.type === 'buy' ? 
+                                  <TrendingUp className="w-4 h-4 text-green-600" /> : 
+                                  <TrendingDown className="w-4 h-4 text-red-600" />
+                                }
                               </div>
                               
-                              <div className="text-sm text-gray-600 mt-1">
-                                {trade.quantity} shares • {trade.orderType} order
-                              </div>
-                              
-                              <div className="text-xs text-gray-500 mt-1">
-                                {new Date(trade.createdAt).toLocaleDateString()} at {new Date(trade.createdAt).toLocaleTimeString()}
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <span className={`text-lg font-bold ${
+                                    trade.type === 'buy' ? 'text-green-600' : 'text-red-600'
+                                  }`}>
+                                    {trade.type.toUpperCase()}
+                                  </span>
+                                  <span className="text-xl font-bold text-gray-900">{trade.symbol}</span>
+                                  <Badge variant="outline" className="text-xs capitalize">
+                                    {trade.assetType}
+                                  </Badge>
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  Order #{trade.id.slice(0, 8)}...
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          {/* Right Side - Status & Amount */}
-                          <div className="text-right">
-                            <div className="flex items-center gap-2 mb-2">
-                              {trade.adminApproval === 'approved' && <CheckCircle className="w-4 h-4 text-green-500" />}
-                              {trade.adminApproval === 'pending' && <Clock className="w-4 h-4 text-yellow-500" />}
-                              {trade.adminApproval === 'rejected' && <XCircle className="w-4 h-4 text-red-500" />}
+                            {/* Status Badge */}
+                            <div className="flex items-center gap-2">
+                              {trade.adminApproval === 'approved' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                              {trade.adminApproval === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
+                              {trade.adminApproval === 'rejected' && <XCircle className="w-5 h-5 text-red-500" />}
                               
-                              <span className={`font-medium text-sm ${
-                                trade.adminApproval === 'approved' ? 'text-green-600' :
-                                trade.adminApproval === 'pending' ? 'text-yellow-600' :
-                                trade.adminApproval === 'rejected' ? 'text-red-600' : 'text-gray-600'
+                              <Badge className={`${
+                                trade.adminApproval === 'approved' ? 'bg-green-100 text-green-700 border-green-300' :
+                                trade.adminApproval === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                                trade.adminApproval === 'rejected' ? 'bg-red-100 text-red-700 border-red-300' : 'bg-gray-100 text-gray-700'
                               }`}>
                                 {trade.adminApproval === 'approved' ? 'Approved' :
                                  trade.adminApproval === 'pending' ? 'Awaiting Approval' :
                                  trade.adminApproval === 'rejected' ? 'Rejected' : 'Unknown'}
-                              </span>
+                              </Badge>
                             </div>
-                            
-                            <div className="text-gray-900 font-semibold">
-                              ${parseFloat(trade.totalAmount).toFixed(2)}
+                          </div>
+
+                          {/* Details Section */}
+                          <div className="p-4 space-y-3">
+                            {/* Order Details Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div>
+                                <div className="text-xs text-gray-500 uppercase font-medium">Quantity</div>
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {parseFloat(trade.quantity).toLocaleString()} {trade.assetType === 'crypto' ? trade.symbol : 'shares'}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <div className="text-xs text-gray-500 uppercase font-medium">Price</div>
+                                <div className="text-sm font-semibold text-gray-900">
+                                  ${parseFloat(trade.price) > 0 ? parseFloat(trade.price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}) : '0.00'}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <div className="text-xs text-gray-500 uppercase font-medium">Order Type</div>
+                                <div className="text-sm font-semibold text-gray-900 capitalize">
+                                  {trade.orderType}
+                                  {trade.limitPrice && ` @ $${parseFloat(trade.limitPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}`}
+                                  {trade.stopPrice && ` Stop $${parseFloat(trade.stopPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}`}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <div className="text-xs text-gray-500 uppercase font-medium">Total Value</div>
+                                <div className="text-lg font-bold text-gray-900">
+                                  ${parseFloat(trade.totalAmount) > 0 ? parseFloat(trade.totalAmount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}
+                                </div>
+                              </div>
                             </div>
-                            
-                            <div className="text-sm text-gray-600">
-                              @ ${parseFloat(trade.price).toFixed(2)}
+
+                            {/* Timestamp and Additional Info */}
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                              <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                <span>
+                                  <strong>Placed:</strong> {new Date(trade.createdAt).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })} at {new Date(trade.createdAt).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                                {trade.expiresAt && (
+                                  <span>
+                                    <strong>Expires:</strong> {new Date(trade.expiresAt).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="text-xs text-gray-500">
+                                Status: <span className="font-medium capitalize">{trade.status}</span>
+                              </div>
                             </div>
                           </div>
                         </motion.div>
