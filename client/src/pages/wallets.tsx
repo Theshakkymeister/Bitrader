@@ -63,7 +63,7 @@ export default function Wallets() {
   });
 
   // Fetch user wallet balances from database
-  const { data: userWallets = [], refetch: refetchWallets } = useQuery({
+  const { data: userWallets = [], refetch: refetchWallets } = useQuery<any[]>({
     queryKey: ['/api/wallets'],
     refetchInterval: 5000, // Refresh every 5 seconds to show updated balances
   });
@@ -71,7 +71,7 @@ export default function Wallets() {
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
     const asset = allAssets.find(a => a.symbol === symbol);
-    return asset ? asset.price : 0;
+    return asset?.price || 0; // Use actual market price or 0 if not available
   };
 
   // Merge database balances with wallet display data
@@ -82,7 +82,13 @@ export default function Wallets() {
 
   const getWalletUsdValue = (symbol: string) => {
     const userWallet = userWallets.find((w: any) => w.symbol === symbol);
-    return userWallet ? parseFloat(userWallet.usdValue || '0') : 0;
+    if (userWallet && userWallet.usdValue) {
+      return parseFloat(userWallet.usdValue);
+    }
+    // Calculate USD value from balance and current price if not stored
+    const balance = getWalletBalance(symbol);
+    const price = getAssetPrice(symbol);
+    return balance * price;
   };
 
   // Wallet data with real balances from database

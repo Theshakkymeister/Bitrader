@@ -84,7 +84,7 @@ export default function Portfolio() {
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
     const asset = allAssets.find(a => a.symbol === symbol);
-    return asset ? asset.price : 0;
+    return asset ? asset.price : 1; // Default to $1 if price not found
   };
 
   // Get icon and color for a symbol
