@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, TrendingUp, TrendingDown } from "lucide-react";
+import { Search, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface MarketData {
@@ -15,20 +16,21 @@ interface MarketData {
   marketCap?: number;
 }
 
-// Market data with $0.00 values for new users - displays real market structure
-const marketData: MarketData[] = [
-  { symbol: "AAPL", name: "Apple Inc.", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "TSLA", name: "Tesla Inc.", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "GOOGL", name: "Alphabet Inc.", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "MSFT", name: "Microsoft Corp.", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "NVDA", name: "NVIDIA Corp.", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "SPY", name: "SPDR S&P 500 ETF", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "QQQ", name: "Invesco QQQ Trust", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "BTC", name: "Bitcoin", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "ETH", name: "Ethereum", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "SOL", name: "Solana", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "USDT", name: "Tether", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
-  { symbol: "USDC", name: "USD Coin", price: 0.00, change: 0.00, changePercent: 0.00, volume: 0 },
+// Market symbols with full names
+const marketSymbols = [
+  { symbol: "AAPL", name: "Apple Inc." },
+  { symbol: "TSLA", name: "Tesla Inc." },
+  { symbol: "GOOGL", name: "Alphabet Inc." },
+  { symbol: "MSFT", name: "Microsoft Corp." },
+  { symbol: "NVDA", name: "NVIDIA Corp." },
+  { symbol: "INTC", name: "Intel Corp." },
+  { symbol: "SPY", name: "SPDR S&P 500 ETF" },
+  { symbol: "QQQ", name: "Invesco QQQ Trust" },
+  { symbol: "BTC", name: "Bitcoin" },
+  { symbol: "ETH", name: "Ethereum" },
+  { symbol: "SOL", name: "Solana" },
+  { symbol: "USDT", name: "Tether" },
+  { symbol: "USDC", name: "USD Coin" },
 ];
 
 function MarketDataCard({ data }: { data: MarketData }) {
@@ -106,11 +108,38 @@ function MarketDataCard({ data }: { data: MarketData }) {
 export default function MarketsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Fetch real market data
+  const { data: marketPrices, isLoading: pricesLoading } = useQuery<any>({
+    queryKey: ['/api/market-prices'],
+    refetchInterval: 3000, // Update every 3 seconds like dashboard
+  });
+
+  // Fetch user portfolio data
+  const { data: portfolio, isLoading: portfolioLoading } = useQuery<any>({
+    queryKey: ['/api/portfolio'],
+    refetchInterval: 5000,
+  });
+
+  // Create market data from real prices
+  const marketData: MarketData[] = marketSymbols.map(item => {
+    const priceData = marketPrices?.[item.symbol];
+    return {
+      symbol: item.symbol,
+      name: item.name,
+      price: priceData?.price || 0,
+      change: priceData?.change || 0,
+      changePercent: priceData?.changePercent || 0,
+      volume: priceData?.volume || 0,
+    };
+  });
+
   const filteredData = marketData.filter(
     item =>
       item.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const isLoading = pricesLoading || portfolioLoading;
 
   return (
     <motion.div 
@@ -182,8 +211,16 @@ export default function MarketsPage() {
                 <CardTitle className="text-sm font-medium text-gray-600">Portfolio Value</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">$0.00</div>
-                <p className="text-xs text-gray-500 mt-1">Deposit funds to start trading</p>
+                <div className="text-2xl font-bold text-gray-900">
+                  {isLoading ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    `$${((portfolio?.totalValue || portfolio?.balance) || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {((portfolio?.totalValue || portfolio?.balance) || 0) > 0 ? 'Current portfolio value' : 'Deposit funds to start trading'}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -195,21 +232,28 @@ export default function MarketsPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredData.map((data, index) => (
-              <motion.div
-                key={data.symbol}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.3, 
-                  delay: 0.5 + (index * 0.05) 
-                }}
-              >
-                <MarketDataCard data={data} />
-              </motion.div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-600">Loading market data...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredData.map((data, index) => (
+                <motion.div
+                  key={data.symbol}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.3, 
+                    delay: 0.5 + (index * 0.05) 
+                  }}
+                >
+                  <MarketDataCard data={data} />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {filteredData.length === 0 && (
