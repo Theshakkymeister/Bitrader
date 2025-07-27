@@ -305,17 +305,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Positions</div>
-          <div className="text-xl font-bold text-black">{holdings.length}</div>
+          <div className="text-xl font-bold text-black">{portfolioValue === 0 ? 0 : holdings.length}</div>
           <div className="text-xs text-gray-500 mt-1">Active Holdings</div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's P&L</div>
-          <div className={`text-xl font-bold ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {todayPL >= 0 ? '+' : ''}${todayPL.toFixed(2)}
-          </div>
-          <div className={`text-xs mt-1 ${todayPL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {todayPL >= 0 ? '+' : ''}{todayPLPercent}%
-          </div>
+          <div className="text-xl font-bold text-gray-600">$0.00</div>
+          <div className="text-xs mt-1 text-gray-600">0.00%</div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-300">
           <div className="flex justify-between items-start mb-2">
@@ -323,19 +319,19 @@ export default function Dashboard() {
             <div className="text-xs text-gray-500 font-medium">All Time</div>
           </div>
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-green-600">+$4,123.45</div>
+            <div className="text-2xl font-bold text-gray-600">$0.00</div>
             <div className="flex justify-between items-center">
-              <div className="text-sm text-green-500 font-medium">+20.17%</div>
-              <div className="text-xs text-gray-600 bg-green-50 px-2 py-1 rounded-full">
-                Portfolio Growth
+              <div className="text-sm text-gray-600 font-medium">0.00%</div>
+              <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full">
+                {portfolioValue === 0 ? 'No Growth Yet' : 'Portfolio Growth'}
               </div>
             </div>
           </div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Diversity Score</div>
-          <div className="text-xl font-bold text-black">8.5/10</div>
-          <div className="text-xs text-green-500 mt-1">Well Diversified</div>
+          <div className="text-xl font-bold text-black">{portfolioValue === 0 ? '0/10' : '8.5/10'}</div>
+          <div className="text-xs text-gray-500 mt-1">{portfolioValue === 0 ? 'No Holdings' : 'Well Diversified'}</div>
         </div>
       </div>
 
