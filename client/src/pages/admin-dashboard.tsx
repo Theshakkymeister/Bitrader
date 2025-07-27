@@ -885,6 +885,8 @@ export default function AdminDashboard() {
     </motion.div>
   );
 
+
+
   const renderSection = () => {
     switch (activeSection) {
       case 'overview':
