@@ -1099,7 +1099,7 @@ User Activity History:
     >
       <div>
         <h2 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h2>
-        <p className="text-gray-600 mt-2">Platform performance and usage metrics</p>
+        <p className="text-gray-600 mt-2">Live platform performance and usage metrics</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1108,9 +1108,9 @@ User Activity History:
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-600 text-sm font-medium">Total Trades</p>
-                  <p className="text-2xl font-bold text-blue-900">12,847</p>
-                  <p className="text-xs text-blue-600 mt-1">+8.2% from last month</p>
+                  <p className="text-blue-600 text-sm font-medium">Active Trades</p>
+                  <p className="text-2xl font-bold text-blue-900">{adminStats?.activeTrades || 0}</p>
+                  <p className="text-xs text-blue-600 mt-1">Executed orders</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-blue-600" />
               </div>
@@ -1123,9 +1123,9 @@ User Activity History:
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-600 text-sm font-medium">Revenue</p>
-                  <p className="text-2xl font-bold text-green-900">$284K</p>
-                  <p className="text-xs text-green-600 mt-1">+12.5% from last month</p>
+                  <p className="text-green-600 text-sm font-medium">Platform Revenue</p>
+                  <p className="text-2xl font-bold text-green-900">{adminStats?.totalRevenue || '$0'}</p>
+                  <p className="text-xs text-green-600 mt-1">From user portfolios</p>
                 </div>
                 <BarChart3 className="h-8 w-8 text-green-600" />
               </div>
@@ -1138,9 +1138,9 @@ User Activity History:
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-600 text-sm font-medium">API Calls</p>
-                  <p className="text-2xl font-bold text-purple-900">1.2M</p>
-                  <p className="text-xs text-purple-600 mt-1">+15.3% from last month</p>
+                  <p className="text-purple-600 text-sm font-medium">Pending Deposits</p>
+                  <p className="text-2xl font-bold text-purple-900">{adminStats?.pendingDeposits || 0}</p>
+                  <p className="text-xs text-purple-600 mt-1">Users with $0 balance</p>
                 </div>
                 <Database className="h-8 w-8 text-purple-600" />
               </div>
@@ -1153,9 +1153,9 @@ User Activity History:
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-orange-600 text-sm font-medium">Avg Response</p>
-                  <p className="text-2xl font-bold text-orange-900">145ms</p>
-                  <p className="text-xs text-orange-600 mt-1">-5.2% from last month</p>
+                  <p className="text-orange-600 text-sm font-medium">Total Users</p>
+                  <p className="text-2xl font-bold text-orange-900">{adminStats?.totalUsers || 0}</p>
+                  <p className="text-xs text-orange-600 mt-1">Platform registered</p>
                 </div>
                 <Activity className="h-8 w-8 text-orange-600" />
               </div>
@@ -1169,32 +1169,65 @@ User Activity History:
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <BarChart3 className="h-5 w-5 text-blue-600" />
-              <span>Trading Volume (7 days)</span>
+              <span>Platform Statistics</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { day: 'Monday', volume: '$45,230', growth: '+12%' },
-                { day: 'Tuesday', volume: '$52,840', growth: '+18%' },
-                { day: 'Wednesday', volume: '$38,920', growth: '-8%' },
-                { day: 'Thursday', volume: '$61,340', growth: '+25%' },
-                { day: 'Friday', volume: '$72,580', growth: '+35%' },
-                { day: 'Saturday', volume: '$41,260', growth: '+5%' },
-                { day: 'Sunday', volume: '$33,150', growth: '-12%' }
-              ].map((day, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{day.day}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">{day.volume}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      day.growth.startsWith('+') ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                    }`}>
-                      {day.growth}
-                    </span>
-                  </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Total Registered Users</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">{adminStats?.totalUsers || 0}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600">
+                    Active
+                  </span>
                 </div>
-              ))}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Users Active Today</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">{adminStats?.usersActiveToday || 0}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-600">
+                    Online
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">New Signups Today</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">{adminStats?.usersRegisteredToday || 0}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-600">
+                    New
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Platform Revenue</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">{adminStats?.totalRevenue || '$0'}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-600">
+                    Total
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Active Trades</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">{adminStats?.activeTrades || 0}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600">
+                    Executed
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Pending Deposits</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">{adminStats?.pendingDeposits || 0}</span>
+                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-600">
+                    Awaiting
+                  </span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1203,33 +1236,60 @@ User Activity History:
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-green-600" />
-              <span>Top Performing Assets</span>
+              <span>Live User Directory</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                { asset: 'Bitcoin (BTC)', price: '$43,250', change: '+5.2%', volume: '$2.4M' },
-                { asset: 'Ethereum (ETH)', price: '$2,840', change: '+3.8%', volume: '$1.8M' },
-                { asset: 'Solana (SOL)', price: '$98.50', change: '+12.4%', volume: '$890K' },
-                { asset: 'Apple (AAPL)', price: '$182.40', change: '+2.1%', volume: '$1.2M' },
-                { asset: 'Tesla (TSLA)', price: '$248.80', change: '-1.5%', volume: '$950K' }
-              ].map((asset, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">{asset.asset}</p>
-                    <p className="text-sm text-gray-500">Vol: {asset.volume}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{asset.price}</p>
-                    <p className={`text-sm ${
-                      asset.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {asset.change}
-                    </p>
-                  </div>
+            <div className="space-y-4 max-h-60 overflow-y-auto">
+              {usersLoading ? (
+                <div className="text-center py-4 text-gray-500">
+                  <div className="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                  <p className="text-sm">Loading users...</p>
                 </div>
-              ))}
+              ) : !users || users.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">
+                  <Users className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">No users registered yet</p>
+                </div>
+              ) : (
+                users.slice(0, 5).map((user, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-xs">
+                          {user.firstName && user.lastName 
+                            ? `${user.firstName[0]}${user.lastName[0]}` 
+                            : user.username[0]?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">
+                          {user.firstName && user.lastName 
+                            ? `${user.firstName} ${user.lastName}` 
+                            : user.username}
+                        </p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </p>
+                      <div className={`w-2 h-2 rounded-full mt-1 ${user.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    </div>
+                  </div>
+                ))
+              )}
+              {users && users.length > 5 && (
+                <div className="text-center pt-2">
+                  <button 
+                    onClick={() => setActiveSection('userManagement')}
+                    className="text-blue-600 text-sm hover:text-blue-800"
+                  >
+                    View all {users.length} users →
+                  </button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

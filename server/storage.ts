@@ -523,6 +523,33 @@ export class DatabaseStorage implements IStorage {
     return pendingTrades;
   }
 
+  async getTotalPlatformRevenue(): Promise<string> {
+    const result = await db.select({
+      totalRevenue: sql<string>`COALESCE(SUM(CAST(${portfolios.totalBalance} AS DECIMAL)), 0)`
+    }).from(portfolios);
+    
+    const revenue = parseFloat(result[0]?.totalRevenue || '0');
+    return `$${(revenue / 1000).toFixed(1)}K`;
+  }
+
+  async getActiveTradesCount(): Promise<number> {
+    const result = await db.select({
+      count: sql<string>`COUNT(*)`
+    }).from(trades)
+    .where(eq(trades.status, "executed"));
+    
+    return parseInt(result[0]?.count || '0');
+  }
+
+  async getPendingDepositsCount(): Promise<number> {
+    const result = await db.select({
+      count: sql<string>`COUNT(*)`
+    }).from(portfolios)
+    .where(sql`CAST(${portfolios.totalBalance} AS DECIMAL) = 0`);
+    
+    return parseInt(result[0]?.count || '0');
+  }
+
   // Admin user management operations
   async getAllUsers(limit = 50, offset = 0): Promise<User[]> {
     return await db.select().from(users)
@@ -565,35 +592,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
-  }
-
-  // Real-time analytics methods
-  async getTotalPlatformRevenue(): Promise<string> {
-    try {
-      // Sum all user portfolio balances to get total platform value
-      const result = await db.select({ 
-        total: sql<string>`COALESCE(SUM(CAST(total_balance AS DECIMAL)), 0)` 
-      }).from(portfolios);
-      
-      const totalBalance = parseFloat(result[0]?.total || '0');
-      return totalBalance > 0 ? `$${totalBalance.toFixed(2)}` : '$0.00';
-    } catch (error) {
-      console.error('Error calculating platform revenue:', error);
-      return '$0.00';
-    }
-  }
-
-  async getPendingTradesCount(): Promise<number> {
-    try {
-      const result = await db.select({ 
-        count: sql<number>`count(*)` 
-      }).from(trades).where(eq(trades.adminApproval, 'pending'));
-      
-      return result[0]?.count || 0;
-    } catch (error) {
-      console.error('Error getting pending trades count:', error);
-      return 0;
-    }
   }
 
   async getActiveTradesCount(): Promise<number> {
