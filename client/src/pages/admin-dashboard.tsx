@@ -1602,31 +1602,57 @@ User Activity History:
 
           {/* Desktop Sidebar Navigation */}
           <div className="hidden lg:block lg:w-64 flex-shrink-0">
-            <Card className="shadow-lg border-0 sticky top-8">
-              <CardContent className="p-0">
-                <ScrollArea className="h-[calc(100vh-200px)]">
-                  <div className="p-4 space-y-2">
-                    {menuItems.map((item) => (
+            <Card className="shadow-lg border-0 sticky top-8 overflow-hidden">
+              <CardContent className="p-0 relative">
+                <ScrollArea className="h-[calc(100vh-200px)]" style={{ scrollBehavior: 'smooth' }}>
+                  <motion.div 
+                    className="p-4 space-y-2"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {menuItems.map((item, index) => (
                       <motion.button
                         key={item.id}
-                        whileHover={{ scale: 1.02 }}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05, duration: 0.3 }}
+                        whileHover={{ scale: 1.02, x: 5 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setActiveSection(item.id)}
-                        className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all ${
+                        className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-300 ${
                           activeSection === item.id
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200 shadow-sm'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm'
                         }`}
                       >
-                        <item.icon className={`h-5 w-5 ${activeSection === item.id ? item.color : 'text-gray-400'}`} />
+                        <motion.div
+                          animate={{ 
+                            rotate: activeSection === item.id ? 360 : 0,
+                            scale: activeSection === item.id ? 1.1 : 1
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <item.icon className={`h-5 w-5 ${activeSection === item.id ? item.color : 'text-gray-400'}`} />
+                        </motion.div>
                         <span className="font-medium">{item.label}</span>
                         {activeSection === item.id && (
-                          <ChevronRight className="h-4 w-4 ml-auto text-blue-600" />
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          >
+                            <ChevronRight className="h-4 w-4 ml-auto text-blue-600" />
+                          </motion.div>
                         )}
                       </motion.button>
                     ))}
-                  </div>
+                  </motion.div>
                 </ScrollArea>
+                
+                {/* Scroll indicators for desktop sidebar */}
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
               </CardContent>
             </Card>
           </div>
