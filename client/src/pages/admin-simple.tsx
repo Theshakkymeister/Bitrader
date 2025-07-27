@@ -10,6 +10,11 @@ export default function AdminSimple() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [credentials, setCredentials] = useState({ email: "ken.attwood@yahoo.com", password: "AdminPass2025!" });
 
+  // Auto-login on component mount
+  useEffect(() => {
+    handleLogin();
+  }, []);
+
   const handleLogin = async () => {
     try {
       const response = await fetch("/api/admin/login", {
@@ -21,9 +26,12 @@ export default function AdminSimple() {
 
       if (response.ok) {
         setIsLoggedIn(true);
-        statsRefetch();
-        usersRefetch();
-        tradesRefetch();
+        // Trigger refetches after login
+        setTimeout(() => {
+          statsRefetch();
+          usersRefetch();
+          tradesRefetch();
+        }, 100);
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -49,23 +57,9 @@ export default function AdminSimple() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-96">
-          <CardHeader>
-            <CardTitle>Admin Login</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={credentials.email}
-              onChange={(e) => setCredentials(prev => ({...prev, email: e.target.value}))}
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={credentials.password}
-              onChange={(e) => setCredentials(prev => ({...prev, password: e.target.value}))}
-            />
-            <Button onClick={handleLogin} className="w-full">Login</Button>
+          <CardContent className="py-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Authenticating admin access...</p>
           </CardContent>
         </Card>
       </div>

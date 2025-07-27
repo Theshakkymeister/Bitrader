@@ -24,6 +24,7 @@ import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminTest from "@/pages/admin-test";
 import AdminSimple from "@/pages/admin-simple";
+import AdminTrades from "@/pages/admin-trades";
 import NotFound from "@/pages/not-found";
 
 function MobileNav() {
@@ -369,6 +370,7 @@ function Router() {
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/test" component={AdminTest} />
       <Route path="/admin/simple" component={AdminSimple} />
+      <Route path="/admin/trades" component={AdminTrades} />
       
       {/* User authentication routes */}
       <Route path="/auth">
