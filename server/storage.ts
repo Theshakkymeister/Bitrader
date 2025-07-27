@@ -587,11 +587,35 @@ export class DatabaseStorage implements IStorage {
     return newTrade;
   }
 
-  async getTrades(userId: string): Promise<any[]> {
-    const userTrades = await db.select()
-      .from(trades)
-      .where(eq(trades.userId, userId))
-      .orderBy(desc(trades.createdAt));
+  async getTrades(userId: string, limit?: number): Promise<any[]> {
+    const selectQuery = db.select({
+      id: trades.id,
+      userId: trades.userId,
+      symbol: trades.symbol,
+      type: trades.type,
+      orderType: trades.orderType,
+      quantity: trades.quantity,
+      price: trades.price,
+      totalAmount: trades.totalAmount,
+      status: trades.status,
+      adminApproval: trades.adminApproval,
+      createdAt: trades.createdAt,
+      updatedAt: trades.updatedAt,
+      entryPrice: trades.entryPrice,
+      exitPrice: trades.exitPrice,
+      profitLoss: trades.profitLoss,
+      assetType: trades.assetType,
+      pair: trades.pair
+    })
+    .from(trades)
+    .where(eq(trades.userId, userId))
+    .orderBy(desc(trades.createdAt));
+    
+    if (limit) {
+      selectQuery.limit(limit);
+    }
+    
+    const userTrades = await selectQuery;
     return userTrades;
   }
 
