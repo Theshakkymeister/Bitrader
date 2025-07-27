@@ -367,7 +367,7 @@ function Router() {
     <Switch>
       {/* Admin routes - always accessible */}
       <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/admin/dashboard" component={AdminMobile} />
+      <Route path="/admin/dashboard" component={AdminTest} />
       <Route path="/admin/test" component={AdminTest} />
       <Route path="/admin/simple" component={AdminSimple} />
       <Route path="/admin/trades" component={AdminTrades} />
