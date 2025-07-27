@@ -234,7 +234,15 @@ export default function Wallets() {
     });
   };
 
-  const copyAddress = (address: string) => {
+  const copyAddress = (address: string | undefined) => {
+    if (!address) {
+      toast({
+        title: "No Address Available",
+        description: "This wallet doesn't have an address yet",
+        variant: "destructive"
+      });
+      return;
+    }
     navigator.clipboard.writeText(address);
     toast({
       title: "Address Copied",
@@ -250,7 +258,8 @@ export default function Wallets() {
     }));
   };
 
-  const formatAddress = (address: string, show: boolean) => {
+  const formatAddress = (address: string | undefined, show: boolean) => {
+    if (!address) return "No address available";
     if (!show) return "••••••••••••••••••••••••••••••••••••••••";
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
