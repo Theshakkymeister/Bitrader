@@ -159,6 +159,11 @@ export default function TradingPage() {
     queryKey: ['/api/trades'],
   });
 
+  // Debug logging
+  console.log('Trades data:', trades);
+  console.log('Trades loading:', tradesLoading);
+  console.log('Trades length:', trades?.length);
+
   const tradeMutation = useMutation({
     mutationFn: async (tradeData: any) => {
       const response = await apiRequest('POST', '/api/trades', tradeData);
@@ -290,75 +295,75 @@ export default function TradingPage() {
   // My Orders Page - Comprehensive Robinhood-style orders interface
   if (activeTab === 'orders') {
     return (
-      <div className="min-h-screen bg-black text-white p-4">
+      <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-2">My Orders</h1>
-            <p className="text-gray-400">Track all your trading orders and their status</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">My Orders</h1>
+            <p className="text-gray-600">Track all your trading orders and their status</p>
           </div>
 
           {/* Order Summary Stats */}
           <div className="grid grid-cols-4 gap-4 mb-6">
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-400">{trades.filter(t => t.adminApproval === 'approved').length}</div>
-                  <div className="text-sm text-gray-400">Approved</div>
+                  <div className="text-2xl font-bold text-green-600">{trades.filter(t => t.adminApproval === 'approved').length}</div>
+                  <div className="text-sm text-gray-500">Approved</div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{trades.filter(t => t.adminApproval === 'pending').length}</div>
-                  <div className="text-sm text-gray-400">Pending</div>
+                  <div className="text-2xl font-bold text-yellow-600">{trades.filter(t => t.adminApproval === 'pending').length}</div>
+                  <div className="text-sm text-gray-500">Pending</div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-red-400">{trades.filter(t => t.adminApproval === 'rejected').length}</div>
-                  <div className="text-sm text-gray-400">Rejected</div>
+                  <div className="text-2xl font-bold text-red-600">{trades.filter(t => t.adminApproval === 'rejected').length}</div>
+                  <div className="text-sm text-gray-500">Rejected</div>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-400">{trades.length}</div>
-                  <div className="text-sm text-gray-400">Total Orders</div>
+                  <div className="text-2xl font-bold text-blue-600">{trades.length}</div>
+                  <div className="text-sm text-gray-500">Total Orders</div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Orders List */}
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-white border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-gray-900 flex items-center gap-2">
                 <Clock className="w-5 h-5" />
                 Order History
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-gray-600">
                 Real-time order tracking with admin approval status
               </CardDescription>
             </CardHeader>
             <CardContent>
               {tradesLoading ? (
                 <div className="text-center py-12">
-                  <div className="w-8 h-8 border-2 border-gray-600 border-t-white rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-gray-400">Loading your orders...</p>
+                  <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600">Loading your orders...</p>
                 </div>
-              ) : trades.length === 0 ? (
+              ) : !trades || trades.length === 0 ? (
                 <div className="text-center py-12">
-                  <AlertCircle className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-300 mb-2">No Orders Yet</h3>
-                  <p className="text-gray-500 mb-4">Start trading to see your orders here</p>
+                  <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h3>
+                  <p className="text-gray-600 mb-4">Start trading to see your orders here</p>
                   <Button 
                     onClick={() => setActiveTab('trade')}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Place Your First Order
                   </Button>
@@ -366,30 +371,30 @@ export default function TradingPage() {
               ) : (
                 <div className="space-y-4">
                   {trades.map((trade) => (
-                    <div key={trade.id} className="p-4 rounded-lg bg-gray-800 border border-gray-700">
+                    <div key={trade.id} className="p-4 rounded-lg bg-gray-50 border border-gray-200">
                       <div className="flex items-center justify-between">
                         {/* Left Side - Order Info */}
                         <div className="flex items-center gap-4">
                           <div className={`w-3 h-3 rounded-full ${
-                            trade.adminApproval === 'approved' ? 'bg-green-400' :
-                            trade.adminApproval === 'pending' ? 'bg-yellow-400' :
-                            trade.adminApproval === 'rejected' ? 'bg-red-400' : 'bg-gray-400'
+                            trade.adminApproval === 'approved' ? 'bg-green-500' :
+                            trade.adminApproval === 'pending' ? 'bg-yellow-500' :
+                            trade.adminApproval === 'rejected' ? 'bg-red-500' : 'bg-gray-400'
                           }`} />
                           
                           <div>
                             <div className="flex items-center gap-2">
                               <span className={`font-semibold text-lg ${
-                                trade.type === 'buy' ? 'text-green-400' : 'text-red-400'
+                                trade.type === 'buy' ? 'text-green-600' : 'text-red-600'
                               }`}>
                                 {trade.type.toUpperCase()}
                               </span>
-                              <span className="text-white font-bold">{trade.symbol}</span>
+                              <span className="text-gray-900 font-bold">{trade.symbol}</span>
                               <Badge variant="outline" className="text-xs">
                                 {trade.assetType}
                               </Badge>
                             </div>
                             
-                            <div className="text-sm text-gray-400 mt-1">
+                            <div className="text-sm text-gray-600 mt-1">
                               {trade.quantity} shares • {trade.orderType} order
                             </div>
                             
@@ -402,14 +407,14 @@ export default function TradingPage() {
                         {/* Right Side - Status & Amount */}
                         <div className="text-right">
                           <div className="flex items-center gap-2 mb-2">
-                            {trade.adminApproval === 'approved' && <CheckCircle className="w-4 h-4 text-green-400" />}
-                            {trade.adminApproval === 'pending' && <Clock className="w-4 h-4 text-yellow-400" />}
-                            {trade.adminApproval === 'rejected' && <XCircle className="w-4 h-4 text-red-400" />}
+                            {trade.adminApproval === 'approved' && <CheckCircle className="w-4 h-4 text-green-500" />}
+                            {trade.adminApproval === 'pending' && <Clock className="w-4 h-4 text-yellow-500" />}
+                            {trade.adminApproval === 'rejected' && <XCircle className="w-4 h-4 text-red-500" />}
                             
                             <span className={`font-medium text-sm ${
-                              trade.adminApproval === 'approved' ? 'text-green-400' :
-                              trade.adminApproval === 'pending' ? 'text-yellow-400' :
-                              trade.adminApproval === 'rejected' ? 'text-red-400' : 'text-gray-400'
+                              trade.adminApproval === 'approved' ? 'text-green-600' :
+                              trade.adminApproval === 'pending' ? 'text-yellow-600' :
+                              trade.adminApproval === 'rejected' ? 'text-red-600' : 'text-gray-600'
                             }`}>
                               {trade.adminApproval === 'approved' ? 'Approved' :
                                trade.adminApproval === 'pending' ? 'Awaiting Approval' :
@@ -417,11 +422,11 @@ export default function TradingPage() {
                             </span>
                           </div>
                           
-                          <div className="text-white font-semibold">
+                          <div className="text-gray-900 font-semibold">
                             ${parseFloat(trade.totalAmount).toFixed(2)}
                           </div>
                           
-                          <div className="text-sm text-gray-400">
+                          <div className="text-sm text-gray-600">
                             @ ${parseFloat(trade.price).toFixed(2)}
                           </div>
                         </div>
@@ -439,18 +444,18 @@ export default function TradingPage() {
 
   // Trade Page (default) - Robinhood-style comprehensive trading interface
   return (
-    <div className="min-h-screen bg-black text-white p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Live Trading</h1>
-          <p className="text-gray-400">Professional trading platform with real-time market data</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Live Trading</h1>
+          <p className="text-gray-600">Professional trading platform with real-time market data</p>
           
           {/* Buying Power */}
-          <div className="mt-4 p-4 rounded-lg bg-gray-900 border border-green-500/30">
+          <div className="mt-4 p-4 rounded-lg bg-white border border-green-200 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Buying Power</span>
-              <span className="text-2xl font-bold text-green-400">$10,250.00</span>
+              <span className="text-gray-600">Buying Power</span>
+              <span className="text-2xl font-bold text-green-600">$10,250.00</span>
             </div>
           </div>
         </div>
@@ -458,13 +463,13 @@ export default function TradingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Trading Form - Left Side */}
           <div className="lg:col-span-2">
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-green-400" />
+                <CardTitle className="text-gray-900 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
                   Place Order
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-gray-600">
                   All orders require admin approval • Live market pricing
                 </CardDescription>
               </CardHeader>
@@ -473,40 +478,40 @@ export default function TradingPage() {
                   {/* Asset Selection */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-gray-300">Symbol</Label>
+                      <Label className="text-gray-700">Symbol</Label>
                       <Input
                         value={symbol}
                         onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                         placeholder="AAPL, TSLA, SPY..."
-                        className="bg-gray-800 border-gray-600 text-white placeholder-gray-500"
+                        className="border-gray-300"
                         required
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300">Asset Type</Label>
+                      <Label className="text-gray-700">Asset Type</Label>
                       <Select value={assetType} onValueChange={setAssetType}>
-                        <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                        <SelectTrigger className="border-gray-300">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-600">
-                          <SelectItem value="stock" className="text-white">📈 Stock</SelectItem>
-                          <SelectItem value="crypto" className="text-white">₿ Cryptocurrency</SelectItem>
-                          <SelectItem value="etf" className="text-white">📊 ETF</SelectItem>
-                          <SelectItem value="option" className="text-white">⚡ Options</SelectItem>
+                        <SelectContent>
+                          <SelectItem value="stock">📈 Stock</SelectItem>
+                          <SelectItem value="crypto">₿ Cryptocurrency</SelectItem>
+                          <SelectItem value="etf">📊 ETF</SelectItem>
+                          <SelectItem value="option">⚡ Options</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
                   {/* Buy/Sell Toggle - Robinhood Style */}
-                  <div className="flex rounded-lg overflow-hidden bg-gray-800">
+                  <div className="flex rounded-lg overflow-hidden border border-gray-300">
                     <Button
                       type="button"
                       onClick={() => setTradeType("buy")}
                       className={`flex-1 rounded-none ${
                         tradeType === "buy"
                           ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                       }`}
                     >
                       Buy
@@ -517,7 +522,7 @@ export default function TradingPage() {
                       className={`flex-1 rounded-none ${
                         tradeType === "sell"
                           ? "bg-red-600 hover:bg-red-700 text-white"
-                          : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                       }`}
                     >
                       Sell
@@ -526,29 +531,29 @@ export default function TradingPage() {
 
                   {/* Order Type */}
                   <div>
-                    <Label className="text-gray-300">Order Type</Label>
+                    <Label className="text-gray-700">Order Type</Label>
                     <Select value={orderType} onValueChange={(value: "market" | "limit" | "stop") => setOrderType(value)}>
-                      <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                      <SelectTrigger className="border-gray-300">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-600">
-                        <SelectItem value="market" className="text-white">Market Order</SelectItem>
-                        <SelectItem value="limit" className="text-white">Limit Order</SelectItem>
-                        <SelectItem value="stop" className="text-white">Stop Loss</SelectItem>
+                      <SelectContent>
+                        <SelectItem value="market">Market Order</SelectItem>
+                        <SelectItem value="limit">Limit Order</SelectItem>
+                        <SelectItem value="stop">Stop Loss</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   {/* Quantity */}
                   <div>
-                    <Label className="text-gray-300">Quantity</Label>
+                    <Label className="text-gray-700">Quantity</Label>
                     <Input
                       type="number"
                       step="any"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
                       placeholder="Number of shares"
-                      className="bg-gray-800 border-gray-600 text-white placeholder-gray-500"
+                      className="border-gray-300"
                       required
                     />
                   </div>
@@ -556,14 +561,14 @@ export default function TradingPage() {
                   {/* Conditional Price Fields */}
                   {orderType === "limit" && (
                     <div>
-                      <Label className="text-gray-300">Limit Price</Label>
+                      <Label className="text-gray-700">Limit Price</Label>
                       <Input
                         type="number"
                         step="any"
                         value={limitPrice}
                         onChange={(e) => setLimitPrice(e.target.value)}
                         placeholder="Price per share"
-                        className="bg-gray-800 border-gray-600 text-white placeholder-gray-500"
+                        className="border-gray-300"
                         required
                       />
                     </div>
@@ -571,47 +576,47 @@ export default function TradingPage() {
 
                   {orderType === "stop" && (
                     <div>
-                      <Label className="text-gray-300">Stop Price</Label>
+                      <Label className="text-gray-700">Stop Price</Label>
                       <Input
                         type="number"
                         step="any"
                         value={stopPrice}
                         onChange={(e) => setStopPrice(e.target.value)}
                         placeholder="Stop loss price"
-                        className="bg-gray-800 border-gray-600 text-white placeholder-gray-500"
+                        className="border-gray-300"
                         required
                       />
                     </div>
                   )}
 
                   {/* Order Summary */}
-                  <div className="p-4 rounded-lg bg-gray-800 border border-gray-600">
-                    <h3 className="text-white font-semibold mb-3">Order Summary</h3>
+                  <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                    <h3 className="text-gray-900 font-semibold mb-3">Order Summary</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Action:</span>
-                        <span className={`font-medium ${tradeType === 'buy' ? 'text-green-400' : 'text-red-400'}`}>
+                        <span className="text-gray-600">Action:</span>
+                        <span className={`font-medium ${tradeType === 'buy' ? 'text-green-600' : 'text-red-600'}`}>
                           {tradeType.toUpperCase()} {symbol || 'SYMBOL'}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Quantity:</span>
-                        <span className="text-white">{quantity || '0'} shares</span>
+                        <span className="text-gray-600">Quantity:</span>
+                        <span className="text-gray-900">{quantity || '0'} shares</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Order Type:</span>
-                        <span className="text-white">{orderType}</span>
+                        <span className="text-gray-600">Order Type:</span>
+                        <span className="text-gray-900">{orderType}</span>
                       </div>
                       {orderType === "limit" && limitPrice && (
                         <div className="flex justify-between">
-                          <span className="text-gray-400">Limit Price:</span>
-                          <span className="text-white">${limitPrice}</span>
+                          <span className="text-gray-600">Limit Price:</span>
+                          <span className="text-gray-900">${limitPrice}</span>
                         </div>
                       )}
-                      <div className="border-t border-gray-600 pt-2 mt-2">
+                      <div className="border-t border-gray-300 pt-2 mt-2">
                         <div className="flex justify-between">
-                          <span className="text-gray-400">Estimated Total:</span>
-                          <span className="text-white font-semibold">
+                          <span className="text-gray-600">Estimated Total:</span>
+                          <span className="text-gray-900 font-semibold">
                             ${quantity && limitPrice ? (parseFloat(quantity) * parseFloat(limitPrice)).toFixed(2) : '0.00'}
                           </span>
                         </div>
@@ -652,9 +657,9 @@ export default function TradingPage() {
           {/* Market Information & Quick Stats - Right Side */}
           <div className="space-y-4">
             {/* Popular Stocks */}
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white text-sm">Popular Today</CardTitle>
+                <CardTitle className="text-gray-900 text-sm">Popular Today</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -666,11 +671,11 @@ export default function TradingPage() {
                 ].map((stock) => (
                   <div key={stock.symbol} className="flex items-center justify-between">
                     <div>
-                      <div className="text-white font-medium">{stock.symbol}</div>
-                      <div className="text-gray-400 text-sm">{stock.price}</div>
+                      <div className="text-gray-900 font-medium">{stock.symbol}</div>
+                      <div className="text-gray-600 text-sm">{stock.price}</div>
                     </div>
                     <div className={`text-sm font-medium ${
-                      stock.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
+                      stock.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
                     }`}>
                       {stock.change}
                     </div>
@@ -680,9 +685,9 @@ export default function TradingPage() {
             </Card>
 
             {/* Crypto Markets */}
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white text-sm">Crypto Markets</CardTitle>
+                <CardTitle className="text-gray-900 text-sm">Crypto Markets</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -693,12 +698,12 @@ export default function TradingPage() {
                 ].map((crypto) => (
                   <div key={crypto.symbol} className="flex items-center justify-between">
                     <div>
-                      <div className="text-white font-medium">{crypto.symbol}</div>
-                      <div className="text-gray-400 text-sm">{crypto.price}</div>
+                      <div className="text-gray-900 font-medium">{crypto.symbol}</div>
+                      <div className="text-gray-600 text-sm">{crypto.price}</div>
                     </div>
                     <div className={`text-sm font-medium ${
-                      crypto.change.startsWith('+') && !crypto.change.includes('0.0') ? 'text-green-400' : 
-                      crypto.change.startsWith('-') ? 'text-red-400' : 'text-gray-400'
+                      crypto.change.startsWith('+') && !crypto.change.includes('0.0') ? 'text-green-600' : 
+                      crypto.change.startsWith('-') ? 'text-red-600' : 'text-gray-600'
                     }`}>
                       {crypto.change}
                     </div>
@@ -708,9 +713,9 @@ export default function TradingPage() {
             </Card>
 
             {/* ETF Options */}
-            <Card className="bg-gray-900 border-gray-700">
+            <Card className="bg-white border-gray-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white text-sm">Popular ETFs</CardTitle>
+                <CardTitle className="text-gray-900 text-sm">Popular ETFs</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -720,10 +725,10 @@ export default function TradingPage() {
                 ].map((etf) => (
                   <div key={etf.symbol} className="flex items-center justify-between">
                     <div>
-                      <div className="text-white font-medium">{etf.symbol}</div>
-                      <div className="text-gray-400 text-sm">{etf.price}</div>
+                      <div className="text-gray-900 font-medium">{etf.symbol}</div>
+                      <div className="text-gray-600 text-sm">{etf.price}</div>
                     </div>
-                    <div className="text-green-400 text-sm font-medium">
+                    <div className="text-green-600 text-sm font-medium">
                       {etf.change}
                     </div>
                   </div>
