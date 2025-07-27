@@ -74,12 +74,6 @@ export interface IStorage {
   getActiveTradesCount(): Promise<number>;
   getPendingDepositsCount(): Promise<number>;
   
-  // Trade profit tracking methods
-  getTradeById(id: string): Promise<Trade | undefined>;
-  closeTrade(id: string): Promise<Trade>;
-  updateTradePrice(id: string, currentPrice: number): Promise<Trade>;
-  updatePortfolioBalance(userId: string, amount: number): Promise<Portfolio>;
-  
   // Portfolio operations
   getPortfolio(userId: string): Promise<Portfolio | undefined>;
   createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
@@ -112,6 +106,12 @@ export interface IStorage {
   createStockHolding(holding: InsertStockHolding): Promise<StockHolding>;
   updateStockHolding(id: string, updates: Partial<InsertStockHolding>): Promise<StockHolding>;
   
+  // Trade profit tracking methods
+  getTradeById(id: string): Promise<Trade | undefined>;
+  closeTrade(id: string): Promise<Trade>;
+  updateTradePrice(id: string, currentPrice: number): Promise<Trade>;
+  updatePortfolioBalance(userId: string, amount: number): Promise<Portfolio>;
+  
   // Admin operations
   getAdminByEmail(email: string): Promise<AdminUser | undefined>;
   createAdmin(admin: InsertAdminUser): Promise<AdminUser>;
@@ -141,7 +141,8 @@ export class DatabaseStorage implements IStorage {
   constructor() {
     this.sessionStore = new PostgresStore({ 
       pool, 
-      createTableIfMissing: true 
+      createTableIfMissing: true,
+      tableName: 'session'
     });
   }
   // User operations
