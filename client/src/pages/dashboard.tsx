@@ -151,31 +151,51 @@ export default function Dashboard() {
   const todayPLPercent = portfolio?.todayPL || 0;
   const todayPL = portfolioValue * (todayPLPercent / 100);
 
-  // Holdings data - Real data from portfolio
-  const getHolding = (symbol: string, shares: number) => {
+  // Holdings data - Real data from user's actual positions
+  const getHolding = (symbol: string, position?: any) => {
     const asset = allAssets.find(a => a.symbol === symbol);
     if (!asset) return null;
     
-    // Find actual wallet balance if it's a crypto
+    // Check if this is a crypto asset that has wallet data
     const wallet = wallets.find((w: any) => w.symbol === symbol);
-    const actualValue = wallet ? parseFloat(wallet.usdValue || '0') : 0;
     
-    return {
-      ...asset,
-      shares: wallet ? parseFloat(wallet.balance || '0') : 0,
-      value: actualValue
-    };
+    if (position) {
+      // Stock position - use live position data
+      const positionWithLivePrice = positionsWithLivePrices.find(p => p.symbol === symbol);
+      const quantity = parseFloat(position.quantity || '0');
+      const currentValue = positionWithLivePrice?.currentValue || (parseFloat(position.price || '0') * quantity);
+      
+      return {
+        ...asset,
+        shares: quantity,
+        value: currentValue,
+        profitLoss: positionWithLivePrice?.profitLoss || 0,
+        profitLossPercent: positionWithLivePrice?.profitLossPercent || 0
+      };
+    } else if (wallet && parseFloat(wallet.balance || '0') > 0) {
+      // Crypto wallet with balance
+      return {
+        ...asset,
+        shares: parseFloat(wallet.balance || '0'),
+        value: parseFloat(wallet.usdValue || '0'),
+        profitLoss: 0, // Crypto wallets don't track P&L currently
+        profitLossPercent: 0
+      };
+    }
+    
+    return null;
   };
 
+  // Create holdings from actual user positions and wallet balances
+  const stockPositions = positions.filter(p => !['BTC', 'ETH', 'SOL', 'USDT', 'USDC'].includes(p.symbol));
+  const cryptoSymbols = ['BTC', 'ETH', 'SOL', 'USDT', 'USDC'];
+  
   const holdings = [
-    getHolding('AAPL', 0),
-    getHolding('MSFT', 0),
-    getHolding('TSLA', 0),
-    getHolding('GOOGL', 0),
-    getHolding('BTC', 0),
-    getHolding('ETH', 0),
-    getHolding('SOL', 0)
-  ].filter(h => h !== null);
+    // Add all stock positions
+    ...stockPositions.map(position => getHolding(position.symbol, position)),
+    // Add crypto wallets with balances > 0
+    ...cryptoSymbols.map(symbol => getHolding(symbol)).filter(h => h !== null)
+  ].filter(h => h !== null && h.value > 0); // Only show holdings with actual value
 
   const totalStocks = holdings.filter(h => !['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
