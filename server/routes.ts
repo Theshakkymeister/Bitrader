@@ -126,6 +126,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update wallet balance (for deposit approvals)
+  app.patch('/api/wallets/:symbol/balance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { symbol } = req.params;
+      const { amount, operation = 'add' } = req.body;
+      
+      if (!amount || isNaN(parseFloat(amount))) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+      
+      const wallet = await storage.getUserWallet(userId, symbol.toUpperCase());
+      if (!wallet) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+      
+      const currentBalance = parseFloat(wallet.balance?.toString() || '0');
+      const changeAmount = parseFloat(amount);
+      
+      let newBalance: number;
+      if (operation === 'add') {
+        newBalance = currentBalance + changeAmount;
+      } else if (operation === 'subtract') {
+        newBalance = Math.max(0, currentBalance - changeAmount);
+      } else {
+        return res.status(400).json({ message: "Operation must be 'add' or 'subtract'" });
+      }
+      
+      // Get current market price for USD value calculation (simplified)
+      const usdValue = newBalance * 50000; // Placeholder price calculation
+      
+      const updatedWallet = await storage.updateUserWallet(wallet.id, {
+        balance: newBalance.toFixed(8),
+        usdValue: usdValue.toFixed(2),
+        lastSyncAt: new Date()
+      });
+      
+      // Update portfolio total balance
+      const userWallets = await storage.getUserWallets(userId);
+      const totalValue = userWallets.reduce((sum, w) => {
+        const balance = parseFloat(w.balance?.toString() || '0');
+        const value = parseFloat(w.usdValue?.toString() || '0');
+        return sum + (w.id === wallet.id ? usdValue : value);
+      }, 0);
+      
+      const portfolio = await storage.getPortfolio(userId);
+      if (portfolio) {
+        await storage.updatePortfolio(portfolio.id, {
+          totalBalance: totalValue.toFixed(2),
+          updatedAt: new Date()
+        });
+      }
+      
+      res.json(updatedWallet);
+    } catch (error) {
+      console.error("Error updating wallet balance:", error);
+      res.status(500).json({ message: "Failed to update wallet balance" });
+    }
+  });
+
   // Stock holdings - REAL STOCK POSITIONS
   app.get('/api/stocks', isAuthenticated, async (req: any, res) => {
     try {

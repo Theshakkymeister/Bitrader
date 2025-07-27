@@ -333,6 +333,13 @@ export function registerAdminRoutes(app: Express) {
       const { notes } = req.body;
       const adminId = req.adminUser.id;
 
+      // Get the deposit request details first
+      const depositRequest = await storage.getDepositRequestById(id);
+      if (!depositRequest) {
+        return res.status(404).json({ message: "Deposit request not found" });
+      }
+
+      // Update the deposit request status
       const updatedRequest = await storage.updateDepositRequest(id, {
         status: 'approved',
         adminApproval: 'approved',
@@ -341,7 +348,48 @@ export function registerAdminRoutes(app: Express) {
         notes
       });
 
-      await logAdminActivity(adminId, 'APPROVE', 'DEPOSIT_REQUEST', id, { notes }, req);
+      // Update user wallet balance
+      const wallet = await storage.getUserWallet(depositRequest.userId, depositRequest.cryptoSymbol);
+      if (wallet) {
+        const currentBalance = parseFloat(wallet.balance?.toString() || '0');
+        const depositAmount = parseFloat(depositRequest.amount?.toString() || '0');
+        const newBalance = currentBalance + depositAmount;
+        
+        // Calculate USD value using stored USD value ratio
+        const depositUsdValue = parseFloat(depositRequest.usdValue?.toString() || '0');
+        const depositCryptoAmount = parseFloat(depositRequest.amount?.toString() || '0');
+        const pricePerCrypto = depositCryptoAmount > 0 ? depositUsdValue / depositCryptoAmount : 50000;
+        const usdValue = newBalance * pricePerCrypto;
+        
+        await storage.updateUserWallet(wallet.id, {
+          balance: newBalance.toFixed(8),
+          usdValue: usdValue.toFixed(2),
+          lastSyncAt: new Date()
+        });
+
+        // Update portfolio total balance
+        const userWallets = await storage.getUserWallets(depositRequest.userId);
+        const totalValue = userWallets.reduce((sum, w) => {
+          const balance = parseFloat(w.balance?.toString() || '0');
+          const value = parseFloat(w.usdValue?.toString() || '0');
+          return sum + (w.id === wallet.id ? usdValue : value);
+        }, 0);
+        
+        const portfolio = await storage.getPortfolio(depositRequest.userId);
+        if (portfolio) {
+          await storage.updatePortfolio(portfolio.id, {
+            totalBalance: totalValue.toFixed(2),
+            updatedAt: new Date()
+          });
+        }
+      }
+
+      await logAdminActivity(adminId, 'APPROVE', 'DEPOSIT_REQUEST', id, { 
+        notes, 
+        amount: depositRequest.amount,
+        crypto: depositRequest.cryptoSymbol,
+        userId: depositRequest.userId
+      }, req);
 
       res.json(updatedRequest);
     } catch (error) {

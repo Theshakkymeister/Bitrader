@@ -665,6 +665,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(depositRequests.createdAt));
   }
 
+  async getDepositRequestById(id: string): Promise<DepositRequest | undefined> {
+    const [request] = await db.select().from(depositRequests)
+      .where(eq(depositRequests.id, id));
+    return request;
+  }
+
   // Enhanced getUserDetails with real-time data
   async getUserDetails(id: string): Promise<any> {
     try {

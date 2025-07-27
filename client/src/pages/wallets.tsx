@@ -62,39 +62,56 @@ export default function Wallets() {
     queryKey: ['/api/crypto-addresses'],
   });
 
+  // Fetch user wallet balances from database
+  const { data: userWallets = [], refetch: refetchWallets } = useQuery({
+    queryKey: ['/api/wallets'],
+    refetchInterval: 5000, // Refresh every 5 seconds to show updated balances
+  });
+
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
     const asset = allAssets.find(a => a.symbol === symbol);
     return asset ? asset.price : 0;
   };
 
-  // Wallet data with $0.00 values for new users without deposits
+  // Merge database balances with wallet display data
+  const getWalletBalance = (symbol: string) => {
+    const userWallet = userWallets.find((w: any) => w.symbol === symbol);
+    return userWallet ? parseFloat(userWallet.balance || '0') : 0;
+  };
+
+  const getWalletUsdValue = (symbol: string) => {
+    const userWallet = userWallets.find((w: any) => w.symbol === symbol);
+    return userWallet ? parseFloat(userWallet.usdValue || '0') : 0;
+  };
+
+  // Wallet data with real balances from database
   const wallets: WalletData[] = [
     {
       symbol: "BTC",
       name: "Bitcoin",
-      balance: 0.00,
-      usdValue: 0.00,
+      balance: getWalletBalance("BTC"),
+      usdValue: getWalletUsdValue("BTC"),
       address: cryptoAddresses.find(addr => addr.symbol === 'BTC')?.address,
       icon: SiBitcoin,
       color: "text-orange-500",
-      change24h: 0.00
+      change24h: -2.45
     },
     {
       symbol: "ETH", 
       name: "Ethereum",
-      balance: 0.00,
-      usdValue: 0.00,
+      balance: getWalletBalance("ETH"),
+      usdValue: getWalletUsdValue("ETH"),
       address: cryptoAddresses.find(addr => addr.symbol === 'ETH')?.address,
       icon: SiEthereum,
       color: "text-blue-500",
-      change24h: 0.00
+      change24h: 1.82
     },
     {
       symbol: "USDT",
       name: "Tether USD",
-      balance: 0.00,
-      usdValue: 0.00,
+      balance: getWalletBalance("USDT"),
+      usdValue: getWalletUsdValue("USDT"),
       address: cryptoAddresses.find(addr => addr.symbol === 'USDT')?.address,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-green-500 rounded-full flex items-center justify-center text-white font-bold`}>
@@ -102,13 +119,13 @@ export default function Wallets() {
         </div>
       ),
       color: "text-green-500",
-      change24h: 0.00
+      change24h: 0.01
     },
     {
       symbol: "SOL",
       name: "Solana",
-      balance: 0.00,
-      usdValue: 0.00,
+      balance: getWalletBalance("SOL"),
+      usdValue: getWalletUsdValue("SOL"),
       address: cryptoAddresses.find(addr => addr.symbol === 'SOL')?.address,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-purple-500 rounded-full flex items-center justify-center text-white font-bold`}>
@@ -116,13 +133,13 @@ export default function Wallets() {
         </div>
       ),
       color: "text-purple-500",
-      change24h: 0.00
+      change24h: 5.23
     },
     {
       symbol: "USDC",
       name: "USD Coin",
-      balance: 0.00,
-      usdValue: 0.00,
+      balance: getWalletBalance("USDC"),
+      usdValue: getWalletUsdValue("USDC"),
       address: cryptoAddresses.find(addr => addr.symbol === 'USDC')?.address,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-blue-600 rounded-full flex items-center justify-center text-white font-bold`}>
