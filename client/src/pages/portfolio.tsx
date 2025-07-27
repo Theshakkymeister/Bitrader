@@ -177,7 +177,7 @@ export default function Portfolio() {
   const totalPortfolioValue = totalStockValue + totalCryptoValue;
   
   const totalGainLoss = holdings.reduce((sum, h) => sum + (h.change * h.shares), 0);
-  const totalGainLossPercent = (totalGainLoss / (totalPortfolioValue - totalGainLoss)) * 100;
+  const totalGainLossPercent = totalPortfolioValue > 0 ? (totalGainLoss / (totalPortfolioValue - totalGainLoss)) * 100 : 0;
 
   // Simulate real-time updates
   useEffect(() => {
@@ -247,7 +247,7 @@ export default function Portfolio() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalStockValue)}</div>
             <div className="text-sm text-gray-500 mt-1">
-              {((totalStockValue / totalPortfolioValue) * 100).toFixed(1)}% of portfolio
+              {totalPortfolioValue > 0 ? ((totalStockValue / totalPortfolioValue) * 100).toFixed(1) : '0.0'}% of portfolio
             </div>
           </CardContent>
         </Card>
@@ -259,7 +259,7 @@ export default function Portfolio() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalCryptoValue)}</div>
             <div className="text-sm text-gray-500 mt-1">
-              {((totalCryptoValue / totalPortfolioValue) * 100).toFixed(1)}% of portfolio
+              {totalPortfolioValue > 0 ? ((totalCryptoValue / totalPortfolioValue) * 100).toFixed(1) : '0.0'}% of portfolio
             </div>
           </CardContent>
         </Card>
@@ -287,9 +287,9 @@ export default function Portfolio() {
             </Select>
           </div>
         </CardHeader>
-        <CardContent className="p-8">
-          <div className="h-96 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border-2 border-gray-200 rounded-xl mx-auto w-full">
-            <svg className="w-full h-full p-4" viewBox="0 0 800 280" preserveAspectRatio="none">
+        <CardContent className="p-6">
+          <div className="h-96 relative bg-gradient-to-br from-slate-50 via-white to-slate-50 border-2 border-gray-200 rounded-xl mx-auto max-w-full overflow-hidden">
+            <svg className="w-full h-full p-4" viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet">
               <defs>
                 <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#059669" stopOpacity="0.15"/>
@@ -392,20 +392,20 @@ export default function Portfolio() {
               </div>
             </div>
             
-            {/* Chart value display - centered with the green line */}
-            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 translate-x-8 text-center portfolio-value-display">
+            {/* Chart value display - properly centered */}
+            <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-center z-10">
               <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-5 shadow-lg border-2 border-green-200">
                 <div className="text-center space-y-3">
                   {/* Portfolio Value Label */}
                   <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Current Portfolio Value</div>
                   
                   {/* Current Value */}
-                  <div className="text-4xl font-bold text-green-600">$25,235.99</div>
+                  <div className="text-4xl font-bold text-gray-600">{formatCurrency(totalPortfolioValue)}</div>
                   
                   {/* Today's Performance */}
-                  <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50/30 rounded-lg py-2 px-4">
-                    <span className="text-lg font-semibold">+$373.49</span>
-                    <span className="text-sm font-medium">(+1.48%) Today</span>
+                  <div className={`flex items-center justify-center space-x-2 ${totalGainLoss >= 0 ? 'text-green-600 bg-green-50/30' : 'text-red-600 bg-red-50/30'} rounded-lg py-2 px-4`}>
+                    <span className="text-lg font-semibold">{showValues ? `${totalGainLoss >= 0 ? '+' : ''}${formatCurrency(Math.abs(totalGainLoss))}` : "••••••••"}</span>
+                    <span className="text-sm font-medium">{showValues ? `(${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%) Today` : "••••••••"}</span>
                   </div>
                 </div>
               </div>
