@@ -132,6 +132,9 @@ export interface IStorage {
   // Admin logs operations
   createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
   getAdminLogs(adminId?: string, limit?: number): Promise<AdminLog[]>;
+  
+  // Admin trade management
+  getAllTradesForAdmin(limit?: number, offset?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -473,6 +476,31 @@ export class DatabaseStorage implements IStorage {
     }
     return await query.orderBy(desc(adminLogs.createdAt)).limit(limit);
   }
+
+  // Admin trade management operations
+  async getAllTradesForAdmin(limit = 50, offset = 0): Promise<any[]> {
+    const allTrades = await db
+      .select({
+        id: trades.id,
+        userId: trades.userId,
+        symbol: trades.symbol,
+        type: trades.type,
+        quantity: trades.quantity,
+        price: trades.price,
+        status: trades.status,
+        createdAt: trades.createdAt,
+        updatedAt: trades.updatedAt,
+        username: users.username,
+        email: users.email
+      })
+      .from(trades)
+      .leftJoin(users, eq(trades.userId, users.id))
+      .orderBy(desc(trades.createdAt))
+      .limit(limit)
+      .offset(offset);
+    
+    return allTrades;
+  }
   async getUserDetails(id: string): Promise<any> {
     // Get user basic info
     const user = await this.getUser(id);
@@ -507,7 +535,7 @@ export class DatabaseStorage implements IStorage {
         totalBalance: portfolio.totalBalance || '0',
         buyingPower: '0', // Not in current schema
         totalProfitLoss: '0', // Not in current schema  
-        todayPL: portfolio.todayPl || '0',
+        todayPL: portfolio.todayPL || '0',
         winRate: portfolio.winRate || '0',
         activeAlgorithms: portfolio.activeAlgorithms || 0
       } : {
