@@ -870,16 +870,16 @@ User Activity History:
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label className="text-sm font-medium text-gray-500">Total Value</Label>
-                        <p className="text-lg font-semibold">${userDetails.portfolio.totalValue.toFixed(2)}</p>
+                        <p className="text-lg font-semibold">${typeof userDetails.portfolio.totalValue === 'number' ? userDetails.portfolio.totalValue.toFixed(2) : parseFloat(userDetails.portfolio.totalValue || '0').toFixed(2)}</p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-gray-500">Buying Power</Label>
-                        <p className="text-lg font-semibold text-green-600">${userDetails.portfolio.buyingPower.toFixed(2)}</p>
+                        <p className="text-lg font-semibold text-green-600">${typeof userDetails.portfolio.buyingPower === 'number' ? userDetails.portfolio.buyingPower.toFixed(2) : parseFloat(userDetails.portfolio.buyingPower || '0').toFixed(2)}</p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-gray-500">P&L</Label>
                         <p className={`text-lg font-semibold ${userDetails.portfolio.totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${userDetails.portfolio.totalProfitLoss.toFixed(2)} ({userDetails.portfolio.totalGainLossPercentage.toFixed(2)}%)
+                          ${typeof userDetails.portfolio.totalProfitLoss === 'number' ? userDetails.portfolio.totalProfitLoss.toFixed(2) : parseFloat(userDetails.portfolio.totalProfitLoss || '0').toFixed(2)} ({typeof userDetails.portfolio.totalGainLossPercentage === 'number' ? userDetails.portfolio.totalGainLossPercentage.toFixed(2) : parseFloat(userDetails.portfolio.totalGainLossPercentage || '0').toFixed(2)}%)
                         </p>
                       </div>
                     </div>
@@ -900,8 +900,8 @@ User Activity History:
                         <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">{balance.currency}</span>
                           <div className="text-right">
-                            <p className="font-semibold">{balance.balance.toFixed(8)}</p>
-                            <p className="text-sm text-gray-500">${balance.usdValue.toFixed(2)}</p>
+                            <p className="font-semibold">{typeof balance.balance === 'number' ? balance.balance.toFixed(8) : parseFloat(balance.balance || '0').toFixed(8)}</p>
+                            <p className="text-sm text-gray-500">${typeof balance.usdValue === 'number' ? balance.usdValue.toFixed(2) : parseFloat(balance.usdValue || '0').toFixed(2)}</p>
                           </div>
                         </div>
                       ))}
@@ -946,7 +946,7 @@ User Activity History:
                             <p className="text-sm text-gray-500">{trade.type} • {trade.quantity} shares</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">${trade.price.toFixed(2)}</p>
+                            <p className="font-semibold">${typeof trade.price === 'number' ? trade.price.toFixed(2) : parseFloat(trade.price || '0').toFixed(2)}</p>
                             <Badge variant={
                               trade.adminApproval === 'approved' ? 'default' : 
                               trade.adminApproval === 'pending' ? 'secondary' : 'destructive'
