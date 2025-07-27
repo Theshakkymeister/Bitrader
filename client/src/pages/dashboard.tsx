@@ -149,7 +149,7 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <div className="h-64">
+        <div className="h-64 relative">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={portfolioChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -181,11 +181,23 @@ export default function Dashboard() {
                 dataKey="value" 
                 stroke="#10b981" 
                 strokeWidth={3}
-                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                dot={false}
                 activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#ffffff' }}
               />
             </LineChart>
           </ResponsiveContainer>
+          
+          {/* Live indicator dot overlay */}
+          <div className="absolute top-[20%] right-[8%] transform -translate-x-1/2 -translate-y-1/2">
+            <div className="relative">
+              {/* Pulsing ring */}
+              <div className="absolute inset-0 w-4 h-4 bg-green-500 rounded-full animate-ping opacity-75"></div>
+              {/* Static outer ring */}
+              <div className="absolute inset-1 w-2 h-2 bg-green-500 rounded-full opacity-40"></div>
+              {/* Center dot */}
+              <div className="relative w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-lg"></div>
+            </div>
+          </div>
         </div>
       </div>
 
