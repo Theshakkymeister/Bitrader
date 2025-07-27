@@ -51,110 +51,11 @@ export default function Portfolio() {
     return asset ? asset.price : 0;
   };
 
-  // Holdings data - $0.00 until deposits are made and approved by admin
-  const holdings: Holding[] = [
-    // Stock Holdings - All start at $0.00 until deposits approved
-    {
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      shares: 0, // No shares until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("AAPL"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: SiApple,
-      color: "text-gray-700",
-      type: "stock"
-    },
-    {
-      symbol: "TSLA", 
-      name: "Tesla, Inc.",
-      shares: 0, // No shares until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("TSLA"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: SiTesla,
-      color: "text-red-500",
-      type: "stock"
-    },
-    {
-      symbol: "GOOGL",
-      name: "Alphabet Inc.",
-      shares: 0, // No shares until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("GOOGL"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: SiGoogle,
-      color: "text-blue-500",
-      type: "stock"
-    },
-    {
-      symbol: "MSFT",
-      name: "Microsoft Corp.",
-      shares: 0, // No shares until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("MSFT"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: ({ className }: { className: string }) => (
-        <div className={`${className} bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold`}>
-          MS
-        </div>
-      ),
-      color: "text-blue-600",
-      type: "stock"
-    },
-    // Crypto Holdings - All start at $0.00 until deposits approved
-    {
-      symbol: "BTC",
-      name: "Bitcoin",
-      shares: 0, // No coins until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("BTC"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: SiBitcoin,
-      color: "text-orange-500",
-      type: "crypto"
-    },
-    {
-      symbol: "ETH",
-      name: "Ethereum",
-      shares: 0, // No coins until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("ETH"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: SiEthereum,
-      color: "text-blue-500",
-      type: "crypto"
-    },
-    {
-      symbol: "SOL",
-      name: "Solana",
-      shares: 0, // No coins until deposits approved
-      avgPrice: 0.00,
-      currentPrice: getAssetPrice("SOL"),
-      value: 0.00, // $0.00 until deposits approved
-      change: 0.00,
-      changePercent: 0.00,
-      icon: ({ className }: { className: string }) => (
-        <div className={`${className} bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold`}>
-          S
-        </div>
-      ),
-      color: "text-purple-500",
-      type: "crypto"
-    }
-  ];
+  // Holdings data - Empty until user makes actual purchases
+  const holdings: Holding[] = [];
+  
+  // Check if user has any actual holdings
+  const hasHoldings = holdings.length > 0;
 
   const stockHoldings = holdings.filter(h => h.type === 'stock');
   const cryptoHoldings = holdings.filter(h => h.type === 'crypto');
@@ -400,12 +301,22 @@ export default function Portfolio() {
                   <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Current Portfolio Value</div>
                   
                   {/* Current Value */}
-                  <div className="text-4xl font-bold text-gray-600">{formatCurrency(totalPortfolioValue)}</div>
+                  <div className="text-4xl font-bold text-gray-600">{hasHoldings ? formatCurrency(totalPortfolioValue) : "$0.00"}</div>
                   
                   {/* Today's Performance */}
-                  <div className={`flex items-center justify-center space-x-2 ${totalGainLoss >= 0 ? 'text-green-600 bg-green-50/30' : 'text-red-600 bg-red-50/30'} rounded-lg py-2 px-4`}>
-                    <span className="text-lg font-semibold">{showValues ? `${totalGainLoss >= 0 ? '+' : ''}${formatCurrency(Math.abs(totalGainLoss))}` : "••••••••"}</span>
-                    <span className="text-sm font-medium">{showValues ? `(${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%) Today` : "••••••••"}</span>
+                  <div className={`flex items-center justify-center space-x-2 ${hasHoldings && totalGainLoss >= 0 ? 'text-green-600 bg-green-50/30' : hasHoldings && totalGainLoss < 0 ? 'text-red-600 bg-red-50/30' : 'text-gray-600 bg-gray-50/30'} rounded-lg py-2 px-4`}>
+                    <span className="text-lg font-semibold">
+                      {hasHoldings 
+                        ? (showValues ? `${totalGainLoss >= 0 ? '+' : ''}${formatCurrency(Math.abs(totalGainLoss))}` : "••••••••")
+                        : "$0.00"
+                      }
+                    </span>
+                    <span className="text-sm font-medium">
+                      {hasHoldings 
+                        ? (showValues ? `(${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(2)}%) Today` : "••••••••")
+                        : "(0.00%) Today"
+                      }
+                    </span>
                   </div>
                 </div>
               </div>
@@ -417,12 +328,13 @@ export default function Portfolio() {
       </Card>
 
       {/* Holdings Breakdown */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">All Holdings</TabsTrigger>
-          <TabsTrigger value="stocks">Stocks</TabsTrigger>
-          <TabsTrigger value="crypto">Crypto</TabsTrigger>
-        </TabsList>
+      {hasHoldings ? (
+        <Tabs defaultValue="all" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">All Holdings</TabsTrigger>
+            <TabsTrigger value="stocks">Stocks</TabsTrigger>
+            <TabsTrigger value="crypto">Crypto</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="all" className="space-y-4">
           <Card>
@@ -747,7 +659,70 @@ export default function Portfolio() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      ) : (
+        /* Empty State for No Holdings */
+        <div className="space-y-6">
+          <Card className="border-dashed border-2 border-gray-300">
+            <CardContent className="p-12">
+              <div className="text-center space-y-6">
+                <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+                  <PieChart className="w-12 h-12 text-gray-400" />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold text-gray-900">No Holdings Yet</h3>
+                  <p className="text-gray-600 max-w-md mx-auto">
+                    Your portfolio is empty. Start investing in stocks and cryptocurrencies to see your holdings here.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BarChart3 className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900 mb-2">Trade Stocks</h4>
+                    <p className="text-sm text-gray-600">
+                      Invest in your favorite companies like Apple, Tesla, and Google
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <SiBitcoin className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900 mb-2">Buy Crypto</h4>
+                    <p className="text-sm text-gray-600">
+                      Trade Bitcoin, Ethereum, Solana and other cryptocurrencies
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <TrendingUp className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900 mb-2">Track Growth</h4>
+                    <p className="text-sm text-gray-600">
+                      Monitor your investment performance and portfolio growth
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Button className="w-full max-w-sm mx-auto bg-green-600 hover:bg-green-700">
+                    <ArrowUpRight className="w-4 h-4 mr-2" />
+                    Start Trading
+                  </Button>
+                  <p className="text-xs text-gray-500">
+                    All trades require admin approval before execution
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
