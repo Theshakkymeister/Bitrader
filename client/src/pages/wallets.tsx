@@ -374,7 +374,9 @@ export default function Wallets() {
             {showBalances ? `$${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2})}` : "••••••••"}
           </div>
           <div className="text-sm text-gray-500 mt-1">
-            No deposits yet - Connect wallets to add funds
+            {totalValue > 0 
+              ? `Portfolio value across ${userWallets.length} crypto assets` 
+              : "Connect wallets to add funds"}
           </div>
         </CardContent>
       </Card>
