@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, TrendingUp, PieChart, Settings, User, Menu, ChevronDown } from "lucide-react";
+import { Home, TrendingUp, PieChart, Settings, User, Menu, ChevronDown, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -33,9 +33,9 @@ function MobileNav() {
   ];
 
   const tradingOptions = [
-    { href: "/trading", label: "Markets" },
-    { href: "/trading", label: "Trade" },
-    { href: "/trading", label: "My Orders" },
+    { href: "/trading?tab=markets", label: "Markets", icon: BarChart3 },
+    { href: "/trading?tab=trade", label: "Trade", icon: TrendingUp },
+    { href: "/trading?tab=orders", label: "My Orders", icon: PieChart },
   ];
 
   const handleNavClick = () => {
@@ -70,28 +70,35 @@ function MobileNav() {
             <div>
               <button
                 onClick={() => setShowTradeOptions(!showTradeOptions)}
-                className={`w-full flex items-center justify-between space-x-3 p-3 rounded-lg transition-colors ${
+                className={`w-full flex items-center justify-between space-x-3 p-3 rounded-lg transition-all duration-200 ease-in-out ${
                   location === "/trading" ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                } hover:scale-105`}
               >
                 <div className="flex items-center space-x-3">
                   <PieChart className="h-5 w-5" />
                   <span className="font-medium">Live Trade</span>
                 </div>
-                <ChevronDown className={`h-4 w-4 transition-transform ${showTradeOptions ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 transition-transform duration-300 ease-in-out ${showTradeOptions ? 'rotate-180' : ''}`} />
               </button>
               
-              {showTradeOptions && (
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showTradeOptions ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="ml-4 mt-2 space-y-2">
-                  {tradingOptions.map((option) => (
+                  {tradingOptions.map((option, index) => (
                     <Link key={option.label} href={option.href} onClick={handleNavClick}>
-                      <div className="flex items-center space-x-3 p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                      <div 
+                        className="flex items-center space-x-3 p-2 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-700 transition-all duration-200 transform hover:translate-x-1"
+                        style={{
+                          animationDelay: showTradeOptions ? `${index * 50}ms` : '0ms',
+                          animation: showTradeOptions ? 'slideInLeft 0.3s ease-out forwards' : 'none'
+                        }}
+                      >
+                        <option.icon className="h-4 w-4" />
                         <span className="text-sm font-medium">{option.label}</span>
                       </div>
                     </Link>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="border-t pt-4">
@@ -139,22 +146,42 @@ function DesktopNav() {
       {/* Live Trade Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+          <Button variant="ghost" className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ease-in-out ${
             location === "/trading" ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
-          }`}>
+          } hover:scale-105`}>
             <PieChart className="h-4 w-4" />
             <span className="font-medium text-sm">Live Trade</span>
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-3 w-3 transition-transform duration-200 data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {tradingOptions.map((option) => (
-            <DropdownMenuItem key={option.label} asChild>
-              <Link href={option.href}>
-                <span className="cursor-pointer">{option.label}</span>
-              </Link>
-            </DropdownMenuItem>
-          ))}
+        <DropdownMenuContent 
+          align="start" 
+          className="w-40 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"
+        >
+          <DropdownMenuItem asChild className="cursor-pointer hover:bg-green-50 transition-colors">
+            <Link href="/trading?tab=markets">
+              <span className="flex items-center space-x-2">
+                <BarChart3 className="h-4 w-4" />
+                <span>Markets</span>
+              </span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer hover:bg-green-50 transition-colors">
+            <Link href="/trading?tab=trade">
+              <span className="flex items-center space-x-2">
+                <TrendingUp className="h-4 w-4" />
+                <span>Trade</span>
+              </span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer hover:bg-green-50 transition-colors">
+            <Link href="/trading?tab=orders">
+              <span className="flex items-center space-x-2">
+                <PieChart className="h-4 w-4" />
+                <span>My Orders</span>
+              </span>
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </nav>
