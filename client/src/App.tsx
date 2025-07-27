@@ -4,9 +4,10 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, TrendingUp, PieChart, Settings, User, Menu } from "lucide-react";
+import { Home, TrendingUp, PieChart, Settings, User, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
@@ -22,17 +23,24 @@ import NotFound from "@/pages/not-found";
 function MobileNav() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [showTradeOptions, setShowTradeOptions] = useState(false);
   
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/wallets", icon: TrendingUp, label: "Wallets" },
-    { href: "/trading", icon: PieChart, label: "Trade All" },
     { href: "/portfolio", icon: PieChart, label: "Portfolio" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
+  const tradingOptions = [
+    { href: "/trading", label: "Markets" },
+    { href: "/trading", label: "Trade" },
+    { href: "/trading", label: "My Orders" },
+  ];
+
   const handleNavClick = () => {
     setIsOpen(false);
+    setShowTradeOptions(false);
   };
 
   return (
@@ -57,6 +65,35 @@ function MobileNav() {
                 </div>
               </Link>
             ))}
+            
+            {/* Live Trade Section */}
+            <div>
+              <button
+                onClick={() => setShowTradeOptions(!showTradeOptions)}
+                className={`w-full flex items-center justify-between space-x-3 p-3 rounded-lg transition-colors ${
+                  location === "/trading" ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <PieChart className="h-5 w-5" />
+                  <span className="font-medium">Live Trade</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showTradeOptions ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showTradeOptions && (
+                <div className="ml-4 mt-2 space-y-2">
+                  {tradingOptions.map((option) => (
+                    <Link key={option.label} href={option.href} onClick={handleNavClick}>
+                      <div className="flex items-center space-x-3 p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                        <span className="text-sm font-medium">{option.label}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="border-t pt-4">
               <a href="/api/logout" className="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100">
                 <User className="h-5 w-5" />
@@ -76,9 +113,14 @@ function DesktopNav() {
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
     { href: "/wallets", icon: TrendingUp, label: "Wallets" },
-    { href: "/trading", icon: PieChart, label: "Trade All" },
     { href: "/portfolio", icon: PieChart, label: "Portfolio" },
     { href: "/settings", icon: Settings, label: "Settings" },
+  ];
+
+  const tradingOptions = [
+    { href: "/trading", label: "Markets" },
+    { href: "/trading", label: "Trade" },
+    { href: "/trading", label: "My Orders" },
   ];
 
   return (
@@ -93,6 +135,28 @@ function DesktopNav() {
           </div>
         </Link>
       ))}
+      
+      {/* Live Trade Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+            location === "/trading" ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+          }`}>
+            <PieChart className="h-4 w-4" />
+            <span className="font-medium text-sm">Live Trade</span>
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          {tradingOptions.map((option) => (
+            <DropdownMenuItem key={option.label} asChild>
+              <Link href={option.href}>
+                <span className="cursor-pointer">{option.label}</span>
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </nav>
   );
 }
