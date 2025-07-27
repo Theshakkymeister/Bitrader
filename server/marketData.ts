@@ -50,20 +50,24 @@ function updateMarketPrices() {
     const isStablecoin = symbol === 'USDT' || symbol === 'USDC';
     const isCrypto = ['BTC', 'ETH', 'SOL', 'USDT', 'USDC'].includes(symbol);
     
-    let volatility = 0.005; // 0.5% for stocks
+    let volatility = 0.002; // 0.2% for stocks
     if (isCrypto && !isStablecoin) {
-      volatility = 0.01; // 1% for crypto
+      volatility = 0.003; // 0.3% for crypto
     } else if (isStablecoin) {
-      volatility = 0.0001; // 0.01% for stablecoins
+      volatility = 0.00005; // 0.005% for stablecoins
     }
 
-    // Random walk with very strong mean reversion to prevent price drift
+    // Random walk with extremely strong mean reversion to prevent price drift
     const randomChange = (Math.random() - 0.5) * volatility * 2;
-    const meanReversion = (basePrice - marketPrices[symbol].price) * 0.05; // Very strong mean reversion
+    const meanReversion = (basePrice - marketPrices[symbol].price) * 0.1; // Extremely strong mean reversion
     const priceChange = randomChange + meanReversion;
     
+    // Cap maximum price change to prevent runaway inflation
+    const maxChange = 0.005; // Maximum 0.5% change per update
+    const cappedPriceChange = Math.max(-maxChange, Math.min(maxChange, priceChange));
+    
     const oldPrice = marketPrices[symbol].price;
-    const newPrice = Math.max(0.01, oldPrice * (1 + priceChange));
+    const newPrice = Math.max(0.01, oldPrice * (1 + cappedPriceChange));
     
     const change = newPrice - oldPrice;
     const changePercent = (change / oldPrice) * 100;
@@ -78,8 +82,8 @@ function updateMarketPrices() {
   });
 }
 
-// Update prices every 30 seconds with very small changes
-// setInterval(updateMarketPrices, 30000); // Disabled to prevent price drift
+// Update prices every 30 seconds with very conservative changes
+setInterval(updateMarketPrices, 30000);
 
 export function getCurrentPrice(symbol: string): MarketPrice | null {
   return marketPrices[symbol] || null;
