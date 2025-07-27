@@ -811,8 +811,26 @@ export class DatabaseStorage implements IStorage {
           totalBalance: parseFloat(portfolio.totalBalance?.toString() || '0'),
           totalProfitLoss: parseFloat(portfolio.totalProfitLoss?.toString() || '0'),
           availableBalance: parseFloat(portfolio.availableBalance?.toString() || '0'),
-          marginUsed: parseFloat(portfolio.marginUsed?.toString() || '0')
-        } : null,
+          marginUsed: parseFloat(portfolio.marginUsed?.toString() || '0'),
+          // Calculate real-time total value from wallets + stock holdings
+          totalValue: wallets.reduce((sum, wallet) => {
+            return sum + parseFloat(wallet.usdValue?.toString() || '0');
+          }, 0) + stockHoldings.reduce((sum, holding) => {
+            return sum + parseFloat(holding.marketValue?.toString() || '0');
+          }, 0),
+          buyingPower: parseFloat(portfolio.availableBalance?.toString() || '0')
+        } : {
+          totalBalance: 0,
+          totalProfitLoss: 0,
+          availableBalance: 0,
+          marginUsed: 0,
+          totalValue: wallets.reduce((sum, wallet) => {
+            return sum + parseFloat(wallet.usdValue?.toString() || '0');
+          }, 0) + stockHoldings.reduce((sum, holding) => {
+            return sum + parseFloat(holding.marketValue?.toString() || '0');
+          }, 0),
+          buyingPower: 0
+        },
         trades: userTrades.map(trade => ({
           ...trade,
           price: trade.price ? parseFloat(trade.price.toString()) : 0,
@@ -838,6 +856,12 @@ export class DatabaseStorage implements IStorage {
           ...request,
           amount: parseFloat(request.amount?.toString() || '0'),
           usdValue: parseFloat(request.usdValue?.toString() || '0')
+        })),
+        // Add wallet balances for portfolio display
+        walletBalances: wallets.map(wallet => ({
+          currency: wallet.currency,
+          balance: parseFloat(wallet.balance?.toString() || '0'),
+          usdValue: parseFloat(wallet.usdValue?.toString() || '0')
         })),
         analytics: {
           totalTrades,
