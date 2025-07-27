@@ -348,6 +348,131 @@ export default function AdminTest() {
                     </Card>
                   </motion.div>
                 </div>
+
+                {/* Detailed Analytics Dashboard */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  {/* User Analytics Card */}
+                  <Card className="shadow-lg">
+                    <CardHeader className="bg-blue-50 border-b p-3 sm:p-4">
+                      <CardTitle className="flex items-center text-lg">
+                        <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
+                        User Analytics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                          <span className="text-sm font-medium text-blue-800">Total Registered Users</span>
+                          <span className="text-2xl font-bold text-blue-600">{stats?.totalUsers || '0'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                          <span className="text-sm font-medium text-green-800">New Users Today</span>
+                          <span className="text-2xl font-bold text-green-600">{stats?.usersRegisteredToday || '0'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                          <span className="text-sm font-medium text-purple-800">Active Users Today</span>
+                          <span className="text-2xl font-bold text-purple-600">{stats?.usersActiveToday || '0'}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg">
+                          <span className="text-sm font-medium text-teal-800">Platform Revenue</span>
+                          <span className="text-2xl font-bold text-teal-600">${stats?.totalRevenue || '0'}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Trading Activity Card */}
+                  <Card className="shadow-lg">
+                    <CardHeader className="bg-green-50 border-b p-3 sm:p-4">
+                      <CardTitle className="flex items-center text-lg">
+                        <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+                        Trading Activity
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg">
+                          <span className="text-sm font-medium text-orange-800">Pending Trades</span>
+                          <span className="text-2xl font-bold text-orange-600">{pendingTrades.length}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                          <span className="text-sm font-medium text-green-800">Approved Trades</span>
+                          <span className="text-2xl font-bold text-green-600">{approvedTrades.length}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                          <span className="text-sm font-medium text-blue-800">Total Trades</span>
+                          <span className="text-2xl font-bold text-blue-600">{Array.isArray(trades) ? trades.length : 0}</span>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                          <span className="text-sm font-medium text-purple-800">Pending Deposits</span>
+                          <span className="text-2xl font-bold text-purple-600">{stats?.pendingDeposits || '0'}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Real User Data Summary */}
+                <Card className="shadow-lg">
+                  <CardHeader className="bg-gray-50 border-b p-3 sm:p-4">
+                    <CardTitle className="flex items-center text-lg">
+                      <Activity className="h-5 w-5 mr-2 text-gray-600" />
+                      Real Platform Data Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <Users className="h-6 w-6 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-800">Database Users</span>
+                        </div>
+                        <div className="text-3xl font-bold text-blue-600 mb-1">{stats?.totalUsers || '0'}</div>
+                        <div className="text-xs text-blue-500">Real registered accounts</div>
+                      </div>
+                      
+                      <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <DollarSign className="h-6 w-6 text-green-600" />
+                          <span className="text-sm font-medium text-green-800">Total Revenue</span>
+                        </div>
+                        <div className="text-3xl font-bold text-green-600 mb-1">${stats?.totalRevenue || '0'}</div>
+                        <div className="text-xs text-green-500">From user portfolios</div>
+                      </div>
+                      
+                      <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <TrendingUp className="h-6 w-6 text-purple-600" />
+                          <span className="text-sm font-medium text-purple-800">Active Trades</span>
+                        </div>
+                        <div className="text-3xl font-bold text-purple-600 mb-1">{stats?.activeTrades || '0'}</div>
+                        <div className="text-xs text-purple-500">Live database trades</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-3">Live Database Statistics</h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                        <div>
+                          <div className="text-2xl font-bold text-gray-700">{Array.isArray(users) ? users.length : 0}</div>
+                          <div className="text-xs text-gray-500">Total User Records</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-700">{Array.isArray(trades) ? trades.length : 0}</div>
+                          <div className="text-xs text-gray-500">Total Trade Records</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-700">{pendingTrades.length}</div>
+                          <div className="text-xs text-gray-500">Awaiting Approval</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-700">{approvedTrades.length}</div>
+                          <div className="text-xs text-gray-500">Successfully Approved</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </>
             )}
 
