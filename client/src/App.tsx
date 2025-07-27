@@ -372,6 +372,7 @@ function Router() {
       <Route path="/admin/test" component={AdminTest} />
       <Route path="/admin/simple" component={AdminSimple} />
       <Route path="/admin/trades" component={AdminTrades} />
+      <Route path="/admin" component={AdminTest} />
       <Route path="/admin/mobile" component={AdminMobile} />
       
       {/* User authentication routes */}
