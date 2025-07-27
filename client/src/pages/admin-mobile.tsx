@@ -191,6 +191,42 @@ export default function AdminMobile() {
     }
   });
 
+  // Crypto addresses state and mutations
+  const [newAddress, setNewAddress] = useState({ symbol: '', name: '', address: '', network: '' });
+
+  const { data: cryptoAddresses = [], refetch: cryptoRefetch } = useQuery({
+    queryKey: ["/api/admin/crypto-addresses"],
+    enabled: isAuthenticated
+  });
+
+  const addCryptoMutation = useMutation({
+    mutationFn: async (address: typeof newAddress) => {
+      const response = await fetch("/api/admin/crypto-addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(address),
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error("Failed to add crypto address");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/crypto-addresses"] });
+      setNewAddress({ symbol: '', name: '', address: '', network: '' });
+      toast({
+        title: "Crypto Address Added",
+        description: "New crypto address has been added successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Add Address",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -235,7 +271,17 @@ export default function AdminMobile() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, type: "spring" }}
+              className="flex items-center space-x-2"
             >
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                onClick={() => window.location.href = '/'}
+              >
+                <Home className="h-4 w-4 mr-1" />
+                User Dashboard
+              </Button>
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 shadow-md">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
                 Live System
@@ -535,6 +581,109 @@ export default function AdminMobile() {
                       <div className="text-center py-8">
                         <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-500">No deposit requests</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {activeSection === 'crypto' && (
+              <Card className="shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+                  <CardTitle className="flex items-center text-xl">
+                    <Wallet className="h-6 w-6 mr-3 text-green-600" />
+                    Crypto Addresses Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {/* Add New Address Form */}
+                  <div className="mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
+                    <h3 className="font-semibold text-green-800 mb-3 flex items-center">
+                      <Plus className="h-5 w-5 mr-2" />
+                      Add New Crypto Address
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <Input
+                        placeholder="Symbol (e.g., BTC)"
+                        value={newAddress.symbol}
+                        onChange={(e) => setNewAddress({...newAddress, symbol: e.target.value})}
+                        className="bg-white border-green-300 focus:border-green-500"
+                      />
+                      <Input
+                        placeholder="Name (e.g., Bitcoin)"
+                        value={newAddress.name}
+                        onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
+                        className="bg-white border-green-300 focus:border-green-500"
+                      />
+                      <Input
+                        placeholder="Network (e.g., Mainnet)"
+                        value={newAddress.network}
+                        onChange={(e) => setNewAddress({...newAddress, network: e.target.value})}
+                        className="bg-white border-green-300 focus:border-green-500"
+                      />
+                      <Input
+                        placeholder="Wallet Address"
+                        value={newAddress.address}
+                        onChange={(e) => setNewAddress({...newAddress, address: e.target.value})}
+                        className="bg-white border-green-300 focus:border-green-500"
+                      />
+                    </div>
+                    <Button
+                      onClick={() => addCryptoMutation.mutate(newAddress)}
+                      disabled={addCryptoMutation.isPending || !newAddress.symbol || !newAddress.address}
+                      className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {addCryptoMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Adding...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Address
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Existing Addresses */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-gray-800 flex items-center">
+                      <Wallet className="h-5 w-5 mr-2 text-green-600" />
+                      Current Crypto Addresses
+                    </h3>
+                    {Array.isArray(cryptoAddresses) && cryptoAddresses.length > 0 ? (
+                      cryptoAddresses.map((address: any) => (
+                        <motion.div
+                          key={address.id}
+                          whileHover={{ scale: 1.01 }}
+                          className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl shadow-md"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-2">
+                                <Badge className="bg-green-100 text-green-800 font-semibold">
+                                  {address.symbol}
+                                </Badge>
+                                <span className="font-medium text-gray-800">{address.name}</span>
+                                <Badge variant="outline" className="text-green-700 border-green-300">
+                                  {address.network}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 font-mono bg-white/70 p-2 rounded border">
+                                {address.address}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Wallet className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No crypto addresses configured yet</p>
+                        <p className="text-sm text-gray-400 mt-1">Add addresses above to get started</p>
                       </div>
                     )}
                   </div>
