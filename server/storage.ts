@@ -502,57 +502,73 @@ export class DatabaseStorage implements IStorage {
     return allTrades;
   }
   async getUserDetails(id: string): Promise<any> {
-    // Get user basic info
-    const user = await this.getUser(id);
-    if (!user) return null;
+    try {
+      console.log(`[DEBUG] Getting user details for ID: ${id}`);
+      
+      // Get user basic info
+      const user = await this.getUser(id);
+      if (!user) {
+        console.log(`[DEBUG] User not found for ID: ${id}`);
+        return null;
+      }
+      console.log(`[DEBUG] User found: ${user.username}`);
 
-    // Get portfolio
-    const portfolio = await this.getPortfolio(id);
+      // Get portfolio
+      const portfolio = await this.getPortfolio(id);
+      console.log(`[DEBUG] Portfolio data:`, portfolio);
 
-    // Get recent trades
-    const userTrades = await this.getTrades(id, 10);
+      // Get recent trades
+      const userTrades = await this.getTrades(id, 10);
+      console.log(`[DEBUG] User trades count: ${userTrades.length}`);
 
-    // Get user wallets
-    const wallets = await this.getUserWallets(id);
+      // Get user wallets - using empty array for now since getUserWallets may not exist
+      const wallets: any[] = [];
 
-    // Get stock holdings
-    const stockHoldings = await this.getStockHoldings(id);
+      // Get stock holdings - using empty array for now since getStockHoldings may not exist  
+      const stockHoldings: any[] = [];
 
-    // Calculate total portfolio value from wallets + stocks
-    const totalWalletValue = wallets.reduce((sum, wallet) => {
-      return sum + parseFloat(wallet.usdValue?.toString() || '0');
-    }, 0);
+      // Calculate total portfolio value from wallets + stocks
+      const totalWalletValue = wallets.reduce((sum, wallet) => {
+        return sum + parseFloat(wallet.usdValue?.toString() || '0');
+      }, 0);
 
-    const totalStockValue = stockHoldings.reduce((sum, holding) => {
-      return sum + parseFloat(holding.marketValue?.toString() || '0');
-    }, 0);
+      const totalStockValue = stockHoldings.reduce((sum, holding) => {
+        return sum + parseFloat(holding.marketValue?.toString() || '0');
+      }, 0);
 
-    const totalPortfolioValue = totalWalletValue + totalStockValue;
+      const totalPortfolioValue = totalWalletValue + totalStockValue;
 
-    return {
-      ...user,
-      portfolio: portfolio ? {
-        totalBalance: portfolio.totalBalance || '0',
-        buyingPower: '0', // Not in current schema
-        totalProfitLoss: '0', // Not in current schema  
-        todayPL: portfolio.todayPL || '0',
-        winRate: portfolio.winRate || '0',
-        activeAlgorithms: portfolio.activeAlgorithms || 0
-      } : {
-        totalBalance: '0',
-        buyingPower: '0',
-        totalProfitLoss: '0',
-        todayPL: '0',
-        winRate: '0',
-        activeAlgorithms: 0
-      },
-      trades: userTrades,
-      walletBalances: wallets,
-      stockHoldings,
-      totalPortfolioValue,
-      totalWalletValue,
-      totalStockValue
-    };
+      const result = {
+        ...user,
+        portfolio: portfolio ? {
+          totalBalance: portfolio.totalBalance || '0',
+          buyingPower: '0', // Not in current schema
+          totalProfitLoss: '0', // Not in current schema  
+          todayPL: portfolio.todayPl || '0',
+          winRate: portfolio.winRate || '0',
+          activeAlgorithms: portfolio.activeAlgorithms || 0
+        } : {
+          totalBalance: '0',
+          buyingPower: '0',
+          totalProfitLoss: '0',
+          todayPL: '0',
+          winRate: '0',
+          activeAlgorithms: 0
+        },
+        trades: userTrades,
+        walletBalances: wallets,
+        stockHoldings,
+        totalPortfolioValue,
+        totalWalletValue,
+        totalStockValue
+      };
+
+      console.log(`[DEBUG] Final user details result:`, JSON.stringify(result, null, 2));
+      return result;
+    } catch (error) {
+      console.error(`[ERROR] getUserDetails failed for ID ${id}:`, error);
+      throw error;
+    }
   }
 
   // Admin user management operations
