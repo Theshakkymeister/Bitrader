@@ -20,13 +20,6 @@ export default function Landing() {
             >
               Sign In
             </Button>
-            <Button 
-              onClick={() => window.location.href = '/admin/login'}
-              variant="ghost"
-              className="text-gray-400 hover:text-gray-600 px-3 py-2 text-sm font-mono opacity-60 hover:opacity-100 transition-opacity"
-            >
-              dev
-            </Button>
           </div>
         </div>
       </header>
@@ -50,13 +43,6 @@ export default function Landing() {
               >
                 <span>Start Trading Free</span>
                 <ArrowRight className="h-5 w-5" />
-              </Button>
-              <Button 
-                onClick={() => window.location.href = '/admin/login'}
-                variant="ghost"
-                className="text-gray-300 hover:text-gray-500 px-4 py-2 text-sm font-mono opacity-40 hover:opacity-80 transition-all duration-300 absolute bottom-8 right-8"
-              >
-                ./dev
               </Button>
             </div>
           </div>
