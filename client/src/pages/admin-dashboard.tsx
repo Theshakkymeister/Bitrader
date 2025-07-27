@@ -126,6 +126,7 @@ const menuItems = [
 ];
 
 export default function AdminDashboard() {
+  // All state declarations first
   const [activeSection, setActiveSection] = useState('overview');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAddresses, setShowAddresses] = useState<{[key: string]: boolean}>({});
@@ -134,41 +135,44 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [balanceAction, setBalanceAction] = useState<{type: 'add' | 'remove', amount: string}>({type: 'add', amount: ''});
+  
+  // All hooks in consistent order
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get current admin user
+  // All queries in consistent order - always called regardless of conditions
   const { data: adminUser } = useQuery<AdminUser>({
     queryKey: ["/api/admin/user"],
     retry: false,
   });
 
-  // Get crypto addresses
   const { data: cryptoAddresses = [] } = useQuery<CryptoAddress[]>({
     queryKey: ["/api/admin/crypto-addresses"],
   });
 
-  // Get website settings
   const { data: websiteSettings = [] } = useQuery<WebsiteSetting[]>({
     queryKey: ["/api/admin/settings"],
   });
 
-  // Get admin stats
   const { data: adminStats } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
-  // Get users for user management
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
     enabled: activeSection === 'users',
   });
 
-  // Get detailed user data when modal is open
   const { data: userDetails, isLoading: userDetailsLoading } = useQuery<UserDetails>({
     queryKey: ["/api/admin/users", selectedUser?.id, "details"],
     enabled: !!selectedUser?.id && showUserModal,
+  });
+
+  const { data: depositRequests = [], isLoading: loadingDeposits } = useQuery({
+    queryKey: ['/api/admin/deposit-requests'],
+    enabled: activeSection === 'deposits',
+    refetchInterval: 5000,
   });
 
   // User management mutations
@@ -1545,10 +1549,6 @@ User Activity History:
   );
 
   const renderDepositRequests = () => {
-    const { data: depositRequests, isLoading: loadingDeposits } = useQuery({
-      queryKey: ['/api/admin/deposit-requests'],
-      refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
-    });
 
     const approveDepositMutation = useMutation({
       mutationFn: async ({ id, notes }: { id: string; notes?: string }) => {
