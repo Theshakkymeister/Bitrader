@@ -101,16 +101,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user trading positions with real-time prices
+  // Get user trading positions with real-time prices and today's P&L
   app.get('/api/positions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const positions = await storage.getUserPositions(userId);
       
-      // Update positions with live market prices
-      const positionsWithLivePrices = updatePositionValues(positions);
+      // Calculate TODAY'S P&L from all trades
+      const allTrades = await storage.getTrades(userId);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTrades = allTrades.filter(trade => {
+        const tradeDate = new Date(trade.createdAt || trade.executedAt);
+        return tradeDate >= today;
+      });
       
-      res.json(positionsWithLivePrices);
+      const todayPL = todayTrades.reduce((sum, trade) => {
+        return sum + parseFloat(trade.profitLoss?.toString() || '0');
+      }, 0);
+      
+      // Update positions with live market prices and today's P&L
+      const positionsWithLivePrices = updatePositionValues(positions);
+      const positionsWithTodayPL = positionsWithLivePrices.map(position => ({
+        ...position,
+        todayPL: todayPL.toFixed(2)
+      }));
+      
+      res.json(positionsWithTodayPL);
     } catch (error) {
       console.error("Error fetching positions:", error);
       res.status(500).json({ message: "Failed to fetch positions" });
@@ -305,6 +322,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return sum + parseFloat(trade.profitLoss?.toString() || '0');
       }, 0);
       
+      // Calculate TODAY'S P&L from trades executed today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTrades = allTrades.filter(trade => {
+        const tradeDate = new Date(trade.createdAt || trade.executedAt);
+        return tradeDate >= today;
+      });
+      
+      const todayPL = todayTrades.reduce((sum, trade) => {
+        return sum + parseFloat(trade.profitLoss?.toString() || '0');
+      }, 0);
+      
       // Calculate win rate
       const completedTrades = allTrades.filter(t => t.status === 'closed' && t.profitLoss);
       const winningTrades = completedTrades.filter(t => parseFloat(t.profitLoss?.toString() || '0') > 0);
@@ -315,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...portfolio,
         totalBalance: parseFloat(portfolio.totalBalance?.toString() || '0'),
         totalProfitLoss: totalProfitLoss,
-        todayPL: parseFloat(portfolio.todayPL?.toString() || '0'),
+        todayPL: todayPL, // Real-time today's P&L from actual trades
         winRate: winRate,
         totalValue: totalValue,
         walletValue: totalWalletValue,
@@ -323,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } : {
         totalBalance: 0,
         totalProfitLoss: totalProfitLoss,
-        todayPL: 0,
+        todayPL: todayPL, // Real-time today's P&L from actual trades
         winRate: winRate,
         totalValue: totalValue,
         walletValue: totalWalletValue,
