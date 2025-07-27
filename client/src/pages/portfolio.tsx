@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ interface Holding {
 }
 
 export default function Portfolio() {
+  const [, setLocation] = useLocation();
   const [showValues, setShowValues] = useState(true);
   const [timeframe, setTimeframe] = useState("1d");
   const [portfolioValue, setPortfolioValue] = useState(0);
@@ -710,7 +712,10 @@ export default function Portfolio() {
                 </div>
 
                 <div className="space-y-3">
-                  <Button className="w-full max-w-sm mx-auto bg-green-600 hover:bg-green-700">
+                  <Button 
+                    onClick={() => setLocation("/trading")}
+                    className="w-full max-w-sm mx-auto bg-green-600 hover:bg-green-700 transition-all duration-200 hover:shadow-lg hover:scale-105"
+                  >
                     <ArrowUpRight className="w-4 h-4 mr-2" />
                     Start Trading
                   </Button>

@@ -17,6 +17,7 @@ This is a full-stack AI-powered trading platform built with modern web technolog
 - **LATEST: Enhanced Order History**: Redesigned with detailed professional layout, smart decimal formatting
 - **LATEST: Admin-Managed Crypto Addresses**: Wallet modals now properly handle admin-controlled deposit addresses
 - Fixed text visibility issues in all wallet modals (Send, Receive, QR Code)
+- **LATEST: Fixed Start Trading Button**: Added proper navigation functionality to portfolio page "Start Trading" button
 - System fully tested and ready for deployment
 
 ## User Preferences
