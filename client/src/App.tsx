@@ -21,11 +21,10 @@ import MarketsPage from "@/pages/markets";
 import OrdersPage from "@/pages/orders";
 import SettingsPage from "@/pages/settings";
 import AdminLogin from "@/pages/admin-login";
-import AdminDashboard from "@/pages/admin-dashboard";
+import AdminMobile from "@/pages/admin-mobile";
 import AdminTest from "@/pages/admin-test";
 import AdminSimple from "@/pages/admin-simple";
 import AdminTrades from "@/pages/admin-trades";
-import AdminMobile from "@/pages/admin-mobile";
 import NotFound from "@/pages/not-found";
 
 function MobileNav() {
@@ -368,7 +367,7 @@ function Router() {
     <Switch>
       {/* Admin routes - always accessible */}
       <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/dashboard" component={AdminMobile} />
       <Route path="/admin/test" component={AdminTest} />
       <Route path="/admin/simple" component={AdminSimple} />
       <Route path="/admin/trades" component={AdminTrades} />
