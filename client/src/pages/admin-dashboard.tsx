@@ -934,17 +934,39 @@ User Activity History:
                   ) : userDetails?.portfolio ? (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">Total Value</Label>
-                        <p className="text-lg font-semibold text-gray-900">${typeof userDetails.portfolio.totalValue === 'number' ? userDetails.portfolio.totalValue.toFixed(2) : parseFloat(userDetails.portfolio.totalValue || '0').toFixed(2)}</p>
+                        <Label className="text-sm font-medium text-gray-600">Total Portfolio Value</Label>
+                        <p className="text-lg font-semibold text-gray-900">
+                          ${typeof userDetails.portfolio.totalValue === 'number' ? userDetails.portfolio.totalValue.toFixed(2) : parseFloat(userDetails.portfolio.totalValue || '0').toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Wallets + Stocks combined
+                        </p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">Buying Power</Label>
-                        <p className="text-lg font-semibold text-green-600">${typeof userDetails.portfolio.buyingPower === 'number' ? userDetails.portfolio.buyingPower.toFixed(2) : parseFloat(userDetails.portfolio.buyingPower || '0').toFixed(2)}</p>
+                        <Label className="text-sm font-medium text-gray-600">Available Balance</Label>
+                        <p className="text-lg font-semibold text-green-600">
+                          ${typeof userDetails.portfolio.availableBalance === 'number' ? userDetails.portfolio.availableBalance.toFixed(2) : parseFloat(userDetails.portfolio.availableBalance || '0').toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Cash available for trading
+                        </p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">P&L</Label>
+                        <Label className="text-sm font-medium text-gray-600">Total P&L</Label>
                         <p className={`text-lg font-semibold ${userDetails.portfolio.totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${typeof userDetails.portfolio.totalProfitLoss === 'number' ? userDetails.portfolio.totalProfitLoss.toFixed(2) : parseFloat(userDetails.portfolio.totalProfitLoss || '0').toFixed(2)} ({typeof userDetails.portfolio.totalGainLossPercentage === 'number' ? userDetails.portfolio.totalGainLossPercentage.toFixed(2) : parseFloat(userDetails.portfolio.totalGainLossPercentage || '0').toFixed(2)}%)
+                          ${typeof userDetails.portfolio.totalProfitLoss === 'number' ? userDetails.portfolio.totalProfitLoss.toFixed(2) : parseFloat(userDetails.portfolio.totalProfitLoss || '0').toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Total profit/loss from trades
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Total Balance</Label>
+                        <p className="text-lg font-semibold text-blue-600">
+                          ${typeof userDetails.portfolio.totalBalance === 'number' ? userDetails.portfolio.totalBalance.toFixed(2) : parseFloat(userDetails.portfolio.totalBalance || '0').toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Account total balance
                         </p>
                       </div>
                     </div>
@@ -957,7 +979,17 @@ User Activity History:
               {userDetails?.walletBalances && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Wallet Balances</CardTitle>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Wallet Balances</span>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">Total Wallet Value</p>
+                        <p className="text-lg font-semibold text-green-600">
+                          ${userDetails.walletBalances.reduce((sum, wallet) => {
+                            return sum + (typeof wallet.usdValue === 'number' ? wallet.usdValue : parseFloat(wallet.usdValue || '0'));
+                          }, 0).toFixed(2)}
+                        </p>
+                      </div>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="bg-white">
                     <div className="space-y-2">
