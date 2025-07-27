@@ -464,24 +464,33 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  // Adjust user balance
+  // Adjust user balance with profit tracking
   app.patch('/api/admin/users/:userId/balance', isAdminAuthenticated, async (req, res) => {
     try {
       const { userId } = req.params;
       const { amount, type } = req.body;
       const adminId = req.adminUser.id;
       
-      if (!amount || !type || !['add', 'remove'].includes(type)) {
+      if (!amount || !type || !['add', 'remove', 'profit'].includes(type)) {
         return res.status(400).json({ message: "Invalid amount or type" });
       }
       
-      const updatedBalance = await storage.adjustUserBalance(userId, amount, type);
+      let updatedBalance;
       
-      // Log admin action
-      await logAdminActivity(adminId, `BALANCE_${type.toUpperCase()}`, 'USER', userId, {
-        amount,
-        action: type
-      }, req);
+      // Handle profit tracking specifically
+      if (type === 'profit') {
+        updatedBalance = await storage.addUserProfit(userId, amount);
+        await logAdminActivity(adminId, 'PROFIT_ADD', 'USER', userId, {
+          amount,
+          action: 'profit'
+        }, req);
+      } else {
+        updatedBalance = await storage.adjustUserBalance(userId, amount, type);
+        await logAdminActivity(adminId, `BALANCE_${type.toUpperCase()}`, 'USER', userId, {
+          amount,
+          action: type
+        }, req);
+      }
       
       res.json(updatedBalance);
     } catch (error) {

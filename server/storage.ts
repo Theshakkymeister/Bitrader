@@ -65,6 +65,7 @@ export interface IStorage {
   getUserDetails(id: string): Promise<any>;
   updateUserStatus(id: string, isActive: boolean): Promise<User>;
   adjustUserBalance(id: string, amount: number, type: 'add' | 'remove'): Promise<any>;
+  addUserProfit(userId: string, amount: number): Promise<any>;
   approveUserTrades(userId: string, tradeIds: string[]): Promise<any>;
   
   // Real-time analytics methods
@@ -667,6 +668,25 @@ export class DatabaseStorage implements IStorage {
     
     return await this.updatePortfolio(id, {
       totalBalance: newBalance.toString()
+    });
+  }
+
+  async addUserProfit(userId: string, amount: number): Promise<any> {
+    const portfolio = await this.getPortfolio(userId);
+    if (!portfolio) {
+      throw new Error('Portfolio not found');
+    }
+    
+    const currentBalance = parseFloat(portfolio.totalBalance?.toString() || '0');
+    const currentProfit = parseFloat(portfolio.totalProfitLoss?.toString() || '0');
+    
+    // Add profit to both balance and profit tracking
+    const newBalance = currentBalance + amount;
+    const newProfit = currentProfit + amount;
+    
+    return await this.updatePortfolio(userId, {
+      totalBalance: newBalance.toString(),
+      totalProfitLoss: newProfit.toString()
     });
   }
 

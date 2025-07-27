@@ -103,11 +103,11 @@ export default function AdminTest() {
     enabled: !!selectedUser?.id && isAuthenticated,
   });
 
-  // Balance adjustment mutation
+  // Balance adjustment mutation with profit tracking
   const adjustBalanceMutation = useMutation({
     mutationFn: async ({ userId, amount, type }) => {
-      const response = await fetch(`/api/admin/user/${userId}/balance`, {
-        method: "POST",
+      const response = await fetch(`/api/admin/users/${userId}/balance`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount, type }),
         credentials: "include"
@@ -115,9 +115,12 @@ export default function AdminTest() {
       if (!response.ok) throw new Error("Failed to adjust balance");
       return response.json();
     },
-    onSuccess: () => {
-      toast({ title: "Balance updated successfully!" });
+    onSuccess: (data, variables) => {
+      const actionText = variables.type === 'profit' ? 'Profit added' : 
+                        variables.type === 'add' ? 'Balance increased' : 'Balance decreased';
+      toast({ title: `${actionText} successfully!` });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/user", selectedUser?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setBalanceAction({ type: 'add', amount: '' });
     },
     onError: () => {
@@ -392,24 +395,99 @@ export default function AdminTest() {
                               Manage
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-md">
+                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle className="flex items-center">
                                 <Users className="h-5 w-5 mr-2" />
                                 Manage {user.username}
                               </DialogTitle>
                               <DialogDescription>
-                                Manage user balance and trading permissions
+                                Complete user management dashboard with trade controls and profit tracking
                               </DialogDescription>
                             </DialogHeader>
                             
                             <div className="space-y-6">
-                              <div className="bg-gray-50 p-4 rounded-lg">
-                                <h4 className="font-semibold mb-2">User Details</h4>
-                                <div className="space-y-1 text-sm">
-                                  <p><span className="font-medium">Email:</span> {user.email}</p>
-                                  <p><span className="font-medium">Status:</span> {user.isActive ? "Active" : "Inactive"}</p>
-                                  <p><span className="font-medium">Registered:</span> {new Date(user.createdAt).toLocaleDateString()}</p>
+                              {/* User Overview */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                  <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+                                    <Users className="h-4 w-4 mr-1" />
+                                    Account Info
+                                  </h4>
+                                  <div className="space-y-1 text-sm">
+                                    <p><span className="font-medium">Email:</span> {user.email}</p>
+                                    <p><span className="font-medium">Status:</span> 
+                                      <Badge variant={user.isActive ? "default" : "secondary"} className="ml-2">
+                                        {user.isActive ? "Active" : "Inactive"}
+                                      </Badge>
+                                    </p>
+                                    <p><span className="font-medium">Registered:</span> {new Date(user.createdAt).toLocaleDateString()}</p>
+                                  </div>
+                                </div>
+
+                                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                  <h4 className="font-semibold text-green-800 mb-2 flex items-center">
+                                    <BarChart3 className="h-4 w-4 mr-1" />
+                                    Trading Stats
+                                  </h4>
+                                  <div className="space-y-1 text-sm">
+                                    <p><span className="font-medium">Total Trades:</span> {userDetails?.trades?.length || 0}</p>
+                                    <p><span className="font-medium">Pending:</span> {userDetails?.trades?.filter(t => t.adminApproval === 'pending').length || 0}</p>
+                                    <p><span className="font-medium">Approved:</span> {userDetails?.trades?.filter(t => t.adminApproval === 'approved').length || 0}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Quick Actions */}
+                              <div className="bg-gray-50 p-4 rounded-lg border">
+                                <h4 className="font-semibold mb-3 flex items-center">
+                                  <Settings className="h-4 w-4 mr-1" />
+                                  Quick Actions
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex items-center justify-center p-2"
+                                    onClick={() => setBalanceAction({ type: 'add', amount: '1000' })}
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    +$1K
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex items-center justify-center p-2"
+                                    onClick={() => setBalanceAction({ type: 'add', amount: '5000' })}
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    +$5K
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex items-center justify-center p-2"
+                                    onClick={() => setBalanceAction({ type: 'add', amount: '500' })}
+                                  >
+                                    <TrendingUp className="h-3 w-3 mr-1" />
+                                    Profit
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="flex items-center justify-center p-2"
+                                    onClick={() => {
+                                      if (userDetails?.trades?.filter(t => t.adminApproval === 'pending').length > 0) {
+                                        approveTradesMutation.mutate({
+                                          userId: user.id,
+                                          tradeIds: userDetails.trades.filter(t => t.adminApproval === 'pending').map(t => t.id)
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Approve
+                                  </Button>
                                 </div>
                               </div>
                               
@@ -417,33 +495,42 @@ export default function AdminTest() {
                               <div className="space-y-4">
                                 <h4 className="font-semibold flex items-center">
                                   <DollarSign className="h-4 w-4 mr-1" />
-                                  Balance Management
+                                  Balance & Profit Management
                                 </h4>
                                 
-                                <div className="flex space-x-2">
+                                <div className="grid grid-cols-3 gap-2">
                                   <Button
                                     size="sm"
                                     variant={balanceAction.type === 'add' ? 'default' : 'outline'}
                                     onClick={() => setBalanceAction(prev => ({ ...prev, type: 'add' }))}
-                                    className="flex-1"
+                                    className="flex items-center justify-center"
                                   >
                                     <Plus className="h-3 w-3 mr-1" />
                                     Add Funds
                                   </Button>
                                   <Button
                                     size="sm"
+                                    variant={balanceAction.type === 'profit' ? 'default' : 'outline'}
+                                    onClick={() => setBalanceAction(prev => ({ ...prev, type: 'profit' }))}
+                                    className="flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                                  >
+                                    <TrendingUp className="h-3 w-3 mr-1" />
+                                    Add Profit
+                                  </Button>
+                                  <Button
+                                    size="sm"
                                     variant={balanceAction.type === 'remove' ? 'default' : 'outline'}
                                     onClick={() => setBalanceAction(prev => ({ ...prev, type: 'remove' }))}
-                                    className="flex-1"
+                                    className="flex items-center justify-center"
                                   >
                                     <Minus className="h-3 w-3 mr-1" />
-                                    Remove Funds
+                                    Remove
                                   </Button>
                                 </div>
                                 
                                 <div className="flex space-x-2">
                                   <Input
-                                    placeholder="Enter amount"
+                                    placeholder={balanceAction.type === 'profit' ? 'Enter profit amount' : 'Enter amount'}
                                     value={balanceAction.amount}
                                     onChange={(e) => setBalanceAction(prev => ({ ...prev, amount: e.target.value }))}
                                     className="flex-1"
@@ -455,38 +542,98 @@ export default function AdminTest() {
                                       type: balanceAction.type
                                     })}
                                     disabled={!balanceAction.amount || adjustBalanceMutation.isPending}
+                                    className={balanceAction.type === 'profit' ? 'bg-green-600 hover:bg-green-700' : ''}
                                   >
                                     {adjustBalanceMutation.isPending ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
-                                      'Apply'
+                                      balanceAction.type === 'profit' ? 'Add Profit' : 'Apply'
                                     )}
                                   </Button>
                                 </div>
                               </div>
 
-                              {/* Trade Approval */}
-                              {userDetails?.trades?.filter(t => t.adminApproval === 'pending').length > 0 && (
-                                <div className="space-y-3">
+                              {/* Trade Management */}
+                              {userDetails?.trades && userDetails.trades.length > 0 && (
+                                <div className="space-y-4">
                                   <h4 className="font-semibold flex items-center">
-                                    <CheckCircle className="h-4 w-4 mr-1" />
-                                    Pending Trade Approvals
+                                    <TrendingUp className="h-4 w-4 mr-1" />
+                                    Trade Management ({userDetails.trades.length} trades)
                                   </h4>
-                                  <Button
-                                    onClick={() => approveTradesMutation.mutate({
-                                      userId: user.id,
-                                      tradeIds: userDetails.trades.filter(t => t.adminApproval === 'pending').map(t => t.id)
-                                    })}
-                                    disabled={approveTradesMutation.isPending}
-                                    className="w-full bg-green-600 hover:bg-green-700"
-                                  >
-                                    {approveTradesMutation.isPending ? (
-                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                      <CheckCircle className="h-4 w-4 mr-2" />
-                                    )}
-                                    Approve All Pending ({userDetails.trades.filter(t => t.adminApproval === 'pending').length})
-                                  </Button>
+                                  
+                                  <div className="max-h-64 overflow-y-auto space-y-2">
+                                    {userDetails.trades.slice(0, 8).map((trade) => (
+                                      <motion.div
+                                        key={trade.id}
+                                        whileHover={{ scale: 1.01 }}
+                                        className="flex items-center justify-between p-3 bg-white border rounded-lg shadow-sm"
+                                      >
+                                        <div className="flex-1">
+                                          <div className="flex items-center space-x-2 mb-1">
+                                            <span className="font-medium text-sm">{trade.symbol}</span>
+                                            <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'} className="text-xs">
+                                              {trade.type.toUpperCase()}
+                                            </Badge>
+                                            <Badge 
+                                              variant={
+                                                trade.adminApproval === 'pending' ? 'outline' :
+                                                trade.adminApproval === 'approved' ? 'default' : 'destructive'
+                                              }
+                                              className="text-xs"
+                                            >
+                                              {trade.adminApproval}
+                                            </Badge>
+                                          </div>
+                                          <p className="text-xs text-gray-600">
+                                            {parseFloat(trade.quantity).toFixed(4)} @ ${parseFloat(trade.price || '0').toFixed(2)}
+                                          </p>
+                                          {trade.profitLoss && (
+                                            <p className={`text-xs font-semibold ${parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                              P&L: ${parseFloat(trade.profitLoss).toFixed(2)}
+                                            </p>
+                                          )}
+                                        </div>
+                                        
+                                        <div className="flex items-center space-x-2">
+                                          <span className="text-sm font-bold">${parseFloat(trade.totalAmount || '0').toFixed(2)}</span>
+                                          {trade.adminApproval === 'pending' && (
+                                            <Button
+                                              size="sm"
+                                              onClick={() => approveTradesMutation.mutate({
+                                                userId: user.id,
+                                                tradeIds: [trade.id]
+                                              })}
+                                              disabled={approveTradesMutation.isPending}
+                                              className="bg-green-600 hover:bg-green-700 text-white px-2 py-1"
+                                            >
+                                              <CheckCircle className="h-3 w-3" />
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </motion.div>
+                                    ))}
+                                  </div>
+
+                                  {/* Bulk Actions */}
+                                  {userDetails?.trades?.filter(t => t.adminApproval === 'pending').length > 0 && (
+                                    <div className="flex space-x-2 pt-3 border-t">
+                                      <Button
+                                        onClick={() => approveTradesMutation.mutate({
+                                          userId: user.id,
+                                          tradeIds: userDetails.trades.filter(t => t.adminApproval === 'pending').map(t => t.id)
+                                        })}
+                                        disabled={approveTradesMutation.isPending}
+                                        className="flex-1 bg-green-600 hover:bg-green-700"
+                                      >
+                                        {approveTradesMutation.isPending ? (
+                                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                        ) : (
+                                          <CheckCircle className="h-4 w-4 mr-2" />
+                                        )}
+                                        Approve All Pending ({userDetails.trades.filter(t => t.adminApproval === 'pending').length})
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
