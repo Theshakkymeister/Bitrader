@@ -279,8 +279,8 @@ export default function Portfolio() {
                 }}
               />
               
-              {/* Animated glowing dot at the end */}
-              <g className="animate-bounce">
+              {/* Animated glowing dot at the end - perfectly aligned with line endpoint */}
+              <g>
                 <circle cx="740" cy="95" r="12" fill="#059669" opacity="0.1">
                   <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.1;0.02;0.1" dur="2s" repeatCount="indefinite"/>
@@ -289,7 +289,9 @@ export default function Portfolio() {
                   <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.5s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="740" cy="95" r="5" fill="#059669" filter="url(#shadow)"/>
+                <circle cx="740" cy="95" r="5" fill="#059669" filter="url(#shadow)">
+                  <animate attributeName="r" values="5;7;5" dur="1s" repeatCount="indefinite"/>
+                </circle>
                 <circle cx="740" cy="95" r="2.5" fill="#ffffff"/>
               </g>
               
@@ -298,8 +300,10 @@ export default function Portfolio() {
                 <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite"/>
               </line>
               
+              {/* Line endpoint marker to ensure visual connection */}
+              <circle cx="740" cy="95" r="6" fill="#059669" opacity="0.8" stroke="#ffffff" strokeWidth="2"/>
+              
               {/* Small circle markers on the line to show exact connection points */}
-              <circle cx="740" cy="95" r="3" fill="#059669" opacity="0.6" />
               <circle cx="680" cy="108" r="2" fill="#059669" opacity="0.6" />
               <circle cx="520" cy="132" r="2" fill="#059669" opacity="0.6" />
               <circle cx="360" cy="152" r="2" fill="#059669" opacity="0.6" />
