@@ -189,12 +189,35 @@ export const cryptoAddresses = pgTable("crypto_addresses", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Deposit requests from users
+export const depositRequests = pgTable("deposit_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  cryptoSymbol: varchar("crypto_symbol").notNull(), // BTC, ETH, SOL, USDT, USDC
+  amount: decimal("amount", { precision: 18, scale: 8 }).notNull(),
+  usdValue: decimal("usd_value", { precision: 15, scale: 2 }),
+  fromAddress: varchar("from_address"), // User's sending address
+  toAddress: varchar("to_address").notNull(), // Platform's receiving address
+  transactionHash: varchar("transaction_hash"),
+  network: varchar("network").notNull(), // mainnet, ethereum, solana
+  status: varchar("status").notNull().default("pending"), // "pending" | "approved" | "rejected" | "processing"
+  adminApproval: varchar("admin_approval").default("pending"), // "pending" | "approved" | "rejected"
+  approvedBy: varchar("approved_by").references(() => adminUsers.id),
+  approvedAt: timestamp("approved_at"),
+  rejectionReason: text("rejection_reason"),
+  notes: text("notes"), // Admin notes
+  confirmations: integer("confirmations").default(0),
+  requiredConfirmations: integer("required_confirmations").default(3),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Admin activity logs
 export const adminLogs = pgTable("admin_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   adminId: varchar("admin_id").references(() => adminUsers.id).notNull(),
   action: varchar("action").notNull(), // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
-  resource: varchar("resource").notNull(), // CRYPTO_ADDRESS, WEBSITE_SETTING, USER
+  resource: varchar("resource").notNull(), // CRYPTO_ADDRESS, WEBSITE_SETTING, USER, DEPOSIT_REQUEST
   resourceId: varchar("resource_id"),
   details: jsonb("details"),
   ipAddress: varchar("ip_address"),
@@ -209,6 +232,12 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   wallets: many(userWallets),
   stockHoldings: many(stockHoldings),
   performanceMetrics: many(performanceMetrics),
+  depositRequests: many(depositRequests),
+}));
+
+export const depositRequestsRelations = relations(depositRequests, ({ one }) => ({
+  user: one(users, { fields: [depositRequests.userId], references: [users.id] }),
+  approvedBy: one(adminUsers, { fields: [depositRequests.approvedBy], references: [adminUsers.id] }),
 }));
 
 export const portfoliosRelations = relations(portfolios, ({ one }) => ({
@@ -267,6 +296,7 @@ export const insertStockHoldingSchema = createInsertSchema(stockHoldings);
 export const insertAdminUserSchema = createInsertSchema(adminUsers);
 export const insertWebsiteSettingSchema = createInsertSchema(websiteSettings);
 export const insertCryptoAddressSchema = createInsertSchema(cryptoAddresses);
+export const insertDepositRequestSchema = createInsertSchema(depositRequests);
 export const insertAdminLogSchema = createInsertSchema(adminLogs);
 
 // TypeScript types
@@ -300,6 +330,9 @@ export type InsertWebsiteSetting = z.infer<typeof insertWebsiteSettingSchema>;
 
 export type CryptoAddress = typeof cryptoAddresses.$inferSelect;
 export type InsertCryptoAddress = z.infer<typeof insertCryptoAddressSchema>;
+
+export type DepositRequest = typeof depositRequests.$inferSelect;
+export type InsertDepositRequest = z.infer<typeof insertDepositRequestSchema>;
 
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;

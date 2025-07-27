@@ -32,6 +32,9 @@ import {
   type InsertCryptoAddress,
   type AdminLog,
   type InsertAdminLog,
+  type DepositRequest,
+  type InsertDepositRequest,
+  depositRequests,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -123,6 +126,14 @@ export interface IStorage {
   // Admin logs operations
   createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
   getAdminLogs(adminId?: string, limit?: number): Promise<AdminLog[]>;
+  logAdminActivity(adminId: string, action: string, resource: string, resourceId: string | null, details: any, request: any): Promise<void>;
+
+  // Deposit requests
+  getUserDepositRequests(userId: string): Promise<any[]>;
+  createDepositRequest(request: any): Promise<any>;
+  updateDepositRequest(id: string, updates: any): Promise<any>;
+  getDepositRequestsByStatus(status: string): Promise<any[]>;
+  getAllDepositRequests(): Promise<any[]>;
 }
 
 
@@ -609,15 +620,164 @@ export class DatabaseStorage implements IStorage {
 
   async getPendingDepositsCount(): Promise<number> {
     try {
-      // Count users with zero balance portfolios (waiting for deposits)
+      // Count pending deposit requests
       const result = await db.select({ 
         count: sql<number>`count(*)` 
-      }).from(portfolios).where(sql`CAST(total_balance AS DECIMAL) = 0`);
+      }).from(depositRequests).where(eq(depositRequests.status, 'pending'));
       
       return result[0]?.count || 0;
     } catch (error) {
       console.error('Error getting pending deposits count:', error);
       return 0;
+    }
+  }
+
+  // Deposit request operations
+  async getUserDepositRequests(userId: string): Promise<DepositRequest[]> {
+    return await db.select().from(depositRequests)
+      .where(eq(depositRequests.userId, userId))
+      .orderBy(desc(depositRequests.createdAt));
+  }
+
+  async createDepositRequest(request: InsertDepositRequest): Promise<DepositRequest> {
+    const [depositRequest] = await db.insert(depositRequests)
+      .values(request)
+      .returning();
+    return depositRequest;
+  }
+
+  async updateDepositRequest(id: string, updates: Partial<InsertDepositRequest>): Promise<DepositRequest> {
+    const [updated] = await db.update(depositRequests)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(depositRequests.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getDepositRequestsByStatus(status: string): Promise<DepositRequest[]> {
+    return await db.select().from(depositRequests)
+      .where(eq(depositRequests.status, status))
+      .orderBy(desc(depositRequests.createdAt));
+  }
+
+  async getAllDepositRequests(): Promise<DepositRequest[]> {
+    return await db.select().from(depositRequests)
+      .orderBy(desc(depositRequests.createdAt));
+  }
+
+  // Enhanced getUserDetails with real-time data
+  async getUserDetails(id: string): Promise<any> {
+    try {
+      // Get user basic info
+      const user = await this.getUser(id);
+      if (!user) return null;
+
+      // Get portfolio
+      const portfolio = await this.getPortfolio(id);
+
+      // Get recent trades with proper type handling
+      const userTrades = await db.select().from(trades)
+        .where(eq(trades.userId, id))
+        .orderBy(desc(trades.createdAt))
+        .limit(10);
+
+      // Get user wallets
+      const wallets = await this.getUserWallets(id);
+
+      // Get stock holdings
+      const stockHoldings = await this.getStockHoldings(id);
+
+      // Get deposit requests
+      const depositRequests = await this.getUserDepositRequests(id);
+
+      // Calculate real-time metrics
+      const totalTrades = userTrades.length;
+      const profitableTrades = userTrades.filter(trade => {
+        const profit = trade.profitLoss ? parseFloat(trade.profitLoss.toString()) : 0;
+        return profit > 0;
+      }).length;
+
+      const totalProfitLoss = userTrades.reduce((sum, trade) => {
+        const profit = trade.profitLoss ? parseFloat(trade.profitLoss.toString()) : 0;
+        return sum + profit;
+      }, 0);
+
+      return {
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          registrationIp: user.registrationIp,
+          lastLoginIp: user.lastLoginIp,
+          lastLoginAt: user.lastLoginAt,
+          isActive: user.isActive,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        },
+        portfolio: portfolio ? {
+          totalBalance: parseFloat(portfolio.totalBalance?.toString() || '0'),
+          totalProfitLoss: parseFloat(portfolio.totalProfitLoss?.toString() || '0'),
+          availableBalance: parseFloat(portfolio.availableBalance?.toString() || '0'),
+          marginUsed: parseFloat(portfolio.marginUsed?.toString() || '0')
+        } : null,
+        trades: userTrades.map(trade => ({
+          ...trade,
+          price: trade.price ? parseFloat(trade.price.toString()) : 0,
+          totalAmount: trade.totalAmount ? parseFloat(trade.totalAmount.toString()) : 0,
+          quantity: trade.quantity ? parseFloat(trade.quantity.toString()) : 0,
+          profitLoss: trade.profitLoss ? parseFloat(trade.profitLoss.toString()) : 0
+        })),
+        wallets: wallets.map(wallet => ({
+          ...wallet,
+          balance: parseFloat(wallet.balance?.toString() || '0'),
+          usdValue: parseFloat(wallet.usdValue?.toString() || '0')
+        })),
+        stockHoldings: stockHoldings.map(holding => ({
+          ...holding,
+          shares: parseFloat(holding.shares?.toString() || '0'),
+          avgCostBasis: parseFloat(holding.avgCostBasis?.toString() || '0'),
+          currentPrice: parseFloat(holding.currentPrice?.toString() || '0'),
+          marketValue: parseFloat(holding.marketValue?.toString() || '0'),
+          totalReturn: parseFloat(holding.totalReturn?.toString() || '0'),
+          returnPercentage: parseFloat(holding.returnPercentage?.toString() || '0')
+        })),
+        depositRequests: depositRequests.map(request => ({
+          ...request,
+          amount: parseFloat(request.amount?.toString() || '0'),
+          usdValue: parseFloat(request.usdValue?.toString() || '0')
+        })),
+        analytics: {
+          totalTrades,
+          profitableTrades,
+          winRate: totalTrades > 0 ? ((profitableTrades / totalTrades) * 100).toFixed(2) : '0.00',
+          totalProfitLoss: totalProfitLoss.toFixed(2),
+          avgTradeSize: userTrades.length > 0 ? 
+            (userTrades.reduce((sum, trade) => sum + parseFloat(trade.totalAmount?.toString() || '0'), 0) / userTrades.length).toFixed(2) : '0.00'
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching enhanced user details:', error);
+      throw error;
+    }
+  }
+
+  // Admin logging activity
+  async logAdminActivity(adminId: string, action: string, resource: string, resourceId: string | null, details: any, request: any): Promise<void> {
+    try {
+      await this.createAdminLog({
+        adminId,
+        action,
+        resource,
+        resourceId,
+        details,
+        ipAddress: request.ip || request.connection?.remoteAddress || 'unknown',
+        userAgent: request.get('User-Agent') || 'unknown'
+      });
+    } catch (error) {
+      console.error('Error logging admin activity:', error);
+      // Don't throw error to prevent disrupting main operation
     }
   }
 }

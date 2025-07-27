@@ -308,6 +308,72 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Deposit requests management
+  app.get('/api/admin/deposit-requests', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { status } = req.query;
+      let depositRequests;
+      
+      if (status && status !== 'all') {
+        depositRequests = await storage.getDepositRequestsByStatus(status as string);
+      } else {
+        depositRequests = await storage.getAllDepositRequests();
+      }
+      
+      res.json(depositRequests);
+    } catch (error) {
+      console.error("Get deposit requests error:", error);
+      res.status(500).json({ message: "Failed to get deposit requests" });
+    }
+  });
+
+  app.patch('/api/admin/deposit-requests/:id/approve', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { notes } = req.body;
+      const adminId = req.adminUser.id;
+
+      const updatedRequest = await storage.updateDepositRequest(id, {
+        status: 'approved',
+        adminApproval: 'approved',
+        approvedBy: adminId,
+        approvedAt: new Date(),
+        notes
+      });
+
+      await logAdminActivity(adminId, 'APPROVE', 'DEPOSIT_REQUEST', id, { notes }, req);
+
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Approve deposit request error:", error);
+      res.status(500).json({ message: "Failed to approve deposit request" });
+    }
+  });
+
+  app.patch('/api/admin/deposit-requests/:id/reject', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { rejectionReason, notes } = req.body;
+      const adminId = req.adminUser.id;
+
+      const updatedRequest = await storage.updateDepositRequest(id, {
+        status: 'rejected',
+        adminApproval: 'rejected',
+        approvedBy: adminId,
+        approvedAt: new Date(),
+        rejectionReason,
+        notes
+      });
+
+      await logAdminActivity(adminId, 'REJECT', 'DEPOSIT_REQUEST', id, { rejectionReason, notes }, req);
+
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Reject deposit request error:", error);
+      res.status(500).json({ message: "Failed to reject deposit request" });
+    }
+  });
+
   // Get detailed user information
   app.get('/api/admin/users/:userId/details', isAdminAuthenticated, async (req, res) => {
     try {

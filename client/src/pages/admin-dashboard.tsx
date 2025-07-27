@@ -40,7 +40,9 @@ import {
   History,
   Ban,
   UserCheck,
-  X
+  X,
+  Check,
+  Loader2
 } from "lucide-react";
 
 interface AdminUser {
@@ -114,6 +116,7 @@ const menuItems = [
   { id: 'crypto', label: 'Crypto Addresses', icon: Wallet, color: 'text-green-600' },
   { id: 'settings', label: 'Website Settings', icon: Settings, color: 'text-purple-600' },
   { id: 'users', label: 'User Management', icon: Users, color: 'text-orange-600' },
+  { id: 'deposits', label: 'Deposit Requests', icon: DollarSign, color: 'text-yellow-600' },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, color: 'text-pink-600' },
   { id: 'system', label: 'System Status', icon: Monitor, color: 'text-indigo-600' }
 ];
@@ -1537,7 +1540,147 @@ User Activity History:
     </motion.div>
   );
 
+  const renderDepositRequests = () => {
+    const { data: depositRequests, isLoading: loadingDeposits } = useQuery({
+      queryKey: ['/api/admin/deposit-requests'],
+      refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
+    });
 
+    const approveDepositMutation = useMutation({
+      mutationFn: async ({ id, notes }: { id: string; notes?: string }) => {
+        await apiRequest('PATCH', `/api/admin/deposit-requests/${id}/approve`, { notes });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/deposit-requests'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+        toast({ title: "Success", description: "Deposit request approved successfully" });
+      },
+      onError: (error: Error) => {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      },
+    });
+
+    const rejectDepositMutation = useMutation({
+      mutationFn: async ({ id, rejectionReason, notes }: { id: string; rejectionReason: string; notes?: string }) => {
+        await apiRequest('PATCH', `/api/admin/deposit-requests/${id}/reject`, { rejectionReason, notes });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/deposit-requests'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+        toast({ title: "Success", description: "Deposit request rejected" });
+      },
+      onError: (error: Error) => {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      },
+    });
+
+    if (loadingDeposits) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      );
+    }
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center space-x-3">
+          <DollarSign className="h-6 w-6 text-green-600" />
+          <h2 className="text-2xl font-bold text-gray-900">Deposit Requests</h2>
+          <Badge variant="outline" className="ml-auto">
+            {depositRequests?.length || 0} Total
+          </Badge>
+        </div>
+
+        {!depositRequests?.length ? (
+          <Card className="shadow-md border-0">
+            <CardContent className="py-12 text-center">
+              <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No deposit requests found</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {depositRequests.map((request: any, index: number) => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="shadow-md border-0 hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="font-semibold text-gray-900">
+                            {parseFloat(request.amount || '0').toFixed(8)} {request.cryptoSymbol}
+                          </h3>
+                          <Badge 
+                            variant={
+                              request.status === 'pending' ? 'outline' :
+                              request.status === 'approved' ? 'default' : 'destructive'
+                            }
+                          >
+                            {request.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          USD Value: ${parseFloat(request.usdValue || '0').toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Network: {request.network} • {new Date(request.createdAt).toLocaleDateString()}
+                        </p>
+                        {request.transactionHash && (
+                          <p className="text-xs text-gray-400 font-mono">
+                            TX: {request.transactionHash.substring(0, 20)}...
+                          </p>
+                        )}
+                      </div>
+                      
+                      {request.status === 'pending' && (
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                            onClick={() => approveDepositMutation.mutate({ id: request.id })}
+                            disabled={approveDepositMutation.isPending}
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                            onClick={() => rejectDepositMutation.mutate({ 
+                              id: request.id, 
+                              rejectionReason: 'Invalid transaction or insufficient confirmation' 
+                            })}
+                            disabled={rejectDepositMutation.isPending}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    );
+  };
 
   const handleSectionChange = async (sectionId: string) => {
     if (sectionId === activeSection) return;
@@ -1564,6 +1707,8 @@ User Activity History:
           return renderUserManagement();
         case 'analytics':
           return renderAnalytics();
+        case 'deposits':
+          return renderDepositRequests();
         case 'system':
           return renderSystemStatus();
         default:
