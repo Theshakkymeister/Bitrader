@@ -260,31 +260,23 @@ export default function Dashboard() {
                   
                   return (
                     <g>
-                      {/* Pulsing ring */}
-                      <circle 
-                        cx={cx} 
-                        cy={cy} 
-                        r="12" 
-                        fill="#10b981" 
-                        opacity="0.3"
-                        className="animate-ping"
-                      />
-                      {/* Outer ring */}
+                      {/* Subtle pulsing ring */}
                       <circle 
                         cx={cx} 
                         cy={cy} 
                         r="8" 
                         fill="#10b981" 
-                        opacity="0.5"
+                        opacity="0.15"
+                        className="animate-ping"
                       />
                       {/* Main dot */}
                       <circle 
                         cx={cx} 
                         cy={cy} 
-                        r="5" 
+                        r="4" 
                         fill="#10b981" 
                         stroke="#ffffff" 
-                        strokeWidth="2"
+                        strokeWidth="1.5"
                       />
                     </g>
                   );
