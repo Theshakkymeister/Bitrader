@@ -775,11 +775,19 @@ User Activity History:
                   <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                     <div className="text-left sm:text-right">
                       <p className="text-sm text-gray-900">
-                        Joined {new Date(user.createdAt).toLocaleDateString()}
+                        Joined {new Date(user.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </p>
                       <p className="text-xs text-gray-500">
                         {user.lastLoginAt 
-                          ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}` 
+                          ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}` 
                           : 'Never logged in'}
                       </p>
                     </div>
@@ -882,13 +890,27 @@ User Activity History:
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-600">Joined</Label>
-                    <p className="text-sm text-gray-900">{new Date(selectedUser.createdAt).toLocaleString()}</p>
+                    <p className="text-sm text-gray-900">
+                      {new Date(selectedUser.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-600">Last Login</Label>
                     <p className="text-sm text-gray-900">
                       {selectedUser.lastLoginAt 
-                        ? new Date(selectedUser.lastLoginAt).toLocaleString() 
+                        ? new Date(selectedUser.lastLoginAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
                         : 'Never logged in'}
                     </p>
                   </div>
