@@ -311,6 +311,81 @@ export default function AdminDashboard() {
     }
   };
 
+  // User management action handlers
+  const handleVerifyAccount = async (userId: string) => {
+    try {
+      await toggleUserStatusMutation.mutateAsync({ userId, isActive: true });
+      toast({ 
+        title: "Account Verified", 
+        description: "User account has been verified and activated.",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({ 
+        title: "Verification Failed", 
+        description: "Failed to verify user account.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleViewHistory = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/history`);
+      if (!response.ok) throw new Error("Failed to fetch user history");
+      
+      const history = await response.json();
+      
+      // Create a detailed history modal content
+      const historyContent = `
+User Activity History:
+- Login History: ${history.loginCount || 0} total logins
+- Trade History: ${history.tradeCount || 0} total trades  
+- Deposit History: ${history.depositCount || 0} total deposits
+- Last Activity: ${history.lastActivity || 'N/A'}
+- Account Age: ${Math.floor((Date.now() - new Date(selectedUser?.createdAt || '').getTime()) / (1000 * 60 * 60 * 24))} days
+      `;
+      
+      toast({ 
+        title: "User History", 
+        description: historyContent,
+        variant: "default"
+      });
+    } catch (error) {
+      toast({ 
+        title: "History Unavailable", 
+        description: "Could not retrieve user history at this time.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleActivityLog = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/activity-log`);
+      if (!response.ok) throw new Error("Failed to fetch activity log");
+      
+      const activityLog = await response.json();
+      
+      // Show recent activity in toast
+      const recentActivity = activityLog.slice(0, 5).map((activity: any) => 
+        `${new Date(activity.timestamp).toLocaleString()}: ${activity.action}`
+      ).join('\n');
+      
+      toast({ 
+        title: "Recent Activity Log", 
+        description: recentActivity || "No recent activity found.",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({ 
+        title: "Activity Log Unavailable", 
+        description: "Could not retrieve activity log at this time.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const renderOverview = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -996,15 +1071,28 @@ export default function AdminDashboard() {
                   <Separator />
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleVerifyAccount(selectedUser.id)}
+                      disabled={selectedUser.isActive}
+                    >
                       <AlertTriangle className="h-4 w-4 mr-1" />
-                      Verify Account
+                      {selectedUser.isActive ? 'Verified' : 'Verify Account'}
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewHistory(selectedUser.id)}
+                    >
                       <History className="h-4 w-4 mr-1" />
                       View Full History
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleActivityLog(selectedUser.id)}
+                    >
                       <Eye className="h-4 w-4 mr-1" />
                       Activity Log
                     </Button>

@@ -402,6 +402,93 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Get user activity history
+  app.get('/api/admin/users/:userId/history', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get user's complete history
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const trades = await storage.getTrades(userId);
+      const portfolio = await storage.getPortfolio(userId);
+      
+      // Calculate metrics
+      const loginCount = user.lastLoginAt ? 1 : 0; // Basic implementation
+      const tradeCount = trades.length;
+      const depositCount = portfolio && parseFloat(portfolio.totalBalance || '0') > 0 ? 1 : 0;
+      const accountAge = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+      
+      const history = {
+        loginCount,
+        tradeCount,
+        depositCount,
+        lastActivity: user.lastLoginAt || user.createdAt,
+        accountAge: `${accountAge} days`,
+        totalBalance: portfolio?.totalBalance || '0',
+        registrationDate: user.createdAt,
+        lastLogin: user.lastLoginAt
+      };
+
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching user history:", error);
+      res.status(500).json({ message: "Failed to fetch user history" });
+    }
+  });
+
+  // Get user activity log
+  app.get('/api/admin/users/:userId/activity-log', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get recent activities for the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const trades = await storage.getTrades(userId);
+      
+      // Create activity log from available data
+      const activities = [
+        {
+          timestamp: user.createdAt,
+          action: "Account Created",
+          details: `User registered with email: ${user.email}`
+        }
+      ];
+
+      if (user.lastLoginAt) {
+        activities.push({
+          timestamp: user.lastLoginAt,
+          action: "Last Login",
+          details: `Logged in from IP: ${user.lastLoginIp || 'Unknown'}`
+        });
+      }
+
+      // Add trade activities
+      trades.slice(0, 10).forEach(trade => {
+        activities.push({
+          timestamp: trade.createdAt,
+          action: `Trade ${trade.type.toUpperCase()}`,
+          details: `${trade.quantity} ${trade.symbol} at $${trade.price}`
+        });
+      });
+
+      // Sort by timestamp descending
+      activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching activity log:", error);
+      res.status(500).json({ message: "Failed to fetch activity log" });
+    }
+  });
+
   // Algorithm Management
   app.get('/api/admin/algorithms', isAdminAuthenticated, async (req, res) => {
     try {
