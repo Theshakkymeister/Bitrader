@@ -869,7 +869,10 @@ export class DatabaseStorage implements IStorage {
           }, 0) + stockHoldings.reduce((sum, holding) => {
             return sum + parseFloat(holding.marketValue?.toString() || '0');
           }, 0),
-          buyingPower: parseFloat(portfolio.availableBalance?.toString() || '0')
+          // Calculate buying power from total wallet value (same as dashboard)
+          buyingPower: wallets.reduce((sum, wallet) => {
+            return sum + parseFloat(wallet.usdValue?.toString() || '0');
+          }, 0)
         } : {
           totalBalance: 0,
           totalProfitLoss: 0,
@@ -880,7 +883,10 @@ export class DatabaseStorage implements IStorage {
           }, 0) + stockHoldings.reduce((sum, holding) => {
             return sum + parseFloat(holding.marketValue?.toString() || '0');
           }, 0),
-          buyingPower: 0
+          // Calculate buying power from total wallet value (same as dashboard)
+          buyingPower: wallets.reduce((sum, wallet) => {
+            return sum + parseFloat(wallet.usdValue?.toString() || '0');
+          }, 0)
         },
         trades: userTrades.map(trade => ({
           ...trade,

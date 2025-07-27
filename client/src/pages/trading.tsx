@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { TrendingUp, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
@@ -23,6 +23,18 @@ export default function TradingPage() {
   const [quantity, setQuantity] = useState("");
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
+
+  // Get user wallets data for buying power calculation
+  const { data: wallets = [] } = useQuery({
+    queryKey: ['/api/wallets'],
+    enabled: !!user,
+    refetchInterval: 5000,
+  });
+
+  // Calculate buying power from wallet balances (same as dashboard)
+  const buyingPower = wallets.reduce((sum, wallet) => {
+    return sum + parseFloat(wallet.usdValue || '0');
+  }, 0);
 
   const tradeMutation = useMutation({
     mutationFn: async (tradeData: any) => {
@@ -120,15 +132,20 @@ export default function TradingPage() {
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Buying Power</span>
               <motion.span 
-                className="text-2xl font-bold text-gray-600"
+                className={`text-2xl font-bold ${buyingPower > 0 ? 'text-green-600' : 'text-gray-600'}`}
                 animate={{ 
-                  textShadow: "0 0 8px rgba(107, 114, 128, 0.3)"
+                  textShadow: buyingPower > 0 ? "0 0 8px rgba(34, 197, 94, 0.3)" : "0 0 8px rgba(107, 114, 128, 0.3)"
                 }}
                 transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
               >
-                $0.00
+                ${buyingPower.toLocaleString('en-US', {minimumFractionDigits: 2})}
               </motion.span>
             </div>
+            {buyingPower === 0 && (
+              <div className="mt-2 text-xs text-gray-500">
+                💰 Deposit funds via Wallets to increase buying power
+              </div>
+            )}
           </motion.div>
         </motion.div>
 
