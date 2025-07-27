@@ -1052,7 +1052,7 @@ User Activity Summary:
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Buying Power</Label>
                         <p className="text-lg font-semibold text-green-600">
-                          ${userDetails.portfolio?.totalBalance?.toFixed(2) || '0.00'}
+                          ${parseFloat(userDetails.portfolio?.totalBalance || '0').toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-500">
                           Cash available for trading
@@ -1061,7 +1061,7 @@ User Activity Summary:
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Total P&L</Label>
                         <p className={`text-lg font-semibold ${(userDetails.portfolio?.todayPL || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${userDetails.portfolio?.todayPL?.toFixed(2) || '0.00'}
+                          ${parseFloat(userDetails.portfolio?.todayPL || '0').toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-500">
                           Total profit/loss from trades
