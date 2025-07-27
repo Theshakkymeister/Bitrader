@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import Landing from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -26,6 +28,44 @@ function MobileNav() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [showTradeOptions, setShowTradeOptions] = useState(false);
+  const { toast } = useToast();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logged Out Successfully",
+        description: "You have been logged out of your account.",
+        variant: "default"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setTimeout(() => {
+        window.location.href = "/auth";
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Logout Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+    setIsOpen(false);
+  };
   
   const navItems = [
     { href: "/", icon: Home, label: "Dashboard" },
@@ -104,10 +144,14 @@ function MobileNav() {
             </div>
 
             <div className="border-t pt-4">
-              <a href="/api/logout" className="flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100">
+              <Button
+                variant="ghost"
+                className="w-full flex items-center justify-start space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 h-auto"
+                onClick={handleLogout}
+              >
                 <User className="h-5 w-5" />
                 <span className="font-medium">Logout</span>
-              </a>
+              </Button>
             </div>
           </div>
         </SheetContent>
@@ -192,6 +236,43 @@ function DesktopNav() {
 
 function AppHeader() {
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logged Out Successfully",
+        description: "You have been logged out of your account.",
+        variant: "default"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setTimeout(() => {
+        window.location.href = "/auth";
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Logout Failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -229,11 +310,15 @@ function AppHeader() {
                   </div>
                 </div>
               </div>
-              <a href="/api/logout">
-                <Button variant="outline" size="sm" className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-                  Logout
-                </Button>
-              </a>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+                className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+              >
+                {logoutMutation.isPending ? "Logging out..." : "Logout"}
+              </Button>
             </div>
           </div>
         </div>

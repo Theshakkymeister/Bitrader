@@ -96,14 +96,34 @@ export default function AdminDashboard() {
 
   // Admin logout
   const logoutMutation = useMutation({
-    mutationFn: () => fetch("/api/admin/logout", { method: "POST" }),
+    mutationFn: async () => {
+      const response = await fetch("/api/admin/logout", { 
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Admin logout failed");
+      }
+    },
     onSuccess: () => {
       toast({
-        title: "Logged Out",
-        description: "You have been successfully logged out",
+        title: "Logged Out Successfully",
+        description: "You have been logged out of the admin panel.",
         variant: "default"
       });
-      window.location.href = "/admin/login";
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/user"] });
+      setTimeout(() => {
+        window.location.href = "/admin/login";
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Logout Failed",
+        description: error.message,
+        variant: "destructive"
+      });
     },
   });
 
