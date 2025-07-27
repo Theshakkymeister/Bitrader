@@ -258,8 +258,22 @@ export default function Dashboard() {
                   const isLastPoint = index === portfolioChartData.length - 1;
                   if (!isLastPoint) return null;
                   
+                  const currentValue = payload?.value || 0;
+                  
                   return (
                     <g>
+                      {/* Current balance value above the dot */}
+                      <text 
+                        x={cx} 
+                        y={cy - 20} 
+                        textAnchor="middle" 
+                        fill="#10b981" 
+                        fontSize="12" 
+                        fontWeight="600"
+                        className="font-mono"
+                      >
+                        ${currentValue.toLocaleString()}
+                      </text>
                       {/* Subtle pulsing ring */}
                       <circle 
                         cx={cx} 
