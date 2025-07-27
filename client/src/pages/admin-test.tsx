@@ -104,6 +104,11 @@ export default function AdminTest() {
     enabled: !!selectedUser?.id && isAuthenticated,
   });
 
+  const { data: depositRequests } = useQuery({
+    queryKey: ["/api/admin/deposit-requests"],
+    enabled: isAuthenticated,
+  });
+
   // Balance adjustment mutation with profit tracking
   const adjustBalanceMutation = useMutation({
     mutationFn: async ({ userId, amount, type }) => {
@@ -206,6 +211,47 @@ export default function AdminTest() {
     },
     onError: () => {
       toast({ title: "Failed to deactivate user", variant: "destructive" });
+    }
+  });
+
+  // Deposit approval mutations
+  const approveDepositMutation = useMutation({
+    mutationFn: async ({ depositId, notes }) => {
+      const response = await fetch(`/api/admin/deposit-requests/${depositId}/approve`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ notes })
+      });
+      if (!response.ok) throw new Error("Failed to approve deposit");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Deposit approved successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/deposit-requests"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to approve deposit", variant: "destructive" });
+    }
+  });
+
+  const rejectDepositMutation = useMutation({
+    mutationFn: async ({ depositId, rejectionReason, notes }) => {
+      const response = await fetch(`/api/admin/deposit-requests/${depositId}/reject`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ rejectionReason, notes })
+      });
+      if (!response.ok) throw new Error("Failed to reject deposit");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Deposit rejected successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/deposit-requests"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to reject deposit", variant: "destructive" });
     }
   });
 
@@ -962,14 +1008,16 @@ export default function AdminTest() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 lg:p-6">
-                  {/* Deposit Stats */}
+                  {/* Real Deposit Stats */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
                       <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
                         <CardContent className="p-3 sm:p-4">
                           <div className="text-center">
                             <p className="text-orange-100 text-xs sm:text-sm font-medium">Pending</p>
-                            <p className="text-xl sm:text-2xl font-bold">8</p>
+                            <p className="text-xl sm:text-2xl font-bold">
+                              {Array.isArray(depositRequests) ? depositRequests.filter(d => d.status === 'pending').length : 0}
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
@@ -980,7 +1028,9 @@ export default function AdminTest() {
                         <CardContent className="p-3 sm:p-4">
                           <div className="text-center">
                             <p className="text-green-100 text-xs sm:text-sm font-medium">Approved</p>
-                            <p className="text-xl sm:text-2xl font-bold">42</p>
+                            <p className="text-xl sm:text-2xl font-bold">
+                              {Array.isArray(depositRequests) ? depositRequests.filter(d => d.status === 'approved').length : 0}
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
@@ -991,7 +1041,9 @@ export default function AdminTest() {
                         <CardContent className="p-3 sm:p-4">
                           <div className="text-center">
                             <p className="text-red-100 text-xs sm:text-sm font-medium">Rejected</p>
-                            <p className="text-xl sm:text-2xl font-bold">2</p>
+                            <p className="text-xl sm:text-2xl font-bold">
+                              {Array.isArray(depositRequests) ? depositRequests.filter(d => d.status === 'rejected').length : 0}
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
@@ -1002,67 +1054,101 @@ export default function AdminTest() {
                         <CardContent className="p-3 sm:p-4">
                           <div className="text-center">
                             <p className="text-blue-100 text-xs sm:text-sm font-medium">Total Value</p>
-                            <p className="text-lg sm:text-xl font-bold">$127K</p>
+                            <p className="text-lg sm:text-xl font-bold">
+                              ${Array.isArray(depositRequests) ? 
+                                depositRequests.reduce((sum, d) => sum + parseFloat(d.usdValue || '0'), 0).toFixed(0) 
+                                : '0'}K
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
                     </motion.div>
                   </div>
 
-                  {/* Recent Deposit Requests */}
+                  {/* Real Deposit Requests */}
                   <div className="space-y-3 sm:space-y-4">
                     <h4 className="font-semibold flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      Recent Deposit Requests
+                      Real Deposit Requests ({Array.isArray(depositRequests) ? depositRequests.length : 0})
                     </h4>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {[
-                        { id: 1, user: 'user_45547567', crypto: 'BTC', amount: '0.5', usd: '$32,500', status: 'pending', time: '2 mins ago' },
-                        { id: 2, user: 'user_78901234', crypto: 'ETH', amount: '15.2', usd: '$45,600', status: 'approved', time: '15 mins ago' },
-                        { id: 3, user: 'user_23456789', crypto: 'USDT', amount: '10,000', usd: '$10,000', status: 'pending', time: '1 hour ago' },
-                        { id: 4, user: 'user_34567890', crypto: 'SOL', amount: '250', usd: '$18,750', status: 'approved', time: '2 hours ago' }
-                      ].map((deposit) => (
-                        <motion.div
-                          key={deposit.id}
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.99 }}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
-                        >
-                          <div className="flex-1 mb-2 sm:mb-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="font-medium text-sm">{deposit.crypto}</span>
-                              <Badge 
-                                variant={
-                                  deposit.status === 'pending' ? 'outline' :
-                                  deposit.status === 'approved' ? 'default' : 'destructive'
-                                }
-                                className="text-xs"
-                              >
-                                {deposit.status}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-gray-600">
-                              {deposit.user} • {deposit.amount} {deposit.crypto} ({deposit.usd})
-                            </p>
-                            <p className="text-xs text-gray-500">{deposit.time}</p>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm font-bold">{deposit.usd}</span>
-                            {deposit.status === 'pending' && (
-                              <div className="flex space-x-1">
-                                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-2 py-1">
-                                  <CheckCircle className="h-3 w-3" />
-                                </Button>
-                                <Button size="sm" variant="destructive" className="px-2 py-1">
-                                  <XCircle className="h-3 w-3" />
-                                </Button>
+                    {!Array.isArray(depositRequests) || depositRequests.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="text-sm">No deposit requests found in the database</p>
+                        <p className="text-xs mt-1">Deposit requests will appear here when users request crypto deposits</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {depositRequests.slice(0, 10).map((deposit) => (
+                          <motion.div
+                            key={deposit.id}
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-lg shadow-sm"
+                          >
+                            <div className="flex-1 mb-2 sm:mb-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="font-medium text-sm">{deposit.cryptoType}</span>
+                                <Badge 
+                                  variant={
+                                    deposit.status === 'pending' ? 'outline' :
+                                    deposit.status === 'approved' ? 'default' : 'destructive'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {deposit.status}
+                                </Badge>
                               </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
+                              <p className="text-xs text-gray-600">
+                                User {deposit.userId} • {parseFloat(deposit.amount || '0').toFixed(4)} {deposit.cryptoType}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                ${parseFloat(deposit.usdValue || '0').toFixed(2)} • {new Date(deposit.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-bold">${parseFloat(deposit.usdValue || '0').toFixed(2)}</span>
+                              {deposit.status === 'pending' && (
+                                <div className="flex space-x-1">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => approveDepositMutation.mutate({ 
+                                      depositId: deposit.id, 
+                                      notes: 'Approved by admin' 
+                                    })}
+                                    disabled={approveDepositMutation.isPending}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1"
+                                  >
+                                    {approveDepositMutation.isPending ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      <CheckCircle className="h-3 w-3" />
+                                    )}
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive" 
+                                    onClick={() => rejectDepositMutation.mutate({ 
+                                      depositId: deposit.id, 
+                                      rejectionReason: 'Rejected by admin',
+                                      notes: 'Rejected due to admin review' 
+                                    })}
+                                    disabled={rejectDepositMutation.isPending}
+                                    className="px-2 py-1"
+                                  >
+                                    {rejectDepositMutation.isPending ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      <XCircle className="h-3 w-3" />
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

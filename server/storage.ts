@@ -139,6 +139,14 @@ export interface IStorage {
   
   // User positions
   getUserPositions(userId: string): Promise<any[]>;
+  
+  // Deposit request operations
+  getAllDepositRequests(): Promise<DepositRequest[]>;
+  getDepositRequestsByStatus(status: string): Promise<DepositRequest[]>;
+  getDepositRequestById(id: string): Promise<DepositRequest | undefined>;
+  updateDepositRequest(id: string, updates: Partial<DepositRequest>): Promise<DepositRequest>;
+  approveDepositRequest(id: string, adminId: string, notes?: string): Promise<DepositRequest>;
+  rejectDepositRequest(id: string, adminId: string, rejectionReason: string, notes?: string): Promise<DepositRequest>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -811,6 +819,55 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return updatedUser;
+  }
+
+  // Deposit request management implementations
+  async getAllDepositRequests(): Promise<DepositRequest[]> {
+    return await db.select().from(depositRequests).orderBy(desc(depositRequests.createdAt));
+  }
+
+  async getDepositRequestsByStatus(status: string): Promise<DepositRequest[]> {
+    return await db.select().from(depositRequests)
+      .where(eq(depositRequests.status, status))
+      .orderBy(desc(depositRequests.createdAt));
+  }
+
+  async getDepositRequestById(id: string): Promise<DepositRequest | undefined> {
+    const [depositRequest] = await db.select().from(depositRequests).where(eq(depositRequests.id, id));
+    return depositRequest;
+  }
+
+  async updateDepositRequest(id: string, updates: Partial<DepositRequest>): Promise<DepositRequest> {
+    const [updatedRequest] = await db
+      .update(depositRequests)
+      .set({ 
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(depositRequests.id, id))
+      .returning();
+    return updatedRequest;
+  }
+
+  async approveDepositRequest(id: string, adminId: string, notes?: string): Promise<DepositRequest> {
+    return await this.updateDepositRequest(id, {
+      status: 'approved',
+      adminApproval: 'approved',
+      approvedBy: adminId,
+      approvedAt: new Date(),
+      notes
+    });
+  }
+
+  async rejectDepositRequest(id: string, adminId: string, rejectionReason: string, notes?: string): Promise<DepositRequest> {
+    return await this.updateDepositRequest(id, {
+      status: 'rejected',
+      adminApproval: 'rejected',
+      approvedBy: adminId,
+      approvedAt: new Date(),
+      rejectionReason,
+      notes
+    });
   }
 }
 
