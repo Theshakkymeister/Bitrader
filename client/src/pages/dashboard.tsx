@@ -187,15 +187,15 @@ export default function Dashboard() {
             </LineChart>
           </ResponsiveContainer>
           
-          {/* Live indicator dot overlay */}
-          <div className="absolute top-[20%] right-[8%] transform -translate-x-1/2 -translate-y-1/2">
+          {/* Live indicator dot overlay - positioned at the end of the line */}
+          <div className="absolute top-[15%] right-[6%] transform -translate-x-1/2 -translate-y-1/2">
             <div className="relative">
               {/* Pulsing ring */}
-              <div className="absolute inset-0 w-4 h-4 bg-green-500 rounded-full animate-ping opacity-75"></div>
+              <div className="absolute inset-0 w-5 h-5 bg-green-500 rounded-full animate-ping opacity-60"></div>
               {/* Static outer ring */}
-              <div className="absolute inset-1 w-2 h-2 bg-green-500 rounded-full opacity-40"></div>
+              <div className="absolute inset-1 w-3 h-3 bg-green-500 rounded-full opacity-30"></div>
               {/* Center dot */}
-              <div className="relative w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-lg"></div>
+              <div className="relative w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-lg"></div>
             </div>
           </div>
         </div>
