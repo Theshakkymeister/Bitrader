@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, Search, Calendar, DollarSign, Hash, Activity, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
@@ -28,6 +31,8 @@ interface Trade {
 export default function OrdersPage() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
+  const [showTradeModal, setShowTradeModal] = useState(false);
 
   const { data: trades = [], isLoading: tradesLoading } = useQuery<Trade[]>({
     queryKey: ['/api/trades'],
@@ -50,6 +55,16 @@ export default function OrdersPage() {
   const pendingTrades = filteredTrades.filter(t => t.adminApproval === 'pending');
   const approvedTrades = filteredTrades.filter(t => t.adminApproval === 'approved');
   const rejectedTrades = filteredTrades.filter(t => t.adminApproval === 'rejected');
+
+  const handleTradeClick = (trade: Trade) => {
+    setSelectedTrade(trade);
+    setShowTradeModal(true);
+  };
+
+  const closeTradeModal = () => {
+    setShowTradeModal(false);
+    setSelectedTrade(null);
+  };
 
   return (
     <motion.div 
@@ -180,8 +195,9 @@ export default function OrdersPage() {
                             duration: 0.3, 
                             delay: index * 0.05 
                           }}
-                          className="border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 overflow-hidden"
+                          className="border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
                           whileHover={{ scale: 1.005 }}
+                          onClick={() => handleTradeClick(trade)}
                         >
                           {/* Header Section */}
                           <div className="flex items-center justify-between p-4 bg-gray-50 border-b">
@@ -290,8 +306,22 @@ export default function OrdersPage() {
                                 )}
                               </div>
                               
-                              <div className="text-xs text-gray-500">
-                                Status: <span className="font-medium capitalize">{trade.status}</span>
+                              <div className="flex items-center space-x-2">
+                                <div className="text-xs text-gray-500">
+                                  Status: <span className="font-medium capitalize">{trade.status}</span>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-6 px-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTradeClick(trade);
+                                  }}
+                                >
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  Details
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -305,6 +335,222 @@ export default function OrdersPage() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Detailed Trade Modal */}
+      <Dialog open={showTradeModal} onOpenChange={closeTradeModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-3">
+              <div className={`p-2 rounded-full ${
+                selectedTrade?.type === 'buy' ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                {selectedTrade?.type === 'buy' ? 
+                  <TrendingUp className="w-5 h-5 text-green-600" /> : 
+                  <TrendingDown className="w-5 h-5 text-red-600" />
+                }
+              </div>
+              <div>
+                <span className={`text-lg font-bold ${
+                  selectedTrade?.type === 'buy' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {selectedTrade?.type.toUpperCase()}
+                </span>
+                <span className="text-xl font-bold text-gray-900 ml-2">{selectedTrade?.symbol}</span>
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Order #{selectedTrade?.id} • {selectedTrade?.assetType?.charAt(0).toUpperCase()}{selectedTrade?.assetType?.slice(1)} Trade
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTrade && (
+            <div className="space-y-6">
+              {/* Status Section */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-sm font-medium text-gray-700">Current Status</h3>
+                    {selectedTrade.adminApproval === 'approved' && <CheckCircle className="w-4 h-4 text-green-500" />}
+                    {selectedTrade.adminApproval === 'pending' && <Clock className="w-4 h-4 text-yellow-500" />}
+                    {selectedTrade.adminApproval === 'rejected' && <XCircle className="w-4 h-4 text-red-500" />}
+                  </div>
+                  <Badge className={`${
+                    selectedTrade.adminApproval === 'approved' ? 'bg-green-100 text-green-700 border-green-300' :
+                    selectedTrade.adminApproval === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                    selectedTrade.adminApproval === 'rejected' ? 'bg-red-100 text-red-700 border-red-300' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {selectedTrade.adminApproval === 'approved' ? 'Approved' :
+                     selectedTrade.adminApproval === 'pending' ? 'Awaiting Admin Approval' :
+                     selectedTrade.adminApproval === 'rejected' ? 'Rejected by Admin' : 'Unknown'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Order Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <Activity className="w-5 h-5 mr-2" />
+                    Order Information
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Asset Symbol</span>
+                      <span className="text-sm font-medium text-gray-900">{selectedTrade.symbol}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Asset Type</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{selectedTrade.assetType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Order Type</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{selectedTrade.orderType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Transaction Type</span>
+                      <span className={`text-sm font-medium ${
+                        selectedTrade.type === 'buy' ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {selectedTrade.type.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <DollarSign className="w-5 h-5 mr-2" />
+                    Financial Details
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Quantity</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {parseFloat(selectedTrade.quantity).toLocaleString()} {selectedTrade.assetType === 'crypto' ? selectedTrade.symbol : 'shares'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Price per Unit</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        ${parseFloat(selectedTrade.price) > 0 ? parseFloat(selectedTrade.price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}) : '0.00'}
+                      </span>
+                    </div>
+                    {selectedTrade.limitPrice && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Limit Price</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          ${parseFloat(selectedTrade.limitPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}
+                        </span>
+                      </div>
+                    )}
+                    {selectedTrade.stopPrice && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Stop Price</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          ${parseFloat(selectedTrade.stopPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}
+                        </span>
+                      </div>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-base font-medium text-gray-900">Total Value</span>
+                      <span className="text-base font-bold text-gray-900">
+                        ${parseFloat(selectedTrade.totalAmount) > 0 ? parseFloat(selectedTrade.totalAmount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Timeline & Status
+                </h3>
+                
+                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Order Placed</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {new Date(selectedTrade.createdAt).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })} at {new Date(selectedTrade.createdAt).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                  
+                  {selectedTrade.expiresAt && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Expires</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {new Date(selectedTrade.expiresAt).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })} at {new Date(selectedTrade.expiresAt).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Order Status</span>
+                    <span className="text-sm font-medium text-gray-900 capitalize">{selectedTrade.status}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order ID Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Hash className="w-5 h-5 mr-2" />
+                  Reference Information
+                </h3>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Order ID</span>
+                    <div className="flex items-center space-x-2">
+                      <code className="text-xs bg-white px-2 py-1 rounded border font-mono text-gray-700">
+                        {selectedTrade.id}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedTrade.id);
+                        }}
+                        className="h-6"
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-2 pt-4 border-t">
+                <Button variant="outline" onClick={closeTradeModal}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
