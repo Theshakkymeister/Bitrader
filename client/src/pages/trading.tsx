@@ -21,6 +21,7 @@ export default function TradingPage() {
   const [orderType, setOrderType] = useState<"market" | "limit" | "stop">("market");
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
   const [quantity, setQuantity] = useState("");
+  const [entryPrice, setEntryPrice] = useState("");
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
 
@@ -50,6 +51,7 @@ export default function TradingPage() {
       // Reset form
       setSymbol("");
       setQuantity("");
+      setEntryPrice("");
       setLimitPrice("");
       setStopPrice("");
     },
@@ -65,17 +67,17 @@ export default function TradingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!symbol || !quantity) {
+    if (!symbol || !quantity || !entryPrice) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields (Symbol, Quantity, Entry Price)",
         variant: "destructive",
       });
       return;
     }
 
-    // For new users, use $0.00 as price
-    const currentPrice = 0.00;
+    // Use the entry price provided by user
+    const currentPrice = parseFloat(entryPrice);
     const tradePrice = orderType === "limit" && limitPrice ? parseFloat(limitPrice) : currentPrice;
     const totalAmount = (parseFloat(quantity) * tradePrice).toFixed(2);
 
@@ -86,6 +88,7 @@ export default function TradingPage() {
       orderType,
       quantity,
       price: currentPrice.toFixed(2),
+      entryPrice: currentPrice.toFixed(2),
       limitPrice: orderType === "limit" ? limitPrice : null,
       stopPrice: orderType === "stop" ? stopPrice : null,
       totalAmount,
@@ -259,6 +262,24 @@ export default function TradingPage() {
                         required
                       />
                     </div>
+                  </div>
+
+                  {/* Entry Price */}
+                  <div>
+                    <Label className="text-gray-700">Entry Price *</Label>
+                    <Input
+                      type="number"
+                      value={entryPrice}
+                      onChange={(e) => setEntryPrice(e.target.value)}
+                      placeholder="0.00"
+                      className="border-gray-300"
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Current market price for this asset
+                    </p>
                   </div>
 
                   {/* Conditional Price Fields */}

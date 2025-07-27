@@ -379,6 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderType: req.body.orderType || 'market',
         quantity: req.body.quantity,
         price: req.body.price,
+        entryPrice: req.body.entryPrice,
         limitPrice: req.body.limitPrice || null,
         stopPrice: req.body.stopPrice || null,
         totalAmount: req.body.totalAmount,
