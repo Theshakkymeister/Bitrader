@@ -64,6 +64,12 @@ export interface IStorage {
   adjustUserBalance(id: string, amount: number, type: 'add' | 'remove'): Promise<any>;
   approveUserTrades(userId: string, tradeIds: string[]): Promise<any>;
   
+  // Real-time analytics methods
+  getTotalPlatformRevenue(): Promise<string>;
+  getPendingTradesCount(): Promise<number>;
+  getActiveTradesCount(): Promise<number>;
+  getPendingDepositsCount(): Promise<number>;
+  
   // Portfolio operations
   getPortfolio(userId: string): Promise<Portfolio | undefined>;
   createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
@@ -559,6 +565,62 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
+  }
+
+  // Real-time analytics methods
+  async getTotalPlatformRevenue(): Promise<string> {
+    try {
+      // Sum all user portfolio balances to get total platform value
+      const result = await db.select({ 
+        total: sql<string>`COALESCE(SUM(CAST(total_balance AS DECIMAL)), 0)` 
+      }).from(portfolios);
+      
+      const totalBalance = parseFloat(result[0]?.total || '0');
+      return totalBalance > 0 ? `$${totalBalance.toFixed(2)}` : '$0.00';
+    } catch (error) {
+      console.error('Error calculating platform revenue:', error);
+      return '$0.00';
+    }
+  }
+
+  async getPendingTradesCount(): Promise<number> {
+    try {
+      const result = await db.select({ 
+        count: sql<number>`count(*)` 
+      }).from(trades).where(eq(trades.adminApproval, 'pending'));
+      
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting pending trades count:', error);
+      return 0;
+    }
+  }
+
+  async getActiveTradesCount(): Promise<number> {
+    try {
+      const result = await db.select({ 
+        count: sql<number>`count(*)` 
+      }).from(trades).where(eq(trades.status, 'executed'));
+      
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting active trades count:', error);
+      return 0;
+    }
+  }
+
+  async getPendingDepositsCount(): Promise<number> {
+    try {
+      // Count users with zero balance portfolios (waiting for deposits)
+      const result = await db.select({ 
+        count: sql<number>`count(*)` 
+      }).from(portfolios).where(sql`CAST(total_balance AS DECIMAL) = 0`);
+      
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error('Error getting pending deposits count:', error);
+      return 0;
+    }
   }
 }
 

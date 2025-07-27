@@ -446,21 +446,32 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  // Dashboard stats for admin
+  // Dashboard stats for admin - Real-time platform data
   app.get('/api/admin/stats', isAdminAuthenticated, async (req, res) => {
     try {
       const totalUsers = await storage.getUserCount();
       const usersRegisteredToday = await storage.getUsersRegisteredToday();
       const usersActiveToday = await storage.getUsersActiveToday();
-      const algorithms = await storage.getAlgorithms();
+      
+      // Calculate real revenue from user portfolios
+      const totalRevenue = await storage.getTotalPlatformRevenue();
+      
+      // Get pending trades count  
       const pendingTrades = await storage.getAllTradesPendingApproval();
       
+      // Get active trades count (executed trades)
+      const activeTrades = await storage.getActiveTradesCount();
+      
+      // Get pending deposits count (users with $0 balance)
+      const pendingDeposits = await storage.getPendingDepositsCount();
+      
       const stats = {
-        totalUsers,
-        usersRegisteredToday,
-        usersActiveToday,
-        activeAlgorithms: algorithms.length,
-        pendingTrades: pendingTrades.length,
+        totalUsers: totalUsers.toString(),
+        usersRegisteredToday: usersRegisteredToday.toString(),
+        usersActiveToday: usersActiveToday.toString(),
+        totalRevenue: totalRevenue,
+        pendingDeposits: pendingDeposits.toString(),
+        activeTrades: activeTrades.toString()
       };
       
       res.json(stats);
