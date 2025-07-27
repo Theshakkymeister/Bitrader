@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -775,9 +775,9 @@ User Activity History:
   // User Details Modal Component
   const renderUserDetailsModal = () => (
     <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
+          <DialogTitle className="flex items-center space-x-2 text-gray-900">
             <Users className="h-5 w-5 text-blue-600" />
             <span>User Account Management</span>
             {selectedUser && (
@@ -786,6 +786,9 @@ User Activity History:
               </Badge>
             )}
           </DialogTitle>
+          <DialogDescription className="text-gray-600">
+            View and manage user account details, portfolio information, and trading activity.
+          </DialogDescription>
         </DialogHeader>
 
         {selectedUser && (
@@ -806,44 +809,44 @@ User Activity History:
                     <span>User Information</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-2 gap-4 bg-white">
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Name</Label>
-                    <p className="text-sm">
+                    <Label className="text-sm font-medium text-gray-600">Name</Label>
+                    <p className="text-sm text-gray-900 font-medium">
                       {selectedUser.firstName && selectedUser.lastName 
                         ? `${selectedUser.firstName} ${selectedUser.lastName}` 
                         : selectedUser.username}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Email</Label>
-                    <p className="text-sm">{selectedUser.email}</p>
+                    <Label className="text-sm font-medium text-gray-600">Email</Label>
+                    <p className="text-sm text-gray-900 font-medium">{selectedUser.email}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Username</Label>
-                    <p className="text-sm">{selectedUser.username}</p>
+                    <Label className="text-sm font-medium text-gray-600">Username</Label>
+                    <p className="text-sm text-gray-900 font-medium">{selectedUser.username}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Status</Label>
+                    <Label className="text-sm font-medium text-gray-600">Status</Label>
                     <Badge variant={selectedUser.isActive ? "default" : "destructive"}>
                       {selectedUser.isActive ? "Active" : "Suspended"}
                     </Badge>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Registration IP</Label>
-                    <p className="text-sm">{selectedUser.registrationIp || 'N/A'}</p>
+                    <Label className="text-sm font-medium text-gray-600">Registration IP</Label>
+                    <p className="text-sm text-gray-900">{selectedUser.registrationIp || 'N/A'}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Last Login IP</Label>
-                    <p className="text-sm">{selectedUser.lastLoginIp || 'N/A'}</p>
+                    <Label className="text-sm font-medium text-gray-600">Last Login IP</Label>
+                    <p className="text-sm text-gray-900">{selectedUser.lastLoginIp || 'N/A'}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Joined</Label>
-                    <p className="text-sm">{new Date(selectedUser.createdAt).toLocaleString()}</p>
+                    <Label className="text-sm font-medium text-gray-600">Joined</Label>
+                    <p className="text-sm text-gray-900">{new Date(selectedUser.createdAt).toLocaleString()}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Last Login</Label>
-                    <p className="text-sm">
+                    <Label className="text-sm font-medium text-gray-600">Last Login</Label>
+                    <p className="text-sm text-gray-900">
                       {selectedUser.lastLoginAt 
                         ? new Date(selectedUser.lastLoginAt).toLocaleString() 
                         : 'Never logged in'}
@@ -861,7 +864,7 @@ User Activity History:
                     <span>Portfolio Overview</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="bg-white">
                   {userDetailsLoading ? (
                     <div className="flex items-center justify-center py-8">
                       <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
@@ -869,15 +872,15 @@ User Activity History:
                   ) : userDetails?.portfolio ? (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-sm font-medium text-gray-500">Total Value</Label>
-                        <p className="text-lg font-semibold">${typeof userDetails.portfolio.totalValue === 'number' ? userDetails.portfolio.totalValue.toFixed(2) : parseFloat(userDetails.portfolio.totalValue || '0').toFixed(2)}</p>
+                        <Label className="text-sm font-medium text-gray-600">Total Value</Label>
+                        <p className="text-lg font-semibold text-gray-900">${typeof userDetails.portfolio.totalValue === 'number' ? userDetails.portfolio.totalValue.toFixed(2) : parseFloat(userDetails.portfolio.totalValue || '0').toFixed(2)}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-500">Buying Power</Label>
+                        <Label className="text-sm font-medium text-gray-600">Buying Power</Label>
                         <p className="text-lg font-semibold text-green-600">${typeof userDetails.portfolio.buyingPower === 'number' ? userDetails.portfolio.buyingPower.toFixed(2) : parseFloat(userDetails.portfolio.buyingPower || '0').toFixed(2)}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-500">P&L</Label>
+                        <Label className="text-sm font-medium text-gray-600">P&L</Label>
                         <p className={`text-lg font-semibold ${userDetails.portfolio.totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           ${typeof userDetails.portfolio.totalProfitLoss === 'number' ? userDetails.portfolio.totalProfitLoss.toFixed(2) : parseFloat(userDetails.portfolio.totalProfitLoss || '0').toFixed(2)} ({typeof userDetails.portfolio.totalGainLossPercentage === 'number' ? userDetails.portfolio.totalGainLossPercentage.toFixed(2) : parseFloat(userDetails.portfolio.totalGainLossPercentage || '0').toFixed(2)}%)
                         </p>
@@ -894,14 +897,14 @@ User Activity History:
                   <CardHeader>
                     <CardTitle>Wallet Balances</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="bg-white">
                     <div className="space-y-2">
                       {userDetails.walletBalances.map((balance, index) => (
                         <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium">{balance.currency}</span>
+                          <span className="font-medium text-gray-900">{balance.currency}</span>
                           <div className="text-right">
-                            <p className="font-semibold">{typeof balance.balance === 'number' ? balance.balance.toFixed(8) : parseFloat(balance.balance || '0').toFixed(8)}</p>
-                            <p className="text-sm text-gray-500">${typeof balance.usdValue === 'number' ? balance.usdValue.toFixed(2) : parseFloat(balance.usdValue || '0').toFixed(2)}</p>
+                            <p className="font-semibold text-gray-900">{typeof balance.balance === 'number' ? balance.balance.toFixed(8) : parseFloat(balance.balance || '0').toFixed(8)}</p>
+                            <p className="text-sm text-gray-600">${typeof balance.usdValue === 'number' ? balance.usdValue.toFixed(2) : parseFloat(balance.usdValue || '0').toFixed(2)}</p>
                           </div>
                         </div>
                       ))}
@@ -932,7 +935,7 @@ User Activity History:
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="bg-white">
                   {userDetailsLoading ? (
                     <div className="flex items-center justify-center py-8">
                       <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
@@ -942,11 +945,11 @@ User Activity History:
                       {userDetails.trades.map((trade, index) => (
                         <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <div>
-                            <p className="font-medium">{trade.symbol}</p>
-                            <p className="text-sm text-gray-500">{trade.type} • {trade.quantity} shares</p>
+                            <p className="font-medium text-gray-900">{trade.symbol}</p>
+                            <p className="text-sm text-gray-600">{trade.type} • {trade.quantity} shares</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">${typeof trade.price === 'number' ? trade.price.toFixed(2) : parseFloat(trade.price || '0').toFixed(2)}</p>
+                            <p className="font-semibold text-gray-900">${typeof trade.price === 'number' ? trade.price.toFixed(2) : parseFloat(trade.price || '0').toFixed(2)}</p>
                             <Badge variant={
                               trade.adminApproval === 'approved' ? 'default' : 
                               trade.adminApproval === 'pending' ? 'secondary' : 'destructive'
@@ -958,7 +961,7 @@ User Activity History:
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500">No trades found</p>
+                    <p className="text-gray-600">No trades found</p>
                   )}
                 </CardContent>
               </Card>
