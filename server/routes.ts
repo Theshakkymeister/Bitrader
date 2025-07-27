@@ -278,14 +278,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get user wallets for total value calculation
       const wallets = await storage.getUserWallets(userId);
-      const stockHoldings = await storage.getUserStockHoldings(userId);
+      const stockHoldings = await storage.getStockHoldings(userId);
       
       // Calculate real-time total value from wallets + stock holdings
-      const totalWalletValue = wallets.reduce((sum, wallet) => {
+      const totalWalletValue = wallets.reduce((sum: number, wallet: any) => {
         return sum + parseFloat(wallet.usdValue?.toString() || '0');
       }, 0);
       
-      const totalStockValue = stockHoldings.reduce((sum, holding) => {
+      const totalStockValue = stockHoldings.reduce((sum: number, holding: any) => {
         return sum + parseFloat(holding.marketValue?.toString() || '0');
       }, 0);
       
@@ -406,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trade = await storage.createTrade(tradeData);
       console.log("Trade created successfully:", trade);
       res.json(trade);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating trade - Full error:", error);
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
