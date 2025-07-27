@@ -105,14 +105,7 @@ export default function Dashboard() {
                     All Time: <span className="text-green-600 font-medium">+$0.00 (+0.00%)</span>
                   </div>
                 </>
-              ) : (
-                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400 mt-4">
-                  <p className="text-sm text-blue-700 font-medium">Welcome to Live Trading!</p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    Your portfolio is ready. Deposit funds via Wallets to start trading stocks, crypto, and ETFs.
-                  </p>
-                </div>
-              )}
+              ) : null}
             </div>
           </div>
           <div className="text-right">
@@ -436,7 +429,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-
+      {/* Welcome Message - Bottom Right */}
+      {portfolioValue === 0 && (
+        <div className="fixed bottom-4 right-4 bg-blue-50 rounded-lg p-3 border border-blue-200 shadow-lg max-w-xs z-50">
+          <p className="text-xs text-blue-700 font-medium">Welcome to Live Trading!</p>
+          <p className="text-xs text-blue-600 mt-1">
+            Deposit funds via Wallets to start trading.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
