@@ -135,6 +135,9 @@ export interface IStorage {
   
   // Admin trade management
   getAllTradesForAdmin(limit?: number, offset?: number): Promise<any[]>;
+  
+  // User positions
+  getUserPositions(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -186,6 +189,15 @@ export class DatabaseStorage implements IStorage {
   async getPortfolio(userId: string): Promise<Portfolio | undefined> {
     const [portfolio] = await db.select().from(portfolios).where(eq(portfolios.userId, userId));
     return portfolio;
+  }
+
+  // User positions for trading
+  async getUserPositions(userId: string): Promise<any[]> {
+    // Get active trades that represent positions
+    return await db.select()
+      .from(trades)
+      .where(and(eq(trades.userId, userId), eq(trades.status, 'approved')))
+      .orderBy(desc(trades.createdAt));
   }
 
   async createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio> {
