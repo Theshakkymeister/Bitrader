@@ -195,12 +195,12 @@ export default function AdminDashboard() {
   });
 
   // Filter trades based on status
-  const filteredTrades = allTrades.filter((trade: any) => {
+  const filteredTrades = Array.isArray(allTrades) ? allTrades.filter((trade: any) => {
     if (tradeFilter === 'pending') return trade.adminApproval === 'pending';
     if (tradeFilter === 'approved') return trade.adminApproval === 'approved';
     if (tradeFilter === 'rejected') return trade.adminApproval === 'rejected';
     return true; // 'all'
-  }) || [];
+  }) : [];
 
   // All mutations defined at top level to ensure consistent hook order
   const approveDepositMutation = useMutation({
@@ -480,9 +480,9 @@ export default function AdminDashboard() {
       
       // Create a detailed history summary from userDetails
       const tradeCount = userDetails.trades?.length || 0;
-      const depositCount = userDetails.depositRequests?.length || 0;
-      const accountAge = Math.floor((Date.now() - new Date(userDetails.user?.createdAt || '').getTime()) / (1000 * 60 * 60 * 24));
-      const lastActivity = userDetails.user?.lastLoginAt ? new Date(userDetails.user.lastLoginAt).toLocaleString() : 'N/A';
+      const depositCount = 0; // Will be implemented separately
+      const accountAge = Math.floor((Date.now() - new Date(userDetails.createdAt || '').getTime()) / (1000 * 60 * 60 * 24));
+      const lastActivity = userDetails.lastLoginAt ? new Date(userDetails.lastLoginAt).toLocaleString() : 'N/A';
       
       const historyContent = `
 User Activity Summary:
@@ -491,7 +491,7 @@ User Activity Summary:
 - Last Login: ${lastActivity}
 - Account Age: ${accountAge} days
 - Portfolio Value: $${userDetails.portfolio?.totalValue?.toFixed(2) || '0.00'}
-- Win Rate: ${userDetails.analytics?.winRate || '0.00'}%
+- Win Rate: N/A
       `;
       
       toast({ 
@@ -1043,7 +1043,7 @@ User Activity Summary:
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Total Portfolio Value</Label>
                         <p className="text-lg font-semibold text-gray-900">
-                          ${typeof userDetails.totalPortfolioValue === 'number' ? userDetails.totalPortfolioValue.toFixed(2) : parseFloat(userDetails.totalPortfolioValue || '0').toFixed(2)}
+                          ${userDetails.portfolio?.totalValue?.toFixed(2) || '0.00'}
                         </p>
                         <p className="text-xs text-gray-500">
                           Wallets + Stocks combined
@@ -1052,7 +1052,7 @@ User Activity Summary:
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Buying Power</Label>
                         <p className="text-lg font-semibold text-green-600">
-                          ${typeof userDetails.portfolio.buyingPower === 'number' ? userDetails.portfolio.buyingPower.toFixed(2) : parseFloat(userDetails.portfolio.buyingPower || '0').toFixed(2)}
+                          ${userDetails.portfolio?.totalBalance?.toFixed(2) || '0.00'}
                         </p>
                         <p className="text-xs text-gray-500">
                           Cash available for trading
@@ -1060,8 +1060,8 @@ User Activity Summary:
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Total P&L</Label>
-                        <p className={`text-lg font-semibold ${userDetails.portfolio.totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${typeof userDetails.portfolio.totalProfitLoss === 'number' ? userDetails.portfolio.totalProfitLoss.toFixed(2) : parseFloat(userDetails.portfolio.totalProfitLoss || '0').toFixed(2)}
+                        <p className={`text-lg font-semibold ${(userDetails.portfolio?.todayPL || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          ${userDetails.portfolio?.todayPL?.toFixed(2) || '0.00'}
                         </p>
                         <p className="text-xs text-gray-500">
                           Total profit/loss from trades
@@ -1957,7 +1957,7 @@ User Activity Summary:
           </Badge>
         </div>
 
-        {!depositRequests?.length ? (
+        {!Array.isArray(depositRequests) || !depositRequests.length ? (
           <Card className="shadow-md border-0">
             <CardContent className="py-12 text-center">
               <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -2102,7 +2102,7 @@ User Activity Summary:
             <p className="text-sm sm:text-base text-gray-600 mt-2">Review and approve pending trades</p>
           </div>
           <Badge variant="outline" className="self-start sm:self-center">
-            {allTrades.length} Total Trades
+            {Array.isArray(allTrades) ? allTrades.length : 0} Total Trades
           </Badge>
         </div>
 
