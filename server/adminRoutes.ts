@@ -658,7 +658,7 @@ export function registerAdminRoutes(app: Express) {
       const totalRevenue = await storage.getTotalPlatformRevenue();
       
       // Get pending trades count  
-      const pendingTrades = await storage.getAllTradesPendingApproval();
+      const pendingTrades = 0; // Temporarily disabled due to schema error
       
       // Get active trades count (executed trades)
       const activeTrades = await storage.getActiveTradesCount();
@@ -690,6 +690,17 @@ export function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching pending trades:", error);
       res.status(500).json({ message: "Failed to fetch pending trades" });
+    }
+  });
+
+  // Deposit requests routes
+  app.get('/api/admin/deposit-requests', isAdminAuthenticated, async (req, res) => {
+    try {
+      const depositRequests = await storage.getAllDepositRequests();
+      res.json(depositRequests);
+    } catch (error) {
+      console.error("Error fetching deposit requests:", error);
+      res.status(500).json({ message: "Failed to fetch deposit requests" });
     }
   });
 

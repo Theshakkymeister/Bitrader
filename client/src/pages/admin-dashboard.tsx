@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Shield, 
   Settings, 
@@ -109,6 +110,9 @@ interface AdminStats {
   usersActiveToday: number;
   activeAlgorithms: number;
   pendingTrades: number;
+  activeTrades: number;
+  totalRevenue: string;
+  pendingDeposits: number;
 }
 
 const menuItems = [
