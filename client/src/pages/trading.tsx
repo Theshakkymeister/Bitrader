@@ -583,13 +583,13 @@ export default function TradingPage() {
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Buying Power</span>
               <motion.span 
-                className="text-2xl font-bold text-green-600"
+                className="text-2xl font-bold text-gray-600"
                 animate={{ 
-                  textShadow: "0 0 8px rgba(34, 197, 94, 0.3)"
+                  textShadow: "0 0 8px rgba(107, 114, 128, 0.3)"
                 }}
                 transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
               >
-                $10,250.00
+                $0.00
               </motion.span>
             </div>
           </motion.div>

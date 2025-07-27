@@ -9,22 +9,22 @@ import { SiApple, SiBitcoin, SiTesla, SiGoogle, SiEthereum } from "react-icons/s
 import { allAssets } from "@/lib/marketData";
 import { useLocation } from "wouter";
 
-// Portfolio performance data
+// Portfolio performance data - starts at $0.00 for new users
 const portfolioData = [
-  { time: "9:30", value: 24890 },
-  { time: "10:00", value: 24920 },
-  { time: "10:30", value: 24955 },
-  { time: "11:00", value: 24878 },
-  { time: "11:30", value: 24903 },
-  { time: "12:00", value: 24945 },
-  { time: "12:30", value: 24982 },
-  { time: "1:00", value: 25015 },
-  { time: "1:30", value: 24998 },
-  { time: "2:00", value: 25034 },
-  { time: "2:30", value: 25067 },
-  { time: "3:00", value: 25123 },
-  { time: "3:30", value: 25156 },
-  { time: "4:00", value: 25234 }
+  { time: "9:30", value: 0 },
+  { time: "10:00", value: 0 },
+  { time: "10:30", value: 0 },
+  { time: "11:00", value: 0 },
+  { time: "11:30", value: 0 },
+  { time: "12:00", value: 0 },
+  { time: "12:30", value: 0 },
+  { time: "1:00", value: 0 },
+  { time: "1:30", value: 0 },
+  { time: "2:00", value: 0 },
+  { time: "2:30", value: 0 },
+  { time: "3:00", value: 0 },
+  { time: "3:30", value: 0 },
+  { time: "4:00", value: 0 }
 ];
 
 export default function Dashboard() {
@@ -65,14 +65,14 @@ export default function Dashboard() {
   const todayPLPercent = portfolioValue > 0 ? 1.48 : 0;
   const todayPL = portfolioValue * (todayPLPercent / 100);
 
-  // Holdings data with real market data
+  // Holdings data - $0.00 until deposits are made and approved
   const getHolding = (symbol: string, shares: number) => {
     const asset = allAssets.find(a => a.symbol === symbol);
     if (!asset) return null;
     return {
       ...asset,
-      shares,
-      value: asset.price * shares
+      shares: 0, // No shares until deposits approved
+      value: 0.00 // $0.00 until deposits approved
     };
   };
 

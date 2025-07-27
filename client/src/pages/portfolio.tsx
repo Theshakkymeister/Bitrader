@@ -51,30 +51,31 @@ export default function Portfolio() {
     return asset ? asset.price : 0;
   };
 
+  // Holdings data - $0.00 until deposits are made and approved by admin
   const holdings: Holding[] = [
-    // Stock Holdings
+    // Stock Holdings - All start at $0.00 until deposits approved
     {
       symbol: "AAPL",
       name: "Apple Inc.",
-      shares: 32,
-      avgPrice: 175.25,
+      shares: 0, // No shares until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("AAPL"),
-      value: 32 * getAssetPrice("AAPL"),
-      change: getAssetPrice("AAPL") - 175.25,
-      changePercent: ((getAssetPrice("AAPL") - 175.25) / 175.25) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: SiApple,
       color: "text-gray-700",
       type: "stock"
     },
     {
-      symbol: "TSLA",
+      symbol: "TSLA", 
       name: "Tesla, Inc.",
-      shares: 15,
-      avgPrice: 245.80,
+      shares: 0, // No shares until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("TSLA"),
-      value: 15 * getAssetPrice("TSLA"),
-      change: getAssetPrice("TSLA") - 245.80,
-      changePercent: ((getAssetPrice("TSLA") - 245.80) / 245.80) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: SiTesla,
       color: "text-red-500",
       type: "stock"
@@ -82,12 +83,12 @@ export default function Portfolio() {
     {
       symbol: "GOOGL",
       name: "Alphabet Inc.",
-      shares: 23,
-      avgPrice: 142.15,
+      shares: 0, // No shares until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("GOOGL"),
-      value: 23 * getAssetPrice("GOOGL"),
-      change: getAssetPrice("GOOGL") - 142.15,
-      changePercent: ((getAssetPrice("GOOGL") - 142.15) / 142.15) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: SiGoogle,
       color: "text-blue-500",
       type: "stock"
@@ -95,12 +96,12 @@ export default function Portfolio() {
     {
       symbol: "MSFT",
       name: "Microsoft Corp.",
-      shares: 12,
-      avgPrice: 412.33,
+      shares: 0, // No shares until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("MSFT"),
-      value: 12 * getAssetPrice("MSFT"),
-      change: getAssetPrice("MSFT") - 412.33,
-      changePercent: ((getAssetPrice("MSFT") - 412.33) / 412.33) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold`}>
           MS
@@ -109,16 +110,16 @@ export default function Portfolio() {
       color: "text-blue-600",
       type: "stock"
     },
-    // Crypto Holdings
+    // Crypto Holdings - All start at $0.00 until deposits approved
     {
       symbol: "BTC",
       name: "Bitcoin",
-      shares: 0.1234,
-      avgPrice: 65420.00,
+      shares: 0, // No coins until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("BTC"),
-      value: 0.1234 * getAssetPrice("BTC"),
-      change: getAssetPrice("BTC") - 65420.00,
-      changePercent: ((getAssetPrice("BTC") - 65420.00) / 65420.00) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: SiBitcoin,
       color: "text-orange-500",
       type: "crypto"
@@ -126,12 +127,12 @@ export default function Portfolio() {
     {
       symbol: "ETH",
       name: "Ethereum",
-      shares: 1.2567,
-      avgPrice: 3245.80,
+      shares: 0, // No coins until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("ETH"),
-      value: 1.2567 * getAssetPrice("ETH"),
-      change: getAssetPrice("ETH") - 3245.80,
-      changePercent: ((getAssetPrice("ETH") - 3245.80) / 3245.80) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: SiEthereum,
       color: "text-blue-500",
       type: "crypto"
@@ -139,12 +140,12 @@ export default function Portfolio() {
     {
       symbol: "SOL",
       name: "Solana",
-      shares: 15.67,
-      avgPrice: 185.25,
+      shares: 0, // No coins until deposits approved
+      avgPrice: 0.00,
       currentPrice: getAssetPrice("SOL"),
-      value: 15.67 * getAssetPrice("SOL"),
-      change: getAssetPrice("SOL") - 185.25,
-      changePercent: ((getAssetPrice("SOL") - 185.25) / 185.25) * 100,
+      value: 0.00, // $0.00 until deposits approved
+      change: 0.00,
+      changePercent: 0.00,
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold`}>
           S
