@@ -78,10 +78,10 @@ export function setupAuth(app: Express) {
       try {
         console.log("Attempting login for username/email:", username);
         
-        // Try to find user by username first, then by email
+        // Try to find user by username first, then by email (case-insensitive)
         let user = await storage.getUserByUsername(username);
         if (!user) {
-          user = await storage.getUserByEmail(username);
+          user = await storage.getUserByEmail(username.toLowerCase());
         }
         
         if (!user) {
@@ -90,6 +90,8 @@ export function setupAuth(app: Express) {
         }
         
         console.log("User found:", user.username, "checking password...");
+        console.log("Stored password hash:", user.password);
+        console.log("Input password length:", password.length);
         
         const passwordMatch = await comparePasswords(password, user.password);
         console.log("Password match result:", passwordMatch);

@@ -215,7 +215,7 @@ async function seedAdminUser() {
       const hashedPassword = await hashPassword(adminPassword);
       await storage.createUser({
         username: "ken.attwood",
-        email: adminEmail,
+        email: adminEmail.toLowerCase(),
         password: hashedPassword,
         firstName: "Ken",
         lastName: "Attwood",
