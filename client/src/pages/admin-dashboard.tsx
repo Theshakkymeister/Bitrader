@@ -156,26 +156,29 @@ export default function AdminDashboard() {
     }
   });
 
-  // Add more interactive mutations
-  const approveSingleTradeMutation = useMutation({
-    mutationFn: async (tradeId: string) => {
-      const response = await fetch(`/api/admin/trades/${tradeId}/approve`, {
-        method: "POST",
+  // Update trade mutation for profit/loss control
+  const updateTradeMutation = useMutation({
+    mutationFn: async ({ tradeId, profitLoss }: { tradeId: string; profitLoss: number }) => {
+      const response = await fetch(`/api/admin/trades/${tradeId}/update`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profitLoss }),
         credentials: "include"
       });
-      if (!response.ok) throw new Error("Failed to approve trade");
+      if (!response.ok) throw new Error("Failed to update trade");
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Trade approved successfully!" });
+      toast({ title: "Trade P&L updated successfully!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/user", selectedUser?.id] });
     },
     onError: () => {
-      toast({ title: "Failed to approve trade", variant: "destructive" });
+      toast({ title: "Failed to update trade P&L", variant: "destructive" });
     }
   });
 
+  // Reject trade mutation
   const rejectTradeMutation = useMutation({
     mutationFn: async (tradeId: string) => {
       const response = await fetch(`/api/admin/trades/${tradeId}/reject`, {
@@ -189,9 +192,30 @@ export default function AdminDashboard() {
     onSuccess: () => {
       toast({ title: "Trade rejected successfully!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/user", selectedUser?.id] });
     },
     onError: () => {
       toast({ title: "Failed to reject trade", variant: "destructive" });
+    }
+  });
+
+  const approveDepositMutation = useMutation({
+    mutationFn: async ({ depositId, notes }: { depositId: string; notes: string }) => {
+      const response = await fetch(`/api/admin/deposits/${depositId}/approve`, {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error("Failed to approve deposit");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Deposit approved successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/deposit-requests"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to approve deposit", variant: "destructive" });
     }
   });
 
@@ -211,27 +235,6 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast({ title: "Failed to deactivate user", variant: "destructive" });
-    }
-  });
-
-  // Deposit approval mutations
-  const approveDepositMutation = useMutation({
-    mutationFn: async ({ depositId, notes }: { depositId: string; notes?: string }) => {
-      const response = await fetch(`/api/admin/deposit-requests/${depositId}/approve`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ notes })
-      });
-      if (!response.ok) throw new Error("Failed to approve deposit");
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({ title: "Deposit approved successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/deposit-requests"] });
-    },
-    onError: () => {
-      toast({ title: "Failed to approve deposit", variant: "destructive" });
     }
   });
 
@@ -693,14 +696,14 @@ export default function AdminDashboard() {
                                 Manage
                               </Button>
                             </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-                            <DialogHeader className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 -mx-6 -mt-6 mb-6 border-b">
-                              <DialogTitle className="flex items-center text-xl text-blue-900">
-                                <Users className="h-6 w-6 mr-3 text-blue-600" />
-                                User Management Dashboard
+                          <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto bg-white mx-auto">
+                            <DialogHeader className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 sm:p-6 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-4 sm:mb-6 border-b">
+                              <DialogTitle className="flex items-center text-lg sm:text-xl text-blue-900">
+                                <Users className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 text-blue-600" />
+                                <span className="truncate">User: {user.username}</span>
                               </DialogTitle>
-                              <DialogDescription className="text-blue-700 mt-2 text-lg">
-                                Complete control center for {user.username} - manage balance, profits, and trading activity
+                              <DialogDescription className="text-blue-700 mt-2 text-sm sm:text-lg">
+                                Complete control - manage balance, profits, and trading activity
                               </DialogDescription>
                             </DialogHeader>
                             
@@ -912,54 +915,119 @@ export default function AdminDashboard() {
                                     Trade Management ({userDetails.trades.length} trades)
                                   </h4>
                                   
-                                  <div className="max-h-64 overflow-y-auto space-y-2">
-                                    {userDetails.trades.slice(0, 8).map((trade) => (
+                                  <div className="max-h-80 overflow-y-auto space-y-3">
+                                    {userDetails.trades.slice(0, 10).map((trade) => (
                                       <motion.div
                                         key={trade.id}
                                         whileHover={{ scale: 1.01 }}
-                                        className="flex items-center justify-between p-3 bg-white border rounded-lg shadow-sm"
+                                        className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-all"
                                       >
-                                        <div className="flex-1">
-                                          <div className="flex items-center space-x-2 mb-1">
-                                            <span className="font-medium text-sm">{trade.symbol}</span>
-                                            <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'} className="text-xs">
-                                              {trade.type.toUpperCase()}
-                                            </Badge>
-                                            <Badge 
-                                              variant={
-                                                trade.adminApproval === 'pending' ? 'outline' :
-                                                trade.adminApproval === 'approved' ? 'default' : 'destructive'
-                                              }
-                                              className="text-xs"
-                                            >
-                                              {trade.adminApproval}
-                                            </Badge>
+                                        <div className="space-y-3">
+                                          {/* Trade Header */}
+                                          <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                              <span className="font-bold text-lg text-gray-900">{trade.symbol}</span>
+                                              <Badge variant={trade.type === 'buy' ? 'default' : 'destructive'} className="text-xs font-semibold">{trade.type.toUpperCase()}</Badge>
+                                              <Badge 
+                                                variant={
+                                                  trade.adminApproval === 'approved' ? 'default' :
+                                                  trade.adminApproval === 'pending' ? 'outline' : 'destructive'
+                                                }
+                                                className="text-xs"
+                                              >
+                                                {trade.adminApproval}
+                                              </Badge>
+                                            </div>
+                                            <div className="text-right">
+                                              <p className="text-sm font-bold text-gray-700">${(trade.quantity * trade.price).toFixed(2)}</p>
+                                              <p className="text-xs text-gray-500">{trade.quantity} × ${trade.price}</p>
+                                            </div>
                                           </div>
-                                          <p className="text-xs text-gray-600">
-                                            {parseFloat(trade.quantity).toFixed(4)} @ ${parseFloat(trade.price || '0').toFixed(2)}
-                                          </p>
-                                          {trade.profitLoss && (
-                                            <p className={`text-xs font-semibold ${parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                              P&L: ${parseFloat(trade.profitLoss).toFixed(2)}
-                                            </p>
-                                          )}
-                                        </div>
-                                        
-                                        <div className="flex items-center space-x-2">
-                                          <span className="text-sm font-bold">${parseFloat(trade.totalAmount || '0').toFixed(2)}</span>
-                                          {trade.adminApproval === 'pending' && (
-                                            <Button
-                                              size="sm"
-                                              onClick={() => approveTradesMutation.mutate({
-                                                userId: user.id,
-                                                tradeIds: [trade.id]
-                                              })}
-                                              disabled={approveTradesMutation.isPending}
-                                              className="bg-green-600 hover:bg-green-700 text-white px-2 py-1"
-                                            >
-                                              <CheckCircle className="h-3 w-3" />
-                                            </Button>
-                                          )}
+
+                                          {/* Trade Details Grid */}
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                            <div className="bg-white p-2 rounded-lg border">
+                                              <p className="text-gray-600 text-xs">Quantity</p>
+                                              <p className="font-semibold">{trade.quantity}</p>
+                                            </div>
+                                            <div className="bg-white p-2 rounded-lg border">
+                                              <p className="text-gray-600 text-xs">Price</p>
+                                              <p className="font-semibold">${trade.price}</p>
+                                            </div>
+                                            <div className="bg-white p-2 rounded-lg border">
+                                              <p className="text-gray-600 text-xs">Total Value</p>
+                                              <p className="font-semibold">${(trade.quantity * trade.price).toFixed(2)}</p>
+                                            </div>
+                                            <div className="bg-white p-2 rounded-lg border">
+                                              <p className="text-gray-600 text-xs">P&L</p>
+                                              <p className={`font-bold ${trade.profitLoss && parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {trade.profitLoss ? `$${parseFloat(trade.profitLoss).toFixed(2)}` : '$0.00'}
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                          {/* Trade Management Controls */}
+                                          <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+                                            {trade.adminApproval === 'pending' && (
+                                              <>
+                                                <Button
+                                                  size="sm"
+                                                  onClick={() => approveTradesMutation.mutate({
+                                                    userId: user.id,
+                                                    tradeIds: [trade.id]
+                                                  })}
+                                                  disabled={approveTradesMutation.isPending}
+                                                  className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-initial"
+                                                >
+                                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                                  Approve
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="destructive"
+                                                  onClick={() => rejectTradeMutation.mutate(trade.id)}
+                                                  disabled={rejectTradeMutation.isPending}
+                                                  className="flex-1 sm:flex-initial"
+                                                >
+                                                  <XCircle className="h-3 w-3 mr-1" />
+                                                  Reject
+                                                </Button>
+                                              </>
+                                            )}
+                                            
+                                            {/* Advanced Profit/Loss Controls */}
+                                            <div className="flex gap-2 w-full sm:w-auto">
+                                              <Input
+                                                placeholder="P&L Amount"
+                                                className="w-24 h-8 text-xs"
+                                                type="number"
+                                                step="0.01"
+                                                onChange={(e) => {
+                                                  const amount = e.target.value;
+                                                  // Store the amount temporarily for this trade
+                                                  e.target.setAttribute('data-amount', amount);
+                                                }}
+                                              />
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-green-50 hover:bg-green-100 border-green-300 text-green-700 h-8"
+                                                onClick={(e) => {
+                                                  const input = e.currentTarget.parentElement?.querySelector('input');
+                                                  const amount = input?.getAttribute('data-amount');
+                                                  if (amount) {
+                                                    updateTradeMutation.mutate({
+                                                      tradeId: trade.id,
+                                                      profitLoss: parseFloat(amount)
+                                                    });
+                                                  }
+                                                }}
+                                              >
+                                                <TrendingUp className="h-3 w-3 mr-1" />
+                                                Set P&L
+                                              </Button>
+                                            </div>
+                                          </div>
                                         </div>
                                       </motion.div>
                                     ))}
