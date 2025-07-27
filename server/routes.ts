@@ -246,6 +246,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const totalValue = totalWalletValue + totalStockValue;
       
+      console.log('Portfolio calculation:', {
+        totalWalletValue,
+        totalStockValue, 
+        totalValue,
+        walletsCount: wallets.length,
+        stockHoldingsCount: stockHoldings.length
+      });
+      
       // Enhance portfolio with calculated values
       const enhancedPortfolio = portfolio ? {
         ...portfolio,
@@ -267,6 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         activeAlgorithms: 0
       };
       
+      console.log('Enhanced portfolio response:', enhancedPortfolio);
       res.json(enhancedPortfolio);
     } catch (error) {
       console.error("Error fetching portfolio:", error);

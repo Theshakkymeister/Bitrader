@@ -45,9 +45,19 @@ export default function Dashboard() {
     refetchInterval: 5000,
   });
 
-  // Calculate real portfolio value from API data
-  const portfolioValue = (portfolio?.totalValue || portfolio?.walletValue || 0) + (portfolio?.stockValue || 0);
-  const balance = portfolio?.totalBalance || portfolioValue;
+  // Debug portfolio data
+  console.log('Dashboard portfolio data:', portfolio);
+  console.log('Dashboard wallets data:', wallets);
+
+  // Calculate portfolio value from wallet data since API isn't returning calculated values
+  const totalWalletValue = wallets.reduce((sum, wallet) => {
+    return sum + parseFloat(wallet.usdValue || '0');
+  }, 0);
+  
+  const portfolioValue = portfolio?.totalValue || portfolio?.walletValue || totalWalletValue;
+  const balance = parseFloat(portfolio?.totalBalance || '0') || portfolioValue;
+  
+  console.log('Dashboard calculated values:', { portfolioValue, balance, totalWalletValue });
 
   // Real-time portfolio simulation - only when user has funds
   useEffect(() => {
@@ -109,7 +119,6 @@ export default function Dashboard() {
   const totalCrypto = holdings.filter(h => ['BTC', 'ETH', 'SOL'].includes(h.symbol)).reduce((sum, h) => sum + h.value, 0);
   
   // Calculate available buying power from real wallet balances
-  const totalWalletValue = portfolio?.walletValue || 0;
   const buyingPower = totalWalletValue; // Available balance for trading
   
   return (
@@ -120,7 +129,7 @@ export default function Dashboard() {
           <div>
             <div className="text-sm text-gray-600 mb-1">Total Portfolio Value</div>
             <div className="text-4xl font-bold text-black mb-2">
-              ${((portfolio?.totalValue || portfolio?.walletValue || 0) + (portfolio?.stockValue || 0)).toLocaleString('en-US', {minimumFractionDigits: 2})}
+              ${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </div>
             <div className="flex items-center text-sm space-x-4">
               {portfolioValue > 0 ? (
@@ -255,7 +264,7 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-gray-900">Crypto Wallet</h3>
             </div>
             <div className="text-sm font-medium text-green-600">
-              ${(portfolio?.walletValue || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
+              ${totalWalletValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </div>
           </div>
           <div className="space-y-3">
