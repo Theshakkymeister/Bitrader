@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Trade {
   id: string;
@@ -58,26 +59,64 @@ function MarketDataCard({ data }: { data: MarketData }) {
   const isPositive = data.change >= 0;
   
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="font-semibold text-lg">{data.symbol}</h3>
-            <p className="text-sm text-muted-foreground truncate">{data.name}</p>
-          </div>
-          <div className="text-right">
-            <p className="font-bold text-lg">${data.price.toFixed(2)}</p>
-            <div className={`flex items-center text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-              {isPositive ? '+' : ''}{data.change.toFixed(2)} ({isPositive ? '+' : ''}{data.changePercent.toFixed(2)}%)
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-blue-500">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <motion.h3 
+                className="font-semibold text-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                {data.symbol}
+              </motion.h3>
+              <p className="text-sm text-muted-foreground truncate">{data.name}</p>
+            </div>
+            <div className="text-right">
+              <motion.p 
+                className="font-bold text-lg"
+                animate={{ 
+                  color: isPositive ? '#16a34a' : '#dc2626',
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ duration: 0.5 }}
+              >
+                ${data.price.toFixed(2)}
+              </motion.p>
+              <motion.div 
+                className={`flex items-center text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <motion.div
+                  animate={{ rotate: isPositive ? 0 : 180 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                </motion.div>
+                {isPositive ? '+' : ''}{data.change.toFixed(2)} ({isPositive ? '+' : ''}{data.changePercent.toFixed(2)}%)
+              </motion.div>
             </div>
           </div>
-        </div>
-        {data.volume !== undefined && (
-          <p className="text-xs text-muted-foreground">Vol: {(data.volume / 1000000).toFixed(1)}M</p>
-        )}
-      </CardContent>
-    </Card>
+          {data.volume !== undefined && (
+            <p className="text-xs text-muted-foreground">Vol: {(data.volume / 1000000).toFixed(1)}M</p>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -237,12 +276,22 @@ export default function TradingPage() {
     );
 
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <motion.div 
+        className="min-h-screen bg-gray-50 p-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Markets</h1>
             <p className="text-gray-600">Live market data and prices</p>
-          </div>
+          </motion.div>
           
           {/* Search Bar */}
           <div className="mb-6">
@@ -263,48 +312,83 @@ export default function TradingPage() {
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredMarketData.length > 0 ? (
-              filteredMarketData.map((data) => (
-                <MarketDataCard key={data.symbol} data={data} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No assets found</h3>
-                  <p className="text-gray-500">
-                    No assets match your search for "{searchQuery}". Try a different search term.
-                  </p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setSearchQuery("")}
-                  className="mt-4"
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <AnimatePresence>
+              {filteredMarketData.length > 0 ? (
+                filteredMarketData.map((data, index) => (
+                  <motion.div
+                    key={data.symbol}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <MarketDataCard data={data} />
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div 
+                  className="col-span-full text-center py-12"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
                 >
-                  Clear Search
-                </Button>
-              </div>
-            )}
-          </div>
+                  <div className="text-gray-400 mb-4">
+                    <Search className="h-12 w-12 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No assets found</h3>
+                    <p className="text-gray-500">
+                      No assets match your search for "{searchQuery}". Try a different search term.
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSearchQuery("")}
+                    className="mt-4"
+                  >
+                    Clear Search
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   // My Orders Page - Comprehensive Robinhood-style orders interface
   if (activeTab === 'orders') {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <motion.div 
+        className="min-h-screen bg-gray-50 p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-6">
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             <h1 className="text-2xl font-bold text-gray-900 mb-2">My Orders</h1>
             <p className="text-gray-600">Track all your trading orders and their status</p>
-          </div>
+          </motion.div>
 
           {/* Order Summary Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <motion.div 
+            className="grid grid-cols-4 gap-4 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <Card className="bg-white border-gray-200 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-center">
@@ -337,7 +421,7 @@ export default function TradingPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
           {/* Orders List */}
           <Card className="bg-white border-gray-200 shadow-sm">
@@ -369,10 +453,23 @@ export default function TradingPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {trades.map((trade) => (
-                    <div key={trade.id} className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                      <div className="flex items-center justify-between">
+                <motion.div className="space-y-4">
+                  <AnimatePresence>
+                    {trades.map((trade, index) => (
+                      <motion.div 
+                        key={trade.id} 
+                        className="p-4 rounded-lg bg-gray-50 border border-gray-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        whileHover={{ 
+                          scale: 1.02,
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          transition: { duration: 0.2 }
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
                         {/* Left Side - Order Info */}
                         <div className="flex items-center gap-4">
                           <div className={`w-3 h-3 rounded-full ${
@@ -430,35 +527,63 @@ export default function TradingPage() {
                             @ ${parseFloat(trade.price).toFixed(2)}
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
               )}
             </CardContent>
           </Card>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   // Trade Page (default) - Robinhood-style comprehensive trading interface
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <motion.div 
+      className="min-h-screen bg-gray-50 p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <motion.div 
+          className="mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Live Trading</h1>
           <p className="text-gray-600">Professional trading platform with real-time market data</p>
           
           {/* Buying Power */}
-          <div className="mt-4 p-4 rounded-lg bg-white border border-green-200 shadow-sm">
+          <motion.div 
+            className="mt-4 p-4 rounded-lg bg-white border border-green-200 shadow-sm"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ 
+              boxShadow: "0 4px 12px rgba(34, 197, 94, 0.15)",
+              transition: { duration: 0.2 }
+            }}
+          >
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Buying Power</span>
-              <span className="text-2xl font-bold text-green-600">$10,250.00</span>
+              <motion.span 
+                className="text-2xl font-bold text-green-600"
+                animate={{ 
+                  textShadow: "0 0 8px rgba(34, 197, 94, 0.3)"
+                }}
+                transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+              >
+                $10,250.00
+              </motion.span>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Trading Form - Left Side */}
@@ -504,30 +629,49 @@ export default function TradingPage() {
                   </div>
 
                   {/* Buy/Sell Toggle - Robinhood Style */}
-                  <div className="flex rounded-lg overflow-hidden border border-gray-300">
-                    <Button
+                  <motion.div 
+                    className="flex rounded-lg overflow-hidden border border-gray-300 relative"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                  >
+                    <motion.div
+                      className={`absolute inset-0 w-1/2 rounded-lg ${
+                        tradeType === "buy" ? "bg-green-600" : "bg-red-600"
+                      }`}
+                      initial={false}
+                      animate={{
+                        x: tradeType === "buy" ? 0 : "100%",
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                    <motion.button
                       type="button"
                       onClick={() => setTradeType("buy")}
-                      className={`flex-1 rounded-none ${
+                      className={`flex-1 py-3 px-4 rounded-none font-medium transition-colors relative z-10 ${
                         tradeType === "buy"
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          ? "text-white"
+                          : "text-gray-700 hover:text-gray-900"
                       }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                     >
                       Buy
-                    </Button>
-                    <Button
+                    </motion.button>
+                    <motion.button
                       type="button"
                       onClick={() => setTradeType("sell")}
-                      className={`flex-1 rounded-none ${
+                      className={`flex-1 py-3 px-4 rounded-none font-medium transition-colors relative z-10 ${
                         tradeType === "sell"
-                          ? "bg-red-600 hover:bg-red-700 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          ? "text-white"
+                          : "text-gray-700 hover:text-gray-900"
                       }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                     >
                       Sell
-                    </Button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
 
                   {/* Order Type */}
                   <div>
@@ -625,26 +769,60 @@ export default function TradingPage() {
                   </div>
 
                   {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    disabled={tradeMutation.isPending}
-                    className={`w-full h-12 font-semibold text-lg ${
-                      tradeType === "buy"
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-red-600 hover:bg-red-700"
-                    }`}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.8 }}
                   >
-                    {tradeMutation.isPending ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Processing...
-                      </div>
-                    ) : (
-                      <>
-                        {tradeType === "buy" ? "Place Buy Order" : "Place Sell Order"}
-                      </>
-                    )}
-                  </Button>
+                    <motion.button
+                      type="submit"
+                      disabled={tradeMutation.isPending}
+                      className={`w-full h-12 font-semibold text-lg rounded-lg transition-all ${
+                        tradeType === "buy"
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-red-600 hover:bg-red-700"
+                      } text-white`}
+                      whileHover={{ 
+                        scale: 1.02,
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      animate={tradeMutation.isPending ? { 
+                        backgroundColor: ["#16a34a", "#15803d", "#16a34a"],
+                      } : {}}
+                      transition={{ 
+                        backgroundColor: { duration: 1.5, repeat: Infinity }
+                      }}
+                    >
+                      <AnimatePresence mode="wait">
+                        {tradeMutation.isPending ? (
+                          <motion.div 
+                            key="loading"
+                            className="flex items-center gap-2"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            <motion.div 
+                              className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                            Processing...
+                          </motion.div>
+                        ) : (
+                          <motion.span
+                            key="text"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            {tradeType === "buy" ? "Place Buy Order" : "Place Sell Order"}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </motion.div>
 
                   <p className="text-xs text-gray-500 text-center">
                     All orders require admin approval before execution
@@ -738,6 +916,6 @@ export default function TradingPage() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
