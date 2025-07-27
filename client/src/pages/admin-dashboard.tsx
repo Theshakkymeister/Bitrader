@@ -629,22 +629,24 @@ User Activity History:
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900">User Management</h2>
-        <p className="text-gray-600 mt-2">Monitor and manage platform users</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">User Management</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Monitor and manage platform users</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
           <Card className="border-0 shadow-md bg-gradient-to-r from-green-50 to-green-100">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-600 text-sm font-medium">Total Users</p>
-                  <p className="text-2xl font-bold text-green-900">{adminStats?.totalUsers || 0}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-900">{adminStats?.totalUsers || 0}</p>
                   <p className="text-xs text-green-600 mt-1">Platform registered</p>
                 </div>
-                <Users className="h-8 w-8 text-green-600" />
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -652,14 +654,14 @@ User Activity History:
 
         <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
           <Card className="border-0 shadow-md bg-gradient-to-r from-blue-50 to-blue-100">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-600 text-sm font-medium">Active Today</p>
-                  <p className="text-2xl font-bold text-blue-900">{adminStats?.usersActiveToday || 0}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-900">{adminStats?.usersActiveToday || 0}</p>
                   <p className="text-xs text-blue-600 mt-1">{adminStats?.totalUsers ? Math.round((adminStats.usersActiveToday / adminStats.totalUsers) * 100) : 0}% of total</p>
                 </div>
-                <Activity className="h-8 w-8 text-blue-600" />
+                <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -667,14 +669,14 @@ User Activity History:
 
         <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
           <Card className="border-0 shadow-md bg-gradient-to-r from-purple-50 to-purple-100">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-600 text-sm font-medium">New Signups</p>
-                  <p className="text-2xl font-bold text-purple-900">{adminStats?.usersRegisteredToday || 0}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-900">{adminStats?.usersRegisteredToday || 0}</p>
                   <p className="text-xs text-purple-600 mt-1">Today</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-600" />
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
@@ -688,7 +690,7 @@ User Activity History:
             <span>User Directory ({users.length} users)</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6">
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {usersLoading ? (
               <div className="text-center py-8 text-gray-500">
@@ -707,80 +709,58 @@ User Activity History:
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors space-y-3 sm:space-y-0"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-semibold text-sm">
                         {user.firstName && user.lastName 
                           ? `${user.firstName[0]}${user.lastName[0]}` 
                           : user.username[0]?.toUpperCase() || 'U'}
                       </span>
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900 truncate">
                         {user.firstName && user.lastName 
                           ? `${user.firstName} ${user.lastName}` 
                           : user.username}
                       </p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                      <div className="flex items-center space-x-4 text-xs text-gray-400 mt-1">
+                      <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                      <div className="hidden sm:flex items-center space-x-4 text-xs text-gray-400 mt-1">
                         <span>Reg IP: {user.registrationIp || 'N/A'}</span>
                         <span>Last IP: {user.lastLoginIp || 'N/A'}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right flex items-center space-x-3">
-                    <div className="flex flex-col space-y-2">
-                      <div>
-                        <p className="text-sm text-gray-900">
-                          Joined {new Date(user.createdAt).toLocaleDateString()}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {user.lastLoginAt 
-                            ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}` 
-                            : 'Never logged in'}
-                        </p>
-                      </div>
-                      <div className="flex space-x-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setShowUserModal(true);
-                          }}
-                          className="px-2 py-1 text-xs"
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                    <div className="text-left sm:text-right">
+                      <p className="text-sm text-gray-900">
+                        Joined {new Date(user.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {user.lastLoginAt 
+                          ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}` 
+                          : 'Never logged in'}
+                      </p>
+                    </div>
+                    <div className="flex space-x-1 flex-wrap">
+                        <Badge
+                          variant={user.isActive ? "default" : "destructive"}
+                          className="text-xs"
                         >
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
+                          {user.isActive ? "Active" : "Suspended"}
+                        </Badge>
                         <Button
+                          variant="ghost"
                           size="sm"
-                          variant={user.isActive ? "destructive" : "default"}
-                          onClick={() => toggleUserStatusMutation.mutate({ 
-                            userId: user.id, 
-                            isActive: !user.isActive 
-                          })}
-                          className="px-2 py-1 text-xs"
+                          onClick={() => setSelectedUser(user)}
+                          className="hover:bg-blue-50 hover:text-blue-600 h-8 px-2"
                         >
-                          {user.isActive ? (
-                            <>
-                              <Ban className="h-3 w-3 mr-1" />
-                              Suspend
-                            </>
-                          ) : (
-                            <>
-                              <UserCheck className="h-3 w-3 mr-1" />
-                              Activate
-                            </>
-                          )}
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
-                    <div className={`w-3 h-3 rounded-full ${user.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                  </div>
-                </motion.div>
+                  </motion.div>
               ))
             )}
           </div>
