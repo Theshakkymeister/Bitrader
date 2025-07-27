@@ -503,7 +503,14 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...user,
-      portfolio: portfolio || {
+      portfolio: portfolio ? {
+        totalBalance: portfolio.totalBalance || '0',
+        buyingPower: '0', // Not in current schema
+        totalProfitLoss: '0', // Not in current schema  
+        todayPL: portfolio.todayPl || '0',
+        winRate: portfolio.winRate || '0',
+        activeAlgorithms: portfolio.activeAlgorithms || 0
+      } : {
         totalBalance: '0',
         buyingPower: '0',
         totalProfitLoss: '0',
