@@ -1548,24 +1548,54 @@ User Activity History:
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Mobile Navigation */}
           <div className="lg:hidden mb-4">
-            <Card className="shadow-sm border-0">
-              <CardContent className="p-4">
-                <ScrollArea className="w-full">
-                  <div className="flex space-x-2 pb-2">
-                    {menuItems.map((item) => (
-                      <Button
-                        key={item.id}
-                        variant={activeSection === item.id ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setActiveSection(item.id)}
-                        className="flex-shrink-0"
-                      >
-                        <item.icon className="h-4 w-4 mr-1" />
-                        <span className="text-xs">{item.label}</span>
-                      </Button>
-                    ))}
+            <Card className="shadow-sm border-0 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="relative">
+                  <ScrollArea className="w-full" style={{ scrollBehavior: 'smooth' }}>
+                    <motion.div 
+                      className="flex space-x-3 p-4 pb-2 min-w-max"
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {menuItems.map((item, index) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1, duration: 0.3 }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            variant={activeSection === item.id ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setActiveSection(item.id)}
+                            className={`flex-shrink-0 transition-all duration-300 ${
+                              activeSection === item.id 
+                                ? 'shadow-md bg-blue-600 text-white' 
+                                : 'hover:bg-gray-100 hover:shadow-sm'
+                            }`}
+                          >
+                            <item.icon className="h-4 w-4 mr-1" />
+                            <span className="text-xs font-medium">{item.label}</span>
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </ScrollArea>
+                  
+                  {/* Scroll indicators with enhanced visibility */}
+                  <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10"></div>
+                  <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10"></div>
+                  
+                  {/* Scroll hint arrows */}
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
-                </ScrollArea>
+                </div>
               </CardContent>
             </Card>
           </div>
