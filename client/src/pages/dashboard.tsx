@@ -40,6 +40,12 @@ export default function Dashboard() {
     refetchInterval: 5000,
   });
 
+  // Get user trading positions
+  const { data: positions = [] } = useQuery({
+    queryKey: ['/api/positions'],
+    refetchInterval: 5000,
+  });
+
   // Calculate portfolio value from wallet data since API isn't returning calculated values
   const totalWalletValue = wallets.reduce((sum, wallet) => {
     return sum + parseFloat(wallet.usdValue || '0');
@@ -70,6 +76,32 @@ export default function Dashboard() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Calculate real-time metrics from positions data
+  const activeHoldings = positions.length;
+  const totalPositions = positions.length;
+  
+  // Calculate day's P&L from current positions
+  const daysPL = positions.reduce((sum, position) => {
+    const profitLoss = parseFloat(position.profitLoss || '0');
+    return sum + profitLoss;
+  }, 0);
+  
+  const daysPLPercent = portfolioValue > 0 ? (daysPL / portfolioValue) * 100 : 0;
+  
+  // Calculate total return (all time)
+  const totalReturn = positions.reduce((sum, position) => {
+    const totalAmount = parseFloat(position.totalAmount || '0');
+    const currentValue = parseFloat(position.currentValue || totalAmount);
+    return sum + (currentValue - totalAmount);
+  }, 0);
+  
+  const totalReturnPercent = portfolioValue > 0 ? (totalReturn / portfolioValue) * 100 : 0;
+  
+  // Calculate diversity score based on different asset types and symbols
+  const uniqueSymbols = new Set(positions.map(p => p.symbol)).size;
+  const assetTypes = new Set(positions.map(p => p.assetType)).size;
+  const diversityScore = Math.min(10, (uniqueSymbols * 0.5 + assetTypes * 2.5));
 
   const todayPLPercent = portfolio?.todayPL || 0;
   const todayPL = portfolioValue * (todayPLPercent / 100);

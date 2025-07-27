@@ -100,6 +100,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user trading positions
+  app.get('/api/positions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const positions = await storage.getUserPositions(userId);
+      res.json(positions);
+    } catch (error) {
+      console.error("Error fetching positions:", error);
+      res.status(500).json({ message: "Failed to fetch positions" });
+    }
+  });
+
   // Connect external wallet (Trust Wallet, Coinbase)
   app.post('/api/wallets/:symbol/connect', isAuthenticated, async (req: any, res) => {
     try {

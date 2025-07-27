@@ -91,6 +91,7 @@ export interface IStorage {
   
   // Trade operations
   getTrades(userId: string, limit?: number): Promise<Trade[]>;
+  getUserPositions(userId: string): Promise<Trade[]>;
   createTrade(trade: InsertTrade): Promise<Trade>;
   updateTrade(id: string, updates: Partial<InsertTrade>): Promise<Trade>;
   
@@ -247,6 +248,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(trades.userId, userId))
       .orderBy(desc(trades.createdAt))
       .limit(limit);
+  }
+
+  async getUserPositions(userId: string): Promise<Trade[]> {
+    return await db.select()
+      .from(trades)
+      .where(and(
+        eq(trades.userId, userId),
+        eq(trades.status, 'executed'),
+        sql`closed_at IS NULL`
+      ))
+      .orderBy(desc(trades.executedAt));
   }
 
   async getTradeById(id: string): Promise<Trade | undefined> {
