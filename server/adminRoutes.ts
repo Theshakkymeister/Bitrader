@@ -686,8 +686,36 @@ export function registerAdminRoutes(app: Express) {
   app.get('/api/admin/trades', isAdminAuthenticated, async (req, res) => {
     try {
       const { status, limit = 100 } = req.query;
-      const allTrades = await storage.getAllTradesForAdmin(status as string, parseInt(limit as string));
-      res.json(allTrades);
+      const allTrades = await storage.getAllTradesForAdmin(parseInt(limit as string));
+      
+      // Add real-time market data to trades
+      const { getCurrentPrice } = require('./marketData');
+      const tradesWithLiveData = allTrades.map(trade => {
+        if (trade.symbol) {
+          const currentPrice = getCurrentPrice(trade.symbol);
+          const quantity = parseFloat(trade.quantity || '0');
+          const entryPrice = parseFloat(trade.price || '0');
+          
+          if (currentPrice && quantity > 0 && entryPrice > 0) {
+            const currentValue = currentPrice * quantity;
+            const profitLoss = currentValue - parseFloat(trade.totalAmount || '0');
+            const profitLossPercentage = entryPrice > 0 ? ((currentPrice - entryPrice) / entryPrice) * 100 : 0;
+            
+            return {
+              ...trade,
+              currentPrice: currentPrice.toFixed(2),
+              currentValue: currentValue.toFixed(2),
+              profitLoss: profitLoss.toFixed(2),
+              profitLossPercentage: profitLossPercentage.toFixed(2),
+              lastUpdated: new Date().toISOString(),
+              isProfit: profitLoss >= 0
+            };
+          }
+        }
+        return trade;
+      });
+      
+      res.json(tradesWithLiveData);
     } catch (error) {
       console.error("Error fetching all trades:", error);
       res.status(500).json({ message: "Failed to fetch trades" });

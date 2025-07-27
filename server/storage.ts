@@ -187,7 +187,16 @@ export class DatabaseStorage implements IStorage {
 
   // Portfolio operations
   async getPortfolio(userId: string): Promise<Portfolio | undefined> {
-    const [portfolio] = await db.select().from(portfolios).where(eq(portfolios.userId, userId));
+    const [portfolio] = await db.select({
+      id: portfolios.id,
+      userId: portfolios.userId,
+      totalBalance: portfolios.totalBalance,
+      todayPl: portfolios.todayPl,
+      winRate: portfolios.winRate,
+      activeAlgorithms: portfolios.activeAlgorithms,
+      createdAt: portfolios.createdAt,
+      updatedAt: portfolios.updatedAt
+    }).from(portfolios).where(eq(portfolios.userId, userId));
     return portfolio;
   }
 
@@ -499,7 +508,16 @@ export class DatabaseStorage implements IStorage {
         type: trades.type,
         quantity: trades.quantity,
         price: trades.price,
+        totalAmount: trades.totalAmount,
         status: trades.status,
+        adminApproval: trades.adminApproval,
+        assetType: trades.assetType,
+        executedAt: trades.executedAt,
+        currentPrice: trades.currentPrice,
+        currentValue: trades.currentValue,
+        profitLoss: trades.profitLoss,
+        profitLossPercentage: trades.profitLossPercentage,
+        isOpen: trades.isOpen,
         createdAt: trades.createdAt,
         updatedAt: trades.updatedAt,
         username: users.username,
