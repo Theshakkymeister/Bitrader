@@ -119,7 +119,7 @@ export default function Portfolio() {
     return colorMap[symbol] || 'text-gray-500';
   };
 
-  // Convert trades to holdings format for display
+  // Convert trades to holdings format for display with complete trading data
   const activePositions = (trades as any[])
     .filter((trade: any) => trade.adminApproval === 'approved' && trade.isOpen)
     .map((trade: any) => ({
@@ -132,10 +132,15 @@ export default function Portfolio() {
       value: parseFloat(trade.currentValue || trade.totalAmount),
       change: parseFloat(trade.profitLoss || '0'),
       changePercent: parseFloat(trade.profitLossPercentage || '0'),
+      profitLoss: parseFloat(trade.profitLoss || '0'),
       type: trade.assetType,
       tradeType: trade.type,
       entryDate: trade.executedAt || trade.createdAt,
+      executedAt: trade.executedAt,
+      createdAt: trade.createdAt,
       status: trade.status,
+      adminApproval: trade.adminApproval,
+      totalAmount: trade.totalAmount,
       icon: getAssetIcon(trade.symbol),
       color: getAssetColor(trade.symbol)
     }));
@@ -1034,28 +1039,69 @@ export default function Portfolio() {
                 <div className="border rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
                     <BarChart3 className="h-4 w-4 mr-2" />
-                    Performance Metrics
+                    Trading Performance
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm text-gray-500">Average Cost</div>
+                      <div className="text-sm text-gray-500">Entry Price</div>
                       <div className="font-semibold">{showValues ? formatCurrency(selectedHolding.avgPrice) : "••••••••"}</div>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Total Return</div>
-                      <div className={`font-semibold ${selectedHolding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {showValues ? formatCurrency(Math.abs(selectedHolding.change * selectedHolding.shares)) : "••••••••"}
+                      <div className="text-sm text-gray-500">Current P&L</div>
+                      <div className={`font-semibold ${selectedHolding.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {showValues ? `${selectedHolding.profitLoss >= 0 ? '+' : ''}${formatCurrency(Math.abs(parseFloat(selectedHolding.profitLoss || '0')))}` : "••••••••"}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Entry Date</div>
+                      <div className="text-sm text-gray-500">Trade Date</div>
                       <div className="font-semibold">
-                        {new Date(selectedHolding.entryDate || Date.now()).toLocaleDateString()}
+                        {new Date(selectedHolding.executedAt || selectedHolding.createdAt || Date.now()).toLocaleDateString()}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500">Position Type</div>
-                      <div className="font-semibold capitalize">{selectedHolding.tradeType || 'Long'}</div>
+                      <div className="text-sm text-gray-500">Trade Type</div>
+                      <div className="font-semibold capitalize">{selectedHolding.tradeType || 'Buy'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Order Status</div>
+                      <div className="font-semibold">
+                        <Badge variant={selectedHolding.adminApproval === 'approved' ? 'default' : 'secondary'}>
+                          {selectedHolding.adminApproval === 'approved' ? 'Approved' : 'Pending'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Trade ID</div>
+                      <div className="font-mono text-xs font-semibold text-gray-600">
+                        {selectedHolding.id?.slice(0, 8) || 'N/A'}...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Real-time Market Data */}
+                <div className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-blue-50">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <Activity className="h-4 w-4 mr-2 text-green-600" />
+                    Live Market Data
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-500">Live Price</div>
+                      <div className="font-bold text-lg">{formatCurrency(selectedHolding.currentPrice)}</div>
+                      <div className="text-xs text-gray-500">Real-time</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Price Change</div>
+                      <div className={`font-bold text-lg ${selectedHolding.changePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {selectedHolding.changePercent >= 0 ? '+' : ''}{selectedHolding.changePercent.toFixed(2)}%
+                      </div>
+                      <div className="text-xs text-gray-500">Today</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Total Value</div>
+                      <div className="font-bold text-lg">{showValues ? formatCurrency(selectedHolding.value) : "••••••••"}</div>
+                      <div className="text-xs text-gray-500">Current worth</div>
                     </div>
                   </div>
                 </div>
