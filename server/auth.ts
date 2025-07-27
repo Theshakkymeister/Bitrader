@@ -155,6 +155,10 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Email already exists" });
       }
 
+      // Get user's IP address
+      const registrationIp = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
+      const clientIp = Array.isArray(registrationIp) ? registrationIp[0] : registrationIp;
+
       // Create new user
       const user = await storage.createUser({
         username,
@@ -162,6 +166,9 @@ export function setupAuth(app: Express) {
         password: await hashPassword(password),
         firstName: username, // Use username as firstName for now
         lastName: "",
+        registrationIp: clientIp,
+        lastLoginIp: clientIp,
+        lastLoginAt: new Date(),
       });
 
       // Auto-login after registration
@@ -189,10 +196,20 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
       
-      req.logIn(user, (err) => {
+      req.logIn(user, async (err) => {
         if (err) {
           console.error("Login error:", err);
           return res.status(500).json({ message: "Login failed" });
+        }
+        
+        // Update last login IP and time
+        const loginIp = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
+        const clientIp = Array.isArray(loginIp) ? loginIp[0] : loginIp;
+        
+        try {
+          await storage.updateUserLoginInfo(user.id, clientIp);
+        } catch (error) {
+          console.error("Failed to update login info:", error);
         }
         
         // If user is also an admin, set admin session

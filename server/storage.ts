@@ -56,6 +56,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(userData: Omit<UpsertUser, 'id'>): Promise<User>;
   upsertUser(userData: UpsertUser): Promise<User>;
+  updateUserLoginInfo(userId: string, ipAddress: string): Promise<void>;
   // Admin user management operations
   getAllUsers(limit?: number, offset?: number): Promise<User[]>;
   getUserCount(): Promise<number>;
@@ -189,6 +190,17 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async updateUserLoginInfo(userId: string, ipAddress: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        lastLoginIp: ipAddress,
+        lastLoginAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 
   // Portfolio operations
