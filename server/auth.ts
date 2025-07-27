@@ -74,7 +74,9 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
+    new LocalStrategy(
+      { usernameField: 'email' }, // Tell passport to use 'email' field instead of 'username'
+      async (username, password, done) => {
       try {
         console.log("Attempting login for username/email:", username);
         
