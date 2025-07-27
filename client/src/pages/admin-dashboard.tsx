@@ -120,6 +120,7 @@ const menuItems = [
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [showAddresses, setShowAddresses] = useState<{[key: string]: boolean}>({});
   const [newAddress, setNewAddress] = useState({ symbol: '', name: '', address: '', network: '' });
   const [newSetting, setNewSetting] = useState({ key: '', value: '', description: '' });
@@ -1492,23 +1493,56 @@ User Activity History:
 
 
 
+  const handleSectionChange = async (sectionId: string) => {
+    if (sectionId === activeSection) return;
+    
+    setIsTransitioning(true);
+    
+    // Small delay to show transition effect
+    setTimeout(() => {
+      setActiveSection(sectionId);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
   const renderSection = () => {
-    switch (activeSection) {
-      case 'overview':
-        return renderOverview();
-      case 'crypto':
-        return renderCryptoAddresses();
-      case 'settings':
-        return renderWebsiteSettings();
-      case 'users':
-        return renderUserManagement();
-      case 'analytics':
-        return renderAnalytics();
-      case 'system':
-        return renderSystemStatus();
-      default:
-        return renderOverview();
-    }
+    const content = (() => {
+      switch (activeSection) {
+        case 'overview':
+          return renderOverview();
+        case 'crypto':
+          return renderCryptoAddresses();
+        case 'settings':
+          return renderWebsiteSettings();
+        case 'users':
+          return renderUserManagement();
+        case 'analytics':
+          return renderAnalytics();
+        case 'system':
+          return renderSystemStatus();
+        default:
+          return renderOverview();
+      }
+    })();
+
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeSection}
+          initial={{ opacity: 0, x: 20, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: -20, scale: 0.95 }}
+          transition={{ 
+            duration: 0.3, 
+            ease: [0.4, 0.0, 0.2, 1],
+            scale: { duration: 0.2 }
+          }}
+          className={isTransitioning ? 'pointer-events-none' : ''}
+        >
+          {content}
+        </motion.div>
+      </AnimatePresence>
+    );
   };
 
   return (
@@ -1570,7 +1604,7 @@ User Activity History:
                           <Button
                             variant={activeSection === item.id ? "default" : "ghost"}
                             size="sm"
-                            onClick={() => setActiveSection(item.id)}
+                            onClick={() => handleSectionChange(item.id)}
                             className={`flex-shrink-0 transition-all duration-300 ${
                               activeSection === item.id 
                                 ? 'shadow-md bg-blue-600 text-white' 
@@ -1619,7 +1653,11 @@ User Activity History:
                         transition={{ delay: index * 0.05, duration: 0.3 }}
                         whileHover={{ scale: 1.02, x: 5 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setActiveSection(item.id)}
+                        animate={{
+                          backgroundColor: activeSection === item.id ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                          borderColor: activeSection === item.id ? 'rgba(59, 130, 246, 0.3)' : 'transparent'
+                        }}
+                        onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-300 ${
                           activeSection === item.id
                             ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border border-blue-200 shadow-sm'
