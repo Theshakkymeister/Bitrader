@@ -46,20 +46,20 @@ function updateMarketPrices() {
     const basePrice = basePrices[symbol];
     if (!basePrice) return;
 
-    // Generate realistic price fluctuation (±2% for stocks, ±5% for crypto)
+    // Generate realistic price fluctuation (±1% for stocks, ±2% for crypto)
     const isStablecoin = symbol === 'USDT' || symbol === 'USDC';
     const isCrypto = ['BTC', 'ETH', 'SOL', 'USDT', 'USDC'].includes(symbol);
     
-    let volatility = 0.02; // 2% for stocks
+    let volatility = 0.005; // 0.5% for stocks
     if (isCrypto && !isStablecoin) {
-      volatility = 0.05; // 5% for crypto
+      volatility = 0.01; // 1% for crypto
     } else if (isStablecoin) {
-      volatility = 0.001; // 0.1% for stablecoins
+      volatility = 0.0001; // 0.01% for stablecoins
     }
 
-    // Random walk with mean reversion
+    // Random walk with very strong mean reversion to prevent price drift
     const randomChange = (Math.random() - 0.5) * volatility * 2;
-    const meanReversion = (basePrice - marketPrices[symbol].price) * 0.001;
+    const meanReversion = (basePrice - marketPrices[symbol].price) * 0.05; // Very strong mean reversion
     const priceChange = randomChange + meanReversion;
     
     const oldPrice = marketPrices[symbol].price;
@@ -78,8 +78,8 @@ function updateMarketPrices() {
   });
 }
 
-// Update prices every 3 seconds for realistic market simulation
-setInterval(updateMarketPrices, 3000);
+// Update prices every 30 seconds with very small changes
+setInterval(updateMarketPrices, 30000);
 
 export function getCurrentPrice(symbol: string): MarketPrice | null {
   return marketPrices[symbol] || null;
