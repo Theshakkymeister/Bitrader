@@ -262,7 +262,7 @@ export default function Dashboard() {
           <div>
             <div className="text-sm text-gray-600 mb-1">Total Portfolio Value</div>
             <div className="text-4xl font-bold text-black mb-2">
-              ${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
+              {showBalance ? `$${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}` : '••••••'}
             </div>
             <div className="flex items-center text-sm space-x-4">
               <div className="text-gray-600">
@@ -270,7 +270,16 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex items-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBalance(!showBalance)}
+              className="flex items-center space-x-2 h-8"
+            >
+              {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <span className="hidden sm:inline">{showBalance ? 'Hide' : 'Show'}</span>
+            </Button>
             <Select>
               <SelectTrigger className="w-24 h-8 text-xs">
                 <SelectValue placeholder="1D" />
@@ -404,7 +413,7 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-gray-900">Crypto Wallet</h3>
             </div>
             <div className="text-sm font-medium text-green-600">
-              ${totalWalletValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
+              {showBalance ? `$${totalWalletValue.toLocaleString('en-US', {minimumFractionDigits: 2})}` : '••••••'}
             </div>
           </div>
           <div className="space-y-3">
@@ -418,19 +427,19 @@ export default function Dashboard() {
                     <div className="font-medium text-gray-900">{holding.symbol}</div>
                     <div className="text-sm text-gray-500">{holding.shares?.toFixed(4)} coins</div>
                     <div className="text-xs text-gray-400">
-                      ${holding.currentPrice?.toFixed(2)}/coin
+                      {showBalance ? `$${holding.currentPrice?.toFixed(2)}/coin` : '•••••/coin'}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-gray-900">
-                    ${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    {showBalance ? `$${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2})}` : '••••••'}
                   </div>
                   <div className={`text-sm ${(holding.change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {(holding.change || 0) >= 0 ? '+' : ''}{holding.change?.toFixed(2)}%
                   </div>
                   <div className={`text-xs ${(holding.profitLossPercent || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    P&L: {(holding.profitLossPercent || 0) >= 0 ? '+' : ''}${(holding.profitLoss || 0).toFixed(2)}
+                    P&L: {showBalance ? `${(holding.profitLossPercent || 0) >= 0 ? '+' : ''}$${(holding.profitLoss || 0).toFixed(2)}` : '••••'}
                   </div>
                 </div>
               </div>
@@ -446,7 +455,7 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-gray-900">Stock Portfolio</h3>
             </div>
             <div className="text-sm font-medium text-green-600">
-              ${totalStocks.toLocaleString('en-US', {minimumFractionDigits: 2})}
+              {showBalance ? `$${totalStocks.toLocaleString('en-US', {minimumFractionDigits: 2})}` : '••••••'}
             </div>
           </div>
           <div className="space-y-3">
@@ -464,7 +473,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right">
                   <div className="font-medium text-gray-900">
-                    ${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    {showBalance ? `$${holding.value?.toLocaleString('en-US', {minimumFractionDigits: 2})}` : '••••••'}
                   </div>
                   <div className={`text-sm ${(holding.change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {(holding.change || 0) >= 0 ? '+' : ''}{holding.change?.toFixed(2)}%
@@ -497,10 +506,10 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Day's P&L</div>
           <div className={`text-xl font-bold ${daysPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {daysPL >= 0 ? '+' : ''}${Math.abs(daysPL).toFixed(2)}
+            {showBalance ? `${daysPL >= 0 ? '+' : ''}$${Math.abs(daysPL).toFixed(2)}` : '••••••'}
           </div>
           <div className={`text-xs mt-1 ${daysPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {daysPL >= 0 ? '+' : ''}{daysPLPercent.toFixed(2)}%
+            {showBalance ? `${daysPL >= 0 ? '+' : ''}${daysPLPercent.toFixed(2)}%` : '••••'}
           </div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-300">
@@ -510,11 +519,11 @@ export default function Dashboard() {
           </div>
           <div className="space-y-2">
             <div className={`text-2xl font-bold ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {totalProfitLoss >= 0 ? '+' : ''}${Math.abs(totalProfitLoss).toFixed(2)}
+              {showBalance ? `${totalProfitLoss >= 0 ? '+' : ''}$${Math.abs(totalProfitLoss).toFixed(2)}` : '••••••'}
             </div>
             <div className="flex justify-between items-center">
               <div className={`text-sm font-medium ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {totalProfitLoss >= 0 ? '+' : ''}{totalReturnPercentage.toFixed(2)}%
+                {showBalance ? `${totalProfitLoss >= 0 ? '+' : ''}${totalReturnPercentage.toFixed(2)}%` : '••••%'}
               </div>
               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full">
                 {totalProfitLoss === 0 ? 'No Change Yet' : totalProfitLoss > 0 ? 'Profit' : 'Loss'}
