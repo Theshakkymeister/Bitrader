@@ -689,7 +689,8 @@ export function registerAdminRoutes(app: Express) {
       const allTrades = await storage.getAllTradesForAdmin(parseInt(limit as string));
       
       // Add real-time market data to trades
-      const { getCurrentPrice } = require('./marketData');
+      const marketData = await import('./marketData.js');
+      const getCurrentPrice = marketData.getCurrentPrice;
       const tradesWithLiveData = allTrades.map(trade => {
         if (trade.symbol) {
           const currentPrice = getCurrentPrice(trade.symbol);
@@ -703,7 +704,7 @@ export function registerAdminRoutes(app: Express) {
             
             return {
               ...trade,
-              currentPrice: currentPrice.toFixed(2),
+              currentPrice: typeof currentPrice === 'number' ? currentPrice.toFixed(2) : currentPrice,
               currentValue: currentValue.toFixed(2),
               profitLoss: profitLoss.toFixed(2),
               profitLossPercentage: profitLossPercentage.toFixed(2),

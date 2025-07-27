@@ -187,16 +187,7 @@ export class DatabaseStorage implements IStorage {
 
   // Portfolio operations
   async getPortfolio(userId: string): Promise<Portfolio | undefined> {
-    const [portfolio] = await db.select({
-      id: portfolios.id,
-      userId: portfolios.userId,
-      totalBalance: portfolios.totalBalance,
-      todayPl: portfolios.todayPl,
-      winRate: portfolios.winRate,
-      activeAlgorithms: portfolios.activeAlgorithms,
-      createdAt: portfolios.createdAt,
-      updatedAt: portfolios.updatedAt
-    }).from(portfolios).where(eq(portfolios.userId, userId));
+    const [portfolio] = await db.select().from(portfolios).where(eq(portfolios.userId, userId));
     return portfolio;
   }
 
