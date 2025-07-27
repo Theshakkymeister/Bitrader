@@ -676,6 +676,75 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Add profit to trade
+  app.patch('/api/admin/trades/:tradeId/profit', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { tradeId } = req.params;
+      const { profitAmount, note } = req.body;
+      const adminId = req.adminUser.id;
+
+      if (!profitAmount || isNaN(parseFloat(profitAmount))) {
+        return res.status(400).json({ message: "Valid profit amount is required" });
+      }
+
+      // Get trade details
+      const trade = await storage.getTradeById(tradeId);
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+
+      // Calculate new profit/loss values
+      const currentProfitLoss = parseFloat(trade.profitLoss || '0');
+      const addedProfit = parseFloat(profitAmount);
+      const newProfitLoss = currentProfitLoss + addedProfit;
+      
+      const entryPrice = parseFloat(trade.price || '0');
+      const quantity = parseFloat(trade.quantity || '0');
+      const totalAmount = parseFloat(trade.totalAmount || '0');
+      
+      // Calculate new percentage based on updated profit
+      const newProfitLossPercentage = totalAmount > 0 ? (newProfitLoss / totalAmount) * 100 : 0;
+      
+      // Update trade with new profit values
+      const updatedTrade = await storage.updateTrade(tradeId, {
+        profitLoss: newProfitLoss.toFixed(2),
+        profitLossPercentage: newProfitLossPercentage.toFixed(2),
+        notes: note || `Admin added profit: $${addedProfit.toFixed(2)}`,
+        lastUpdated: new Date()
+      });
+
+      // Update user's portfolio balance with the added profit
+      const portfolio = await storage.getPortfolio(trade.userId);
+      if (portfolio) {
+        const currentBalance = parseFloat(portfolio.totalBalance || '0');
+        const newBalance = currentBalance + addedProfit;
+        
+        await storage.updatePortfolio(portfolio.id, {
+          totalBalance: newBalance.toFixed(2),
+          updatedAt: new Date()
+        });
+      }
+
+      // Log admin activity
+      await logAdminActivity(adminId, 'ADD_PROFIT', 'TRADE', tradeId, {
+        profitAdded: addedProfit,
+        newProfitLoss: newProfitLoss,
+        note,
+        userId: trade.userId
+      }, req);
+
+      res.json({ 
+        message: "Profit added successfully", 
+        trade: updatedTrade,
+        profitAdded: addedProfit,
+        newTotalProfit: newProfitLoss
+      });
+    } catch (error) {
+      console.error("Add profit to trade error:", error);
+      res.status(500).json({ message: "Failed to add profit to trade" });
+    }
+  });
+
   // User deactivation
   app.post('/api/admin/users/:userId/deactivate', isAdminAuthenticated, async (req, res) => {
     try {

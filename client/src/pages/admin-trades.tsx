@@ -2,12 +2,19 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Loader2, TrendingUp, CheckCircle, XCircle, Clock, DollarSign, Plus } from "lucide-react";
 
 export default function AdminTrades() {
   const [trades, setTrades] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedTrade, setSelectedTrade] = useState(null);
+  const [profitAmount, setProfitAmount] = useState("");
+  const [profitNote, setProfitNote] = useState("");
+  const [showProfitDialog, setShowProfitDialog] = useState(false);
 
   useEffect(() => {
     loginAndFetchData();
@@ -75,6 +82,38 @@ export default function AdminTrades() {
       }
     } catch (error) {
       console.error("Failed to reject trade:", error);
+    }
+  };
+
+  const addProfitToTrade = async () => {
+    if (!selectedTrade || !profitAmount || isNaN(parseFloat(profitAmount))) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/trades/${selectedTrade.id}/profit`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          profitAmount: parseFloat(profitAmount),
+          note: profitNote
+        }),
+        credentials: "include"
+      });
+
+      if (response.ok) {
+        // Reset form and close dialog
+        setProfitAmount("");
+        setProfitNote("");
+        setShowProfitDialog(false);
+        setSelectedTrade(null);
+        // Refresh data
+        loginAndFetchData();
+      }
+    } catch (error) {
+      console.error("Failed to add profit to trade:", error);
     }
   };
 
@@ -219,14 +258,30 @@ export default function AdminTrades() {
                       </p>
                     )}
                   </div>
-                  <div className="text-right">
-                    <Badge variant={
-                      trade.adminApproval === 'pending' ? 'outline' :
-                      trade.adminApproval === 'approved' ? 'default' : 'destructive'
-                    }>
-                      {trade.adminApproval}
-                    </Badge>
-                    <p className="text-sm font-semibold mt-1">
+                  <div className="text-right space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={
+                        trade.adminApproval === 'pending' ? 'outline' :
+                        trade.adminApproval === 'approved' ? 'default' : 'destructive'
+                      }>
+                        {trade.adminApproval}
+                      </Badge>
+                      {trade.adminApproval === 'approved' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedTrade(trade);
+                            setShowProfitDialog(true);
+                          }}
+                          className="text-xs"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Profit
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-sm font-semibold">
                       ${parseFloat(trade.totalAmount || '0').toFixed(2)}
                     </p>
                   </div>
@@ -235,6 +290,68 @@ export default function AdminTrades() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Profit Addition Dialog */}
+        <Dialog open={showProfitDialog} onOpenChange={setShowProfitDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Profit to Trade</DialogTitle>
+              <DialogDescription>
+                {selectedTrade && (
+                  <>Add profit to {selectedTrade.symbol} trade (${parseFloat(selectedTrade.totalAmount || '0').toFixed(2)})</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="profit-amount">Profit Amount ($)</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="profit-amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={profitAmount}
+                    onChange={(e) => setProfitAmount(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="profit-note">Note (Optional)</Label>
+                <Input
+                  id="profit-note"
+                  placeholder="Admin profit adjustment"
+                  value={profitNote}
+                  onChange={(e) => setProfitNote(e.target.value)}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={addProfitToTrade}
+                  disabled={!profitAmount || isNaN(parseFloat(profitAmount))}
+                  className="flex-1"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Profit
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowProfitDialog(false);
+                    setProfitAmount("");
+                    setProfitNote("");
+                    setSelectedTrade(null);
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
