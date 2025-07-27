@@ -719,18 +719,62 @@ export function registerAdminRoutes(app: Express) {
     try {
       const adminId = req.adminUser.id;
       const tradeId = req.params.id;
-      const { approval, rejectionReason } = req.body;
+      const { approval, rejectionReason, profitLoss, notes } = req.body;
 
+      // Get the trade details first to get user information
+      const trade = await storage.getTradeById(tradeId);
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+
+      // Update the trade with approval status and profit adjustment
       const updatedTrade = await storage.updateTrade(tradeId, {
         adminApproval: approval,
         approvedBy: adminId,
         approvedAt: approval === "approved" ? new Date() : undefined,
         rejectionReason: approval === "rejected" ? rejectionReason : undefined,
-        status: approval === "approved" ? "approved" : "rejected"
+        status: approval === "approved" ? "approved" : "rejected",
+        profitLoss: approval === "approved" && profitLoss !== undefined ? profitLoss : trade.profitLoss,
+        adminNotes: notes || trade.adminNotes
       });
 
-      // Log admin action
-      await logAdminActivity(adminId, approval === "approved" ? "APPROVE_TRADE" : "REJECT_TRADE", "TRADE", tradeId, { approval, rejectionReason }, req);
+      // If trade is approved and there's a profit/loss adjustment, update the user's portfolio
+      if (approval === "approved" && profitLoss !== undefined && profitLoss !== 0) {
+        try {
+          // Get user's portfolio
+          const portfolio = await storage.getPortfolio(trade.userId);
+          if (portfolio) {
+            // Update portfolio balance with profit/loss adjustment
+            const newBuyingPower = (portfolio.buyingPower || 0) + profitLoss;
+            const newTotalProfitLoss = (portfolio.totalProfitLoss || 0) + profitLoss;
+            
+            await storage.updatePortfolio(trade.userId, {
+              buyingPower: Math.max(0, newBuyingPower), // Ensure buying power doesn't go negative
+              totalProfitLoss: newTotalProfitLoss
+            });
+          }
+        } catch (portfolioError) {
+          console.error("Error updating portfolio for profit adjustment:", portfolioError);
+          // Don't fail the trade approval if portfolio update fails
+        }
+      }
+
+      // Log admin action with detailed information
+      await logAdminActivity(
+        adminId, 
+        approval === "approved" ? "APPROVE_TRADE" : "REJECT_TRADE", 
+        "TRADE", 
+        tradeId, 
+        { 
+          approval, 
+          rejectionReason, 
+          profitLoss: approval === "approved" ? profitLoss : undefined,
+          notes,
+          symbol: trade.symbol,
+          quantity: trade.quantity
+        }, 
+        req
+      );
 
       res.json(updatedTrade);
     } catch (error) {

@@ -139,6 +139,14 @@ export default function AdminDashboard() {
   const [balanceAction, setBalanceAction] = useState<{type: 'add' | 'remove', amount: string}>({type: 'add', amount: ''});
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [tradeFilter, setTradeFilter] = useState('all');
+  const [selectedTrade, setSelectedTrade] = useState<any>(null);
+  const [showTradeModal, setShowTradeModal] = useState(false);
+  const [tradeAction, setTradeAction] = useState({
+    approval: 'approved',
+    profitLoss: '',
+    rejectionReason: '',
+    notes: ''
+  });
   
   // All hooks in consistent order
   const { toast } = useToast();
@@ -287,13 +295,25 @@ export default function AdminDashboard() {
     }
   });
 
-  // Individual trade approval/rejection
+  // Individual trade approval/rejection with profit adjustment
   const approveTradeMutation = useMutation({
-    mutationFn: async ({ tradeId, approval, rejectionReason }: { tradeId: string; approval: string; rejectionReason?: string }) => {
+    mutationFn: async ({ 
+      tradeId, 
+      approval, 
+      rejectionReason, 
+      profitLoss, 
+      notes 
+    }: { 
+      tradeId: string; 
+      approval: string; 
+      rejectionReason?: string; 
+      profitLoss?: number; 
+      notes?: string; 
+    }) => {
       const response = await fetch(`/api/admin/trades/${tradeId}/approve`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ approval, rejectionReason })
+        body: JSON.stringify({ approval, rejectionReason, profitLoss, notes })
       });
       if (!response.ok) throw new Error("Failed to update trade");
       return response.json();
@@ -1232,29 +1252,20 @@ User Activity Summary:
                                 <div className="flex items-center space-x-2 ml-4">
                                   <Button
                                     size="sm"
-                                    onClick={() => approveTradeMutation.mutate({ 
-                                      tradeId: trade.id, 
-                                      approval: "approved" 
-                                    })}
-                                    disabled={approveTradeMutation.isPending}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1"
+                                    onClick={() => {
+                                      setSelectedTrade(trade);
+                                      setTradeAction({
+                                        approval: 'approved',
+                                        profitLoss: trade.profitLoss?.toString() || '0',
+                                        rejectionReason: '',
+                                        notes: ''
+                                      });
+                                      setShowTradeModal(true);
+                                    }}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1"
                                   >
-                                    <Check className="h-4 w-4 mr-1" />
-                                    Approve
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => approveTradeMutation.mutate({ 
-                                      tradeId: trade.id, 
-                                      approval: "rejected",
-                                      rejectionReason: "Risk management decision"
-                                    })}
-                                    disabled={approveTradeMutation.isPending}
-                                    className="text-red-600 border-red-600 hover:bg-red-50 px-3 py-1"
-                                  >
-                                    <X className="h-4 w-4 mr-1" />
-                                    Reject
+                                    <Settings className="h-4 w-4 mr-1" />
+                                    Review Trade
                                   </Button>
                                 </div>
                               )}
@@ -2556,6 +2567,241 @@ User Activity Summary:
         </div>
       </div>
       {renderUserDetailsModal()}
+      
+      {/* Trade Approval Modal */}
+      <Dialog open={showTradeModal} onOpenChange={setShowTradeModal}>
+        <DialogContent className="max-w-2xl bg-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-gray-900">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              <span>Trade Approval & Management</span>
+              {selectedTrade && (
+                <Badge variant={selectedTrade.type === 'buy' ? 'default' : 'destructive'}>
+                  {selectedTrade.type.toUpperCase()}
+                </Badge>
+              )}
+            </DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Review and manage trade details, adjust profit/loss, and approve or reject the trade.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTrade && (
+            <div className="space-y-6">
+              {/* Trade Details Section */}
+              <Card className="border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center space-x-2">
+                    <span>{selectedTrade.symbol}</span>
+                    <Badge variant="outline">{selectedTrade.assetType || 'Stock'}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Quantity</Label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {typeof selectedTrade.quantity === 'number' ? selectedTrade.quantity.toFixed(2) : parseFloat(selectedTrade.quantity || '0').toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Entry Price</Label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        ${typeof selectedTrade.price === 'number' ? selectedTrade.price.toFixed(2) : parseFloat(selectedTrade.price || '0').toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Total Amount</Label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        ${typeof selectedTrade.totalAmount === 'number' ? selectedTrade.totalAmount.toFixed(2) : parseFloat(selectedTrade.totalAmount || '0').toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Trade Date</Label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {new Date(selectedTrade.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Approval Action Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Trade Decision</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">Action</Label>
+                    <div className="flex space-x-4 mt-2">
+                      <Button
+                        variant={tradeAction.approval === 'approved' ? 'default' : 'outline'}
+                        onClick={() => setTradeAction({...tradeAction, approval: 'approved'})}
+                        className={tradeAction.approval === 'approved' ? 'bg-green-600 hover:bg-green-700' : ''}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant={tradeAction.approval === 'rejected' ? 'destructive' : 'outline'}
+                        onClick={() => setTradeAction({...tradeAction, approval: 'rejected'})}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+
+                  {tradeAction.approval === 'approved' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="profitLoss" className="text-sm font-medium text-gray-600">
+                          Profit/Loss Adjustment ($)
+                        </Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <input
+                            id="profitLoss"
+                            type="number"
+                            step="0.01"
+                            value={tradeAction.profitLoss}
+                            onChange={(e) => setTradeAction({...tradeAction, profitLoss: e.target.value})}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="0.00"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setTradeAction({...tradeAction, profitLoss: '0'})}
+                          >
+                            Reset
+                          </Button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Enter positive values for profit, negative for loss. This will be added to the user's portfolio.
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="adminNotes" className="text-sm font-medium text-gray-600">
+                          Admin Notes (Optional)
+                        </Label>
+                        <textarea
+                          id="adminNotes"
+                          value={tradeAction.notes}
+                          onChange={(e) => setTradeAction({...tradeAction, notes: e.target.value})}
+                          className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          rows={3}
+                          placeholder="Add any notes about this trade approval..."
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {tradeAction.approval === 'rejected' && (
+                    <div>
+                      <Label htmlFor="rejectionReason" className="text-sm font-medium text-gray-600">
+                        Rejection Reason *
+                      </Label>
+                      <textarea
+                        id="rejectionReason"
+                        value={tradeAction.rejectionReason}
+                        onChange={(e) => setTradeAction({...tradeAction, rejectionReason: e.target.value})}
+                        className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        rows={3}
+                        placeholder="Please provide a reason for rejecting this trade..."
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {/* Profit/Loss Preview */}
+                  {tradeAction.approval === 'approved' && tradeAction.profitLoss && (
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-blue-900">Trade Impact:</span>
+                        <span className={`font-semibold ${parseFloat(tradeAction.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {parseFloat(tradeAction.profitLoss) >= 0 ? '+' : ''}${parseFloat(tradeAction.profitLoss || '0').toFixed(2)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-blue-700 mt-1">
+                        This amount will be {parseFloat(tradeAction.profitLoss) >= 0 ? 'added to' : 'deducted from'} the user's portfolio balance.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowTradeModal(false);
+                    setSelectedTrade(null);
+                    setTradeAction({
+                      approval: 'approved',
+                      profitLoss: '',
+                      rejectionReason: '',
+                      notes: ''
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    const profitLossValue = tradeAction.approval === 'approved' ? parseFloat(tradeAction.profitLoss || '0') : undefined;
+                    
+                    approveTradeMutation.mutate({
+                      tradeId: selectedTrade.id,
+                      approval: tradeAction.approval,
+                      rejectionReason: tradeAction.approval === 'rejected' ? tradeAction.rejectionReason : undefined,
+                      profitLoss: profitLossValue,
+                      notes: tradeAction.notes || undefined
+                    });
+                    
+                    setShowTradeModal(false);
+                    setSelectedTrade(null);
+                    setTradeAction({
+                      approval: 'approved',
+                      profitLoss: '',
+                      rejectionReason: '',
+                      notes: ''
+                    });
+                  }}
+                  disabled={
+                    approveTradeMutation.isPending || 
+                    (tradeAction.approval === 'rejected' && !tradeAction.rejectionReason.trim())
+                  }
+                  className={tradeAction.approval === 'approved' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+                >
+                  {approveTradeMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {tradeAction.approval === 'approved' ? (
+                        <>
+                          <Check className="h-4 w-4 mr-1" />
+                          Approve Trade
+                        </>
+                      ) : (
+                        <>
+                          <X className="h-4 w-4 mr-1" />
+                          Reject Trade
+                        </>
+                      )}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
