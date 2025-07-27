@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, Search } from "lucide-react";
 
 interface Trade {
   id: string;
@@ -153,6 +153,7 @@ export default function TradingPage() {
   const [quantity, setQuantity] = useState("");
   const [limitPrice, setLimitPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const { data: trades = [], isLoading: tradesLoading } = useQuery<Trade[]>({
     queryKey: ['/api/trades'],
@@ -224,6 +225,12 @@ export default function TradingPage() {
 
   // Markets Page
   if (activeTab === 'markets') {
+    // Filter market data based on search query
+    const filteredMarketData = mockMarketData.filter((data) => 
+      data.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      data.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
@@ -232,10 +239,48 @@ export default function TradingPage() {
             <p className="text-gray-600">Live market data and prices</p>
           </div>
           
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search assets (AAPL, Bitcoin, etc.)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full"
+              />
+            </div>
+            {searchQuery && (
+              <p className="text-sm text-gray-500 mt-2">
+                Found {filteredMarketData.length} asset{filteredMarketData.length !== 1 ? 's' : ''} matching "{searchQuery}"
+              </p>
+            )}
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {mockMarketData.map((data) => (
-              <MarketDataCard key={data.symbol} data={data} />
-            ))}
+            {filteredMarketData.length > 0 ? (
+              filteredMarketData.map((data) => (
+                <MarketDataCard key={data.symbol} data={data} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Search className="h-12 w-12 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No assets found</h3>
+                  <p className="text-gray-500">
+                    No assets match your search for "{searchQuery}". Try a different search term.
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSearchQuery("")}
+                  className="mt-4"
+                >
+                  Clear Search
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
