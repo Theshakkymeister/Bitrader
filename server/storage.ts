@@ -36,6 +36,7 @@ import {
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import session from "express-session";
+import type { SessionOptions, Store } from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
@@ -44,7 +45,7 @@ const PostgresStore = connectPg(session);
 // Interface for all storage operations
 export interface IStorage {
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: Store;
   
   // User operations
   getUser(id: string): Promise<User | undefined>;
@@ -58,6 +59,10 @@ export interface IStorage {
   getUsersRegisteredToday(): Promise<number>;
   getUsersActiveToday(): Promise<number>;
   updateUserLastLogin(id: string, ipAddress: string): Promise<User>;
+  getUserDetails(id: string): Promise<any>;
+  updateUserStatus(id: string, isActive: boolean): Promise<User>;
+  adjustUserBalance(id: string, amount: number, type: 'add' | 'remove'): Promise<any>;
+  approveUserTrades(userId: string, tradeIds: string[]): Promise<any>;
   
   // Portfolio operations
   getPortfolio(userId: string): Promise<Portfolio | undefined>;
@@ -116,7 +121,7 @@ export interface IStorage {
 
 
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: Store;
   
   constructor() {
     this.sessionStore = new PostgresStore({
@@ -402,6 +407,86 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
+  // User management methods for admin
+  async getUserDetails(id: string): Promise<any> {
+    // Get user info
+    const user = await this.getUser(id);
+    if (!user) return null;
+
+    // Get portfolio info
+    const portfolio = await this.getPortfolio(id);
+    
+    // Get trades
+    const userTrades = await this.getTrades(id);
+    
+    // Get wallet balances
+    const walletBalances = await this.getUserWallets(id);
+    
+    return {
+      ...user,
+      portfolio,
+      trades: userTrades,
+      walletBalances
+    };
+  }
+
+  async updateUserStatus(id: string, isActive: boolean): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ isActive, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  async adjustUserBalance(id: string, amount: number, type: 'add' | 'remove'): Promise<any> {
+    // Get user's portfolio
+    const portfolio = await this.getPortfolio(id);
+    if (!portfolio) {
+      // Create portfolio if it doesn't exist
+      await this.createPortfolio({
+        userId: id,
+        totalBalance: type === 'add' ? amount.toString() : '0',
+        todayPL: '0',
+        winRate: '0',
+        activeAlgorithms: 0
+      });
+      return { success: true, newBalance: type === 'add' ? amount : 0 };
+    }
+
+    const adjustment = type === 'add' ? amount : -amount;
+    const currentBalance = parseFloat(portfolio.totalBalance || '0');
+    const newBalance = Math.max(0, currentBalance + adjustment);
+    
+    const updatedPortfolio = await this.updatePortfolio(id, {
+      totalBalance: newBalance.toString()
+    });
+
+    return { success: true, newBalance: parseFloat(updatedPortfolio.totalBalance || '0') };
+  }
+
+  async approveUserTrades(userId: string, tradeIds: string[]): Promise<any> {
+    const approvedTrades = [];
+    
+    for (const tradeId of tradeIds) {
+      const [updatedTrade] = await db
+        .update(trades)
+        .set({ 
+          adminApproval: 'approved',
+          status: 'executed',
+          updatedAt: new Date()
+        })
+        .where(and(eq(trades.id, tradeId), eq(trades.userId, userId)))
+        .returning();
+      
+      if (updatedTrade) {
+        approvedTrades.push(updatedTrade);
+      }
+    }
+
+    return { approvedCount: approvedTrades.length, trades: approvedTrades };
+  }
+
   // Trading methods
   async createTrade(trade: any): Promise<any> {
     const [newTrade] = await db.insert(trades).values(trade).returning();
@@ -418,7 +503,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateTrade(id: string, updates: any): Promise<any> {
     const [updated] = await db.update(trades)
-      .set(updates)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(trades.id, id))
       .returning();
     return updated;

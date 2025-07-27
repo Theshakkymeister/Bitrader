@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -30,7 +32,15 @@ import {
   TrendingUp,
   Globe,
   Server,
-  Monitor
+  Monitor,
+  DollarSign,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  History,
+  Ban,
+  UserCheck,
+  X
 } from "lucide-react";
 
 interface AdminUser {
@@ -75,6 +85,22 @@ interface User {
   updatedAt: string;
 }
 
+interface UserDetails extends User {
+  portfolio?: {
+    id: string;
+    totalValue: number;
+    buyingPower: number;
+    totalProfitLoss: number;
+    totalGainLossPercentage: number;
+  };
+  trades?: any[];
+  walletBalances?: {
+    currency: string;
+    balance: number;
+    usdValue: number;
+  }[];
+}
+
 interface AdminStats {
   totalUsers: number;
   usersRegisteredToday: number;
@@ -97,6 +123,9 @@ export default function AdminDashboard() {
   const [showAddresses, setShowAddresses] = useState<{[key: string]: boolean}>({});
   const [newAddress, setNewAddress] = useState({ symbol: '', name: '', address: '', network: '' });
   const [newSetting, setNewSetting] = useState({ key: '', value: '', description: '' });
+  const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [balanceAction, setBalanceAction] = useState<{type: 'add' | 'remove', amount: string}>({type: 'add', amount: ''});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -126,6 +155,71 @@ export default function AdminDashboard() {
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
     enabled: activeSection === 'users',
+  });
+
+  // Get detailed user data when modal is open
+  const { data: userDetails, isLoading: userDetailsLoading } = useQuery<UserDetails>({
+    queryKey: ["/api/admin/users", selectedUser?.id, "details"],
+    enabled: !!selectedUser?.id && showUserModal,
+  });
+
+  // User management mutations
+  const toggleUserStatusMutation = useMutation({
+    mutationFn: async ({ userId, isActive }: { userId: string, isActive: boolean }) => {
+      const response = await fetch(`/api/admin/users/${userId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive })
+      });
+      if (!response.ok) throw new Error("Failed to update user status");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "User status updated successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to update user status", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const adjustBalanceMutation = useMutation({
+    mutationFn: async ({ userId, amount, type }: { userId: string, amount: number, type: 'add' | 'remove' }) => {
+      const response = await fetch(`/api/admin/users/${userId}/balance`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, type })
+      });
+      if (!response.ok) throw new Error("Failed to adjust balance");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setBalanceAction({ type: 'add', amount: '' });
+      toast({ title: "Balance adjusted successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to adjust balance", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const approveTradesMutation = useMutation({
+    mutationFn: async ({ userId, tradeIds }: { userId: string, tradeIds: string[] }) => {
+      const response = await fetch(`/api/admin/users/${userId}/trades/approve`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tradeIds })
+      });
+      if (!response.ok) throw new Error("Failed to approve trades");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "Trades approved successfully" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to approve trades", description: error.message, variant: "destructive" });
+    }
   });
 
   // Admin logout
@@ -561,15 +655,52 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="text-right flex items-center space-x-3">
-                    <div>
-                      <p className="text-sm text-gray-900">
-                        Joined {new Date(user.createdAt).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {user.lastLoginAt 
-                          ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}` 
-                          : 'Never logged in'}
-                      </p>
+                    <div className="flex flex-col space-y-2">
+                      <div>
+                        <p className="text-sm text-gray-900">
+                          Joined {new Date(user.createdAt).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {user.lastLoginAt 
+                            ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString()}` 
+                            : 'Never logged in'}
+                        </p>
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowUserModal(true);
+                          }}
+                          className="px-2 py-1 text-xs"
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={user.isActive ? "destructive" : "default"}
+                          onClick={() => toggleUserStatusMutation.mutate({ 
+                            userId: user.id, 
+                            isActive: !user.isActive 
+                          })}
+                          className="px-2 py-1 text-xs"
+                        >
+                          {user.isActive ? (
+                            <>
+                              <Ban className="h-3 w-3 mr-1" />
+                              Suspend
+                            </>
+                          ) : (
+                            <>
+                              <UserCheck className="h-3 w-3 mr-1" />
+                              Activate
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                     <div className={`w-3 h-3 rounded-full ${user.isActive ? 'bg-green-500' : 'bg-red-500'}`}></div>
                   </div>
@@ -580,6 +711,311 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
     </motion.div>
+  );
+
+  // User Details Modal Component
+  const renderUserDetailsModal = () => (
+    <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <Users className="h-5 w-5 text-blue-600" />
+            <span>User Account Management</span>
+            {selectedUser && (
+              <Badge variant={selectedUser.isActive ? "default" : "destructive"}>
+                {selectedUser.isActive ? "Active" : "Suspended"}
+              </Badge>
+            )}
+          </DialogTitle>
+        </DialogHeader>
+
+        {selectedUser && (
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+              <TabsTrigger value="trades">Trades</TabsTrigger>
+              <TabsTrigger value="deposits">Deposits</TabsTrigger>
+              <TabsTrigger value="actions">Actions</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <UserCheck className="h-4 w-4" />
+                    <span>User Information</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Name</Label>
+                    <p className="text-sm">
+                      {selectedUser.firstName && selectedUser.lastName 
+                        ? `${selectedUser.firstName} ${selectedUser.lastName}` 
+                        : selectedUser.username}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Email</Label>
+                    <p className="text-sm">{selectedUser.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Username</Label>
+                    <p className="text-sm">{selectedUser.username}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Status</Label>
+                    <Badge variant={selectedUser.isActive ? "default" : "destructive"}>
+                      {selectedUser.isActive ? "Active" : "Suspended"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Registration IP</Label>
+                    <p className="text-sm">{selectedUser.registrationIp || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Last Login IP</Label>
+                    <p className="text-sm">{selectedUser.lastLoginIp || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Joined</Label>
+                    <p className="text-sm">{new Date(selectedUser.createdAt).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Last Login</Label>
+                    <p className="text-sm">
+                      {selectedUser.lastLoginAt 
+                        ? new Date(selectedUser.lastLoginAt).toLocaleString() 
+                        : 'Never logged in'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="portfolio" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Portfolio Overview</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {userDetailsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                    </div>
+                  ) : userDetails?.portfolio ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Total Value</Label>
+                        <p className="text-lg font-semibold">${userDetails.portfolio.totalValue.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Buying Power</Label>
+                        <p className="text-lg font-semibold text-green-600">${userDetails.portfolio.buyingPower.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">P&L</Label>
+                        <p className={`text-lg font-semibold ${userDetails.portfolio.totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          ${userDetails.portfolio.totalProfitLoss.toFixed(2)} ({userDetails.portfolio.totalGainLossPercentage.toFixed(2)}%)
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No portfolio data available</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {userDetails?.walletBalances && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Wallet Balances</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {userDetails.walletBalances.map((balance, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <span className="font-medium">{balance.currency}</span>
+                          <div className="text-right">
+                            <p className="font-semibold">{balance.balance.toFixed(8)}</p>
+                            <p className="text-sm text-gray-500">${balance.usdValue.toFixed(2)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="trades" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <History className="h-4 w-4" />
+                      <span>Trading History</span>
+                    </div>
+                    <Button 
+                      onClick={() => approveTradesMutation.mutate({ 
+                        userId: selectedUser.id, 
+                        tradeIds: userDetails?.trades?.filter(t => t.adminApproval === 'pending').map(t => t.id) || []
+                      })}
+                      disabled={!userDetails?.trades?.some(t => t.adminApproval === 'pending')}
+                      size="sm"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Approve All Pending
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {userDetailsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                    </div>
+                  ) : userDetails?.trades?.length ? (
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {userDetails.trades.map((trade, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="font-medium">{trade.symbol}</p>
+                            <p className="text-sm text-gray-500">{trade.type} • {trade.quantity} shares</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">${trade.price.toFixed(2)}</p>
+                            <Badge variant={
+                              trade.adminApproval === 'approved' ? 'default' : 
+                              trade.adminApproval === 'pending' ? 'secondary' : 'destructive'
+                            }>
+                              {trade.adminApproval}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No trades found</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="deposits" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Deposit History</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-500">Deposit history will be displayed here when available</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="actions" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Settings className="h-4 w-4" />
+                    <span>Account Actions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Adjust Balance</Label>
+                      <div className="flex space-x-2">
+                        <Input
+                          type="number"
+                          placeholder="Amount"
+                          value={balanceAction.amount}
+                          onChange={(e) => setBalanceAction({...balanceAction, amount: e.target.value})}
+                          className="flex-1"
+                        />
+                        <Button
+                          variant={balanceAction.type === 'add' ? 'default' : 'outline'}
+                          onClick={() => setBalanceAction({...balanceAction, type: 'add'})}
+                          size="sm"
+                        >
+                          Add
+                        </Button>
+                        <Button
+                          variant={balanceAction.type === 'remove' ? 'default' : 'outline'}
+                          onClick={() => setBalanceAction({...balanceAction, type: 'remove'})}
+                          size="sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                      <Button
+                        onClick={() => adjustBalanceMutation.mutate({
+                          userId: selectedUser.id,
+                          amount: parseFloat(balanceAction.amount),
+                          type: balanceAction.type
+                        })}
+                        disabled={!balanceAction.amount || isNaN(parseFloat(balanceAction.amount))}
+                        className="w-full"
+                      >
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        {balanceAction.type === 'add' ? 'Add' : 'Remove'} ${balanceAction.amount || '0'}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Account Status</Label>
+                      <Button
+                        variant={selectedUser.isActive ? "destructive" : "default"}
+                        onClick={() => toggleUserStatusMutation.mutate({ 
+                          userId: selectedUser.id, 
+                          isActive: !selectedUser.isActive 
+                        })}
+                        className="w-full"
+                      >
+                        {selectedUser.isActive ? (
+                          <>
+                            <Ban className="h-4 w-4 mr-1" />
+                            Suspend Account
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-1" />
+                            Activate Account
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Verify Account
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <History className="h-4 w-4 mr-1" />
+                      View Full History
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Eye className="h-4 w-4 mr-1" />
+                      Activity Log
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 
   const renderAnalytics = () => (
@@ -1065,6 +1501,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      {renderUserDetailsModal()}
     </div>
   );
 }

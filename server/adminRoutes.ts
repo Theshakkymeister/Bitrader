@@ -308,6 +308,100 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Get detailed user information
+  app.get('/api/admin/users/:userId/details', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const userDetails = await storage.getUserDetails(userId);
+      
+      if (!userDetails) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(userDetails);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      res.status(500).json({ message: "Failed to fetch user details" });
+    }
+  });
+
+  // Update user status (activate/suspend)
+  app.patch('/api/admin/users/:userId/status', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { isActive } = req.body;
+      const adminId = req.adminUser.id;
+      
+      const updatedUser = await storage.updateUserStatus(userId, isActive);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Log admin action
+      await logAdminActivity(adminId, isActive ? 'ACTIVATE_USER' : 'SUSPEND_USER', 'USER', userId, {
+        newStatus: isActive ? 'active' : 'suspended'
+      }, req);
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
+  // Adjust user balance
+  app.patch('/api/admin/users/:userId/balance', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { amount, type } = req.body;
+      const adminId = req.adminUser.id;
+      
+      if (!amount || !type || !['add', 'remove'].includes(type)) {
+        return res.status(400).json({ message: "Invalid amount or type" });
+      }
+      
+      const updatedBalance = await storage.adjustUserBalance(userId, amount, type);
+      
+      // Log admin action
+      await logAdminActivity(adminId, `BALANCE_${type.toUpperCase()}`, 'USER', userId, {
+        amount,
+        action: type
+      }, req);
+      
+      res.json(updatedBalance);
+    } catch (error) {
+      console.error("Error adjusting user balance:", error);
+      res.status(500).json({ message: "Failed to adjust user balance" });
+    }
+  });
+
+  // Approve user trades
+  app.patch('/api/admin/users/:userId/trades/approve', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { tradeIds } = req.body;
+      const adminId = req.adminUser.id;
+      
+      if (!tradeIds || !Array.isArray(tradeIds)) {
+        return res.status(400).json({ message: "Invalid trade IDs" });
+      }
+      
+      const approvedTrades = await storage.approveUserTrades(userId, tradeIds);
+      
+      // Log admin action
+      await logAdminActivity(adminId, 'APPROVE_TRADES', 'USER', userId, {
+        tradeCount: tradeIds.length,
+        tradeIds
+      }, req);
+      
+      res.json(approvedTrades);
+    } catch (error) {
+      console.error("Error approving trades:", error);
+      res.status(500).json({ message: "Failed to approve trades" });
+    }
+  });
+
   // Algorithm Management
   app.get('/api/admin/algorithms', isAdminAuthenticated, async (req, res) => {
     try {
