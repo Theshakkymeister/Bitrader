@@ -274,7 +274,7 @@ export default function Dashboard() {
             <Button
               size="sm"
               onClick={() => setShowBalance(!showBalance)}
-              className="flex items-center space-x-2 h-8 bg-gray-600 hover:bg-gray-700 text-white"
+              className="flex items-center space-x-2 h-8 bg-blue-600 hover:bg-blue-700 text-white shadow-md border-2 border-blue-500"
             >
               {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               <span className="hidden sm:inline">{showBalance ? 'Hide' : 'Show'}</span>
