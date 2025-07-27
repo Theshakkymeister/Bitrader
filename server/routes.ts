@@ -369,8 +369,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/trades', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const validatedData = insertTradeSchema.parse({ ...req.body, userId });
-      const trade = await storage.createTrade(validatedData);
+      
+      // Extract only the fields that exist in the database schema
+      const tradeData = {
+        userId,
+        symbol: req.body.symbol,
+        assetType: req.body.assetType || 'stock',
+        type: req.body.type,
+        orderType: req.body.orderType || 'market',
+        quantity: req.body.quantity,
+        price: req.body.price,
+        limitPrice: req.body.limitPrice || null,
+        stopPrice: req.body.stopPrice || null,
+        totalAmount: req.body.totalAmount,
+        status: req.body.status || 'pending_approval',
+        adminApproval: req.body.adminApproval || 'pending',
+        isOpen: true
+      };
+      
+      const trade = await storage.createTrade(tradeData);
       res.json(trade);
     } catch (error) {
       console.error("Error creating trade:", error);

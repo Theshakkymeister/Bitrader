@@ -32,9 +32,9 @@ export default function TradingPage() {
   });
 
   // Calculate buying power from wallet balances (same as dashboard)
-  const buyingPower = wallets.reduce((sum, wallet) => {
+  const buyingPower = Array.isArray(wallets) ? wallets.reduce((sum: number, wallet: any) => {
     return sum + parseFloat(wallet.usdValue || '0');
-  }, 0);
+  }, 0) : 0;
 
   const tradeMutation = useMutation({
     mutationFn: async (tradeData: any) => {
@@ -81,15 +81,15 @@ export default function TradingPage() {
 
     const tradeData = {
       symbol: symbol.toUpperCase(),
-      assetType,
+      assetType: assetType,
       type: tradeType,
       orderType,
       quantity,
       price: currentPrice.toFixed(2),
-      limitPrice: orderType === "limit" ? limitPrice : undefined,
-      stopPrice: orderType === "stop" ? stopPrice : undefined,
+      limitPrice: orderType === "limit" ? limitPrice : null,
+      stopPrice: orderType === "stop" ? stopPrice : null,
       totalAmount,
-      status: "pending",
+      status: "pending_approval",
       adminApproval: "pending"
     };
 
