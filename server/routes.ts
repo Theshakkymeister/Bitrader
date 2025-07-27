@@ -373,6 +373,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Close a trade position and realize profits/losses
+  app.patch('/api/trades/:tradeId/close', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tradeId } = req.params;
+      const userId = req.user.id;
+      
+      // Verify the trade belongs to the user
+      const trade = await storage.getTradeById(tradeId);
+      if (!trade || trade.userId !== userId) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+      
+      if (!trade.isOpen) {
+        return res.status(400).json({ message: "Trade is already closed" });
+      }
+      
+      if (trade.adminApproval !== 'approved') {
+        return res.status(400).json({ message: "Trade must be approved before closing" });
+      }
+      
+      // Close the trade and realize profits/losses
+      const closedTrade = await storage.closeTrade(tradeId);
+      
+      // Update user portfolio balance with realized profits
+      if (closedTrade.profitLoss) {
+        await storage.updatePortfolioBalance(userId, parseFloat(closedTrade.profitLoss));
+      }
+      
+      res.json(closedTrade);
+    } catch (error) {
+      console.error("Error closing trade:", error);
+      res.status(500).json({ message: "Failed to close trade" });
+    }
+  });
+
+  // Update trade current price for P&L calculation
+  app.patch('/api/trades/:tradeId/price', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tradeId } = req.params;
+      const { currentPrice } = req.body;
+      const userId = req.user.id;
+      
+      // Verify the trade belongs to the user
+      const trade = await storage.getTradeById(tradeId);
+      if (!trade || trade.userId !== userId) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+      
+      if (!trade.isOpen || trade.adminApproval !== 'approved') {
+        return res.status(400).json({ message: "Can only update price for open approved trades" });
+      }
+      
+      // Update current price and calculate P&L
+      const updatedTrade = await storage.updateTradePrice(tradeId, currentPrice);
+      
+      res.json(updatedTrade);
+    } catch (error) {
+      console.error("Error updating trade price:", error);
+      res.status(500).json({ message: "Failed to update trade price" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

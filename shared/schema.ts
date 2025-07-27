@@ -83,13 +83,17 @@ export const trades = pgTable("trades", {
   limitPrice: decimal("limit_price", { precision: 18, scale: 8 }), // For limit orders
   stopPrice: decimal("stop_price", { precision: 18, scale: 8 }), // For stop orders
   totalAmount: decimal("total_amount", { precision: 18, scale: 8 }).notNull(),
-  status: varchar("status").notNull().default("pending_approval"), // "pending_approval" | "approved" | "rejected" | "executed" | "cancelled"
+  currentPrice: decimal("current_price", { precision: 18, scale: 8 }), // Current market price for P&L calculation
+  currentValue: decimal("current_value", { precision: 18, scale: 8 }), // Current position value
+  profitLossPercentage: decimal("profit_loss_percentage", { precision: 5, scale: 2 }), // P&L %
+  status: varchar("status").notNull().default("pending_approval"), // "pending_approval" | "approved" | "rejected" | "executed" | "cancelled" | "closed"
   adminApproval: varchar("admin_approval").default("pending"), // "pending" | "approved" | "rejected"
   approvedBy: varchar("approved_by").references(() => adminUsers.id),
   approvedAt: timestamp("approved_at"),
   rejectionReason: text("rejection_reason"),
   executedAt: timestamp("executed_at"),
   expiresAt: timestamp("expires_at"), // For limit orders
+  isOpen: boolean("is_open").default(true), // Track if position is open or closed
   // Legacy fields for compatibility - all nullable
   pair: varchar("pair"), // For backward compatibility
   entryPrice: decimal("entry_price", { precision: 15, scale: 5 }), // nullable

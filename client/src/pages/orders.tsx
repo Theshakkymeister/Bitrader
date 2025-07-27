@@ -10,6 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle, Search, Calendar, DollarSign, Hash, Activity, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface Trade {
   id: string;
@@ -19,12 +22,19 @@ interface Trade {
   orderType: "market" | "limit" | "stop";
   quantity: string;
   price: string;
+  currentPrice?: string;
   limitPrice?: string;
   stopPrice?: string;
   totalAmount: string;
+  currentValue?: string;
+  profitLoss?: string;
+  profitLossPercentage?: string;
   status: string;
   adminApproval: string;
+  isOpen?: boolean;
   createdAt: string;
+  executedAt?: string;
+  closedAt?: string;
   expiresAt?: string;
 }
 
@@ -33,6 +43,8 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [showTradeModal, setShowTradeModal] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: trades = [], isLoading: tradesLoading, error: tradesError } = useQuery<Trade[]>({
     queryKey: ['/api/trades'],
@@ -90,6 +102,33 @@ export default function OrdersPage() {
   const closeTradeModal = () => {
     setShowTradeModal(false);
     setSelectedTrade(null);
+  };
+
+  // Close trade mutation
+  const closePositionMutation = useMutation({
+    mutationFn: async (tradeId: string) => {
+      const response = await apiRequest("PATCH", `/api/trades/${tradeId}/close`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/portfolio'] });
+      toast({
+        title: "Position Closed",
+        description: "Your position has been successfully closed and profits/losses realized.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Close Position",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleCloseTrade = (tradeId: string) => {
+    closePositionMutation.mutate(tradeId);
   };
 
   return (
@@ -285,20 +324,20 @@ export default function OrdersPage() {
                               </div>
                               
                               <div>
-                                <div className="text-xs text-gray-500 uppercase font-medium">Price</div>
+                                <div className="text-xs text-gray-500 uppercase font-medium">Entry Price</div>
                                 <div className="text-sm font-semibold text-gray-900">
                                   ${parseFloat(trade.price) > 0 ? parseFloat(trade.price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}) : '0.00'}
                                 </div>
                               </div>
                               
-                              <div>
-                                <div className="text-xs text-gray-500 uppercase font-medium">Order Type</div>
-                                <div className="text-sm font-semibold text-gray-900 capitalize">
-                                  {trade.orderType}
-                                  {trade.limitPrice && ` @ $${parseFloat(trade.limitPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}`}
-                                  {trade.stopPrice && ` Stop $${parseFloat(trade.stopPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}`}
+                              {trade.currentPrice && trade.adminApproval === 'approved' && trade.isOpen && (
+                                <div>
+                                  <div className="text-xs text-gray-500 uppercase font-medium">Current Price</div>
+                                  <div className="text-sm font-semibold text-gray-900">
+                                    ${parseFloat(trade.currentPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}
+                                  </div>
                                 </div>
-                              </div>
+                              )}
                               
                               <div>
                                 <div className="text-xs text-gray-500 uppercase font-medium">Total Value</div>
@@ -307,6 +346,89 @@ export default function OrdersPage() {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Profit/Loss Section for open approved trades */}
+                            {trade.adminApproval === 'approved' && trade.isOpen && trade.profitLoss && (
+                              <div className="mt-4 p-3 rounded-lg bg-gray-50 border">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-4">
+                                    <div>
+                                      <div className="text-xs text-gray-500 uppercase font-medium">Unrealized P&L</div>
+                                      <div className={`text-lg font-bold ${
+                                        parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'
+                                      }`}>
+                                        {parseFloat(trade.profitLoss) >= 0 ? '+' : ''}${parseFloat(trade.profitLoss).toFixed(2)}
+                                      </div>
+                                    </div>
+                                    
+                                    {trade.profitLossPercentage && (
+                                      <div>
+                                        <div className="text-xs text-gray-500 uppercase font-medium">Return</div>
+                                        <div className={`text-lg font-bold ${
+                                          parseFloat(trade.profitLossPercentage) >= 0 ? 'text-green-600' : 'text-red-600'
+                                        }`}>
+                                          {parseFloat(trade.profitLossPercentage) >= 0 ? '+' : ''}{parseFloat(trade.profitLossPercentage).toFixed(2)}%
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {trade.currentValue && (
+                                      <div>
+                                        <div className="text-xs text-gray-500 uppercase font-medium">Current Value</div>
+                                        <div className="text-lg font-bold text-gray-900">
+                                          ${parseFloat(trade.currentValue).toFixed(2)}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCloseTrade(trade.id);
+                                    }}
+                                  >
+                                    Close Position
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Closed trade P&L display */}
+                            {!trade.isOpen && trade.profitLoss && (
+                              <div className="mt-4 p-3 rounded-lg bg-gray-100 border">
+                                <div className="flex items-center space-x-4">
+                                  <div>
+                                    <div className="text-xs text-gray-500 uppercase font-medium">Realized P&L</div>
+                                    <div className={`text-lg font-bold ${
+                                      parseFloat(trade.profitLoss) >= 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {parseFloat(trade.profitLoss) >= 0 ? '+' : ''}${parseFloat(trade.profitLoss).toFixed(2)}
+                                    </div>
+                                  </div>
+                                  
+                                  {trade.profitLossPercentage && (
+                                    <div>
+                                      <div className="text-xs text-gray-500 uppercase font-medium">Return</div>
+                                      <div className={`text-lg font-bold ${
+                                        parseFloat(trade.profitLossPercentage) >= 0 ? 'text-green-600' : 'text-red-600'
+                                      }`}>
+                                        {parseFloat(trade.profitLossPercentage) >= 0 ? '+' : ''}{parseFloat(trade.profitLossPercentage).toFixed(2)}%
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  <div>
+                                    <div className="text-xs text-gray-500 uppercase font-medium">Closed</div>
+                                    <div className="text-sm text-gray-600">
+                                      {trade.closedAt ? new Date(trade.closedAt).toLocaleDateString() : 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
 
                             {/* Timestamp and Additional Info */}
                             <div className="flex items-center justify-between pt-2 border-t border-gray-100">

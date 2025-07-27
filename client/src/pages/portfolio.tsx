@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,11 +21,16 @@ import {
   ChevronUp,
   Globe,
   Shield,
-  Zap
+  Zap,
+  DollarSign,
+  Clock,
+  Activity
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SiApple, SiBitcoin, SiTesla, SiGoogle, SiEthereum } from "react-icons/si";
 import { allAssets } from "@/lib/marketData";
+import { motion } from "framer-motion";
 
 interface Holding {
   symbol: string;
@@ -43,9 +50,23 @@ export default function Portfolio() {
   const [, setLocation] = useLocation();
   const [showValues, setShowValues] = useState(true);
   const [timeframe, setTimeframe] = useState("1d");
-  const [portfolioValue, setPortfolioValue] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedHoldings, setExpandedHoldings] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+
+  // Get real-time portfolio data
+  const { data: portfolio } = useQuery({
+    queryKey: ['/api/portfolio'],
+    enabled: !!user,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
+  // Get user's active trades with profit tracking
+  const { data: trades = [] } = useQuery({
+    queryKey: ['/api/trades'],
+    enabled: !!user,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
 
   // Get current prices from market data
   const getAssetPrice = (symbol: string) => {
@@ -53,42 +74,53 @@ export default function Portfolio() {
     return asset ? asset.price : 0;
   };
 
-  // Holdings data - Empty until user makes actual purchases
-  const holdings: Holding[] = [];
+  // Convert trades to holdings format for display
+  const activePositions = trades
+    .filter((trade: any) => trade.adminApproval === 'approved' && trade.isOpen)
+    .map((trade: any) => ({
+      id: trade.id,
+      symbol: trade.symbol,
+      name: `${trade.symbol} Position`,
+      shares: parseFloat(trade.quantity),
+      avgPrice: parseFloat(trade.price),
+      currentPrice: parseFloat(trade.currentPrice || trade.price),
+      value: parseFloat(trade.currentValue || trade.totalAmount),
+      change: parseFloat(trade.profitLoss || '0'),
+      changePercent: parseFloat(trade.profitLossPercentage || '0'),
+      type: trade.assetType,
+      tradeType: trade.type,
+      entryDate: trade.executedAt || trade.createdAt,
+      status: trade.status
+    }));
+
+  const portfolioValue = portfolio?.totalBalance ? parseFloat(portfolio.totalBalance) : 0;
+  const totalUnrealizedPL = activePositions.reduce((sum, pos) => sum + pos.change, 0);
   
   // Check if user has any actual holdings
-  const hasHoldings = holdings.length > 0;
+  const hasHoldings = activePositions.length > 0;
 
-  const stockHoldings = holdings.filter(h => h.type === 'stock');
-  const cryptoHoldings = holdings.filter(h => h.type === 'crypto');
+  const stockPositions = activePositions.filter(p => p.type === 'stock');
+  const cryptoPositions = activePositions.filter(p => p.type === 'crypto');
   
-  // Filter holdings based on search query
-  const filterHoldings = (holdingsArray: Holding[]) => {
-    if (!searchQuery.trim()) return holdingsArray;
-    return holdingsArray.filter(holding => 
-      holding.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      holding.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter positions based on search query
+  const filterPositions = (positionsArray: any[]) => {
+    if (!searchQuery.trim()) return positionsArray;
+    return positionsArray.filter(position => 
+      position.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      position.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
   
-  const filteredHoldings = filterHoldings(holdings);
-  const filteredStockHoldings = filterHoldings(stockHoldings);
-  const filteredCryptoHoldings = filterHoldings(cryptoHoldings);
+  const filteredPositions = filterPositions(activePositions);
+  const filteredStockPositions = filterPositions(stockPositions);
+  const filteredCryptoPositions = filterPositions(cryptoPositions);
   
-  const totalStockValue = stockHoldings.reduce((sum, h) => sum + h.value, 0);
-  const totalCryptoValue = cryptoHoldings.reduce((sum, h) => sum + h.value, 0);
-  const totalPortfolioValue = totalStockValue + totalCryptoValue;
+  const totalStockValue = filteredStockPositions.reduce((sum, p) => sum + p.value, 0);
+  const totalCryptoValue = filteredCryptoPositions.reduce((sum, p) => sum + p.value, 0);
+  const totalPositionsValue = totalStockValue + totalCryptoValue;
   
-  const totalGainLoss = holdings.reduce((sum, h) => sum + (h.change * h.shares), 0);
-  const totalGainLossPercent = totalPortfolioValue > 0 ? (totalGainLoss / (totalPortfolioValue - totalGainLoss)) * 100 : 0;
-
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPortfolioValue(totalPortfolioValue);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [totalPortfolioValue]);
+  const totalGainLoss = totalUnrealizedPL;
+  const totalGainLossPercent = totalPositionsValue > 0 ? (totalGainLoss / totalPositionsValue) * 100 : 0;
 
   const formatCurrency = (value: number) => {
     return showValues ? `$${value.toLocaleString('en-US', {minimumFractionDigits: 2})}` : "••••••••";
@@ -135,10 +167,10 @@ export default function Portfolio() {
             <CardTitle className="text-sm font-medium text-gray-600">Total Portfolio Value</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalPortfolioValue)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(portfolioValue)}</div>
             <div className={`flex items-center text-sm mt-1 ${totalGainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {totalGainLoss >= 0 ? <ArrowUpRight className="h-4 w-4 mr-1" /> : <ArrowDownRight className="h-4 w-4 mr-1" />}
-              {showValues ? `${totalGainLoss >= 0 ? '+' : ''}${formatCurrency(totalGainLoss).replace('$', '$')} (${totalGainLossPercent.toFixed(2)}%)` : "••••••••"}
+              {showValues ? `${totalGainLoss >= 0 ? '+' : ''}$${Math.abs(totalGainLoss).toFixed(2)} (${totalGainLossPercent.toFixed(2)}%)` : "••••••••"}
             </div>
           </CardContent>
         </Card>
@@ -150,7 +182,7 @@ export default function Portfolio() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalStockValue)}</div>
             <div className="text-sm text-gray-500 mt-1">
-              {totalPortfolioValue > 0 ? ((totalStockValue / totalPortfolioValue) * 100).toFixed(1) : '0.0'}% of portfolio
+              {portfolioValue > 0 ? ((totalStockValue / portfolioValue) * 100).toFixed(1) : '0.0'}% of portfolio
             </div>
           </CardContent>
         </Card>
@@ -162,7 +194,7 @@ export default function Portfolio() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalCryptoValue)}</div>
             <div className="text-sm text-gray-500 mt-1">
-              {totalPortfolioValue > 0 ? ((totalCryptoValue / totalPortfolioValue) * 100).toFixed(1) : '0.0'}% of portfolio
+              {portfolioValue > 0 ? ((totalCryptoValue / portfolioValue) * 100).toFixed(1) : '0.0'}% of portfolio
             </div>
           </CardContent>
         </Card>
@@ -664,69 +696,64 @@ export default function Portfolio() {
         </Tabs>
       ) : (
         /* Empty State for No Holdings */
-        <div className="space-y-6">
-          <Card className="border-dashed border-2 border-gray-300">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-6"
+        >
+          <Card className="border-2 border-gray-200 shadow-lg">
             <CardContent className="p-12">
               <div className="text-center space-y-6">
-                <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
-                  <PieChart className="w-12 h-12 text-gray-400" />
-                </div>
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center"
+                >
+                  <PieChart className="w-12 h-12 text-blue-600" />
+                </motion.div>
                 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold text-gray-900">No Holdings Yet</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">No Active Positions</h3>
                   <p className="text-gray-600 max-w-md mx-auto">
-                    Your portfolio is empty. Start investing in stocks and cryptocurrencies to see your holdings here.
+                    Start trading stocks, crypto, and ETFs to build your portfolio and track your real-time performance here.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BarChart3 className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <h4 className="font-medium text-gray-900 mb-2">Trade Stocks</h4>
-                    <p className="text-sm text-gray-600">
-                      Invest in your favorite companies like Apple, Tesla, and Google
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
-                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <SiBitcoin className="w-6 h-6 text-orange-600" />
-                    </div>
-                    <h4 className="font-medium text-gray-900 mb-2">Buy Crypto</h4>
-                    <p className="text-sm text-gray-600">
-                      Trade Bitcoin, Ethereum, Solana and other cryptocurrencies
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <TrendingUp className="w-6 h-6 text-green-600" />
-                    </div>
-                    <h4 className="font-medium text-gray-900 mb-2">Track Growth</h4>
-                    <p className="text-sm text-gray-600">
-                      Monitor your investment performance and portfolio growth
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Button 
-                    onClick={() => setLocation("/trading")}
-                    className="w-full max-w-sm mx-auto bg-green-600 hover:bg-green-700 transition-all duration-200 hover:shadow-lg hover:scale-105"
+                <div className="space-y-4">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <ArrowUpRight className="w-4 h-4 mr-2" />
-                    Start Trading
-                  </Button>
-                  <p className="text-xs text-gray-500">
-                    All trades require admin approval before execution
-                  </p>
+                    <Button
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+                      onClick={() => setLocation("/trading")}
+                    >
+                      <Activity className="w-5 h-5 mr-2" />
+                      Start Trading
+                    </Button>
+                  </motion.div>
+                  
+                  <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                    <div className="flex items-center space-x-1">
+                      <Shield className="w-4 h-4" />
+                      <span>Secure</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Globe className="w-4 h-4" />
+                      <span>Live Markets</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <DollarSign className="w-4 h-4" />
+                      <span>Real-time P&L</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       )}
     </div>
   );

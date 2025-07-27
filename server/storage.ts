@@ -73,6 +73,12 @@ export interface IStorage {
   getActiveTradesCount(): Promise<number>;
   getPendingDepositsCount(): Promise<number>;
   
+  // Trade profit tracking methods
+  getTradeById(id: string): Promise<Trade | undefined>;
+  closeTrade(id: string): Promise<Trade>;
+  updateTradePrice(id: string, currentPrice: number): Promise<Trade>;
+  updatePortfolioBalance(userId: string, amount: number): Promise<Portfolio>;
+  
   // Portfolio operations
   getPortfolio(userId: string): Promise<Portfolio | undefined>;
   createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
@@ -204,6 +210,20 @@ export class DatabaseStorage implements IStorage {
     return updatedPortfolio;
   }
 
+  async updatePortfolioBalance(userId: string, amount: number): Promise<Portfolio> {
+    const portfolio = await this.getPortfolio(userId);
+    if (!portfolio) {
+      throw new Error('Portfolio not found');
+    }
+    
+    const currentBalance = parseFloat(portfolio.totalBalance?.toString() || '0');
+    const newBalance = currentBalance + amount;
+    
+    return await this.updatePortfolio(userId, {
+      totalBalance: newBalance.toString()
+    });
+  }
+
   // Algorithm operations
   async getAlgorithms(): Promise<Algorithm[]> {
     return await db.select().from(algorithms).where(eq(algorithms.active, true));
@@ -229,6 +249,11 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
+  async getTradeById(id: string): Promise<Trade | undefined> {
+    const [trade] = await db.select().from(trades).where(eq(trades.id, id));
+    return trade;
+  }
+
   async createTrade(trade: InsertTrade): Promise<Trade> {
     const [newTrade] = await db.insert(trades).values(trade).returning();
     return newTrade;
@@ -240,6 +265,56 @@ export class DatabaseStorage implements IStorage {
       .set(updates)
       .where(eq(trades.id, id))
       .returning();
+    return updatedTrade;
+  }
+
+  async closeTrade(id: string): Promise<Trade> {
+    const [closedTrade] = await db
+      .update(trades)
+      .set({
+        isOpen: false,
+        status: 'closed',
+        closedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(trades.id, id))
+      .returning();
+    return closedTrade;
+  }
+
+  async updateTradePrice(id: string, currentPrice: number): Promise<Trade> {
+    // Get the trade first to calculate P&L
+    const trade = await this.getTradeById(id);
+    if (!trade) {
+      throw new Error('Trade not found');
+    }
+
+    const entryPrice = parseFloat(trade.price.toString());
+    const quantity = parseFloat(trade.quantity.toString());
+    const currentValue = currentPrice * quantity;
+    
+    // Calculate profit/loss based on buy/sell type
+    let profitLoss = 0;
+    if (trade.type === 'buy') {
+      profitLoss = (currentPrice - entryPrice) * quantity;
+    } else {
+      profitLoss = (entryPrice - currentPrice) * quantity;
+    }
+    
+    const profitLossPercentage = entryPrice > 0 ? (profitLoss / (entryPrice * quantity)) * 100 : 0;
+
+    const [updatedTrade] = await db
+      .update(trades)
+      .set({
+        currentPrice: currentPrice.toString(),
+        currentValue: currentValue.toString(),
+        profitLoss: profitLoss.toString(),
+        profitLossPercentage: profitLossPercentage.toString(),
+        updatedAt: new Date()
+      })
+      .where(eq(trades.id, id))
+      .returning();
+    
     return updatedTrade;
   }
 
