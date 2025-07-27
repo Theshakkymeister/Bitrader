@@ -62,6 +62,8 @@ export const portfolios = pgTable("portfolios", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
   totalBalance: decimal("total_balance", { precision: 15, scale: 2 }).default('0'),
+  buyingPower: decimal("buying_power", { precision: 15, scale: 2 }).default('0'), // Available cash for trading
+  totalProfitLoss: decimal("total_profit_loss", { precision: 15, scale: 2 }).default('0'), // Overall P&L
   todayPL: decimal("today_pl", { precision: 15, scale: 2 }).default('0'),
   winRate: decimal("win_rate", { precision: 5, scale: 2 }).default('0'),
   activeAlgorithms: integer("active_algorithms").default(0),

@@ -1043,16 +1043,16 @@ User Activity Summary:
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Total Portfolio Value</Label>
                         <p className="text-lg font-semibold text-gray-900">
-                          ${typeof userDetails.portfolio.totalValue === 'number' ? userDetails.portfolio.totalValue.toFixed(2) : parseFloat(userDetails.portfolio.totalValue || '0').toFixed(2)}
+                          ${typeof userDetails.totalPortfolioValue === 'number' ? userDetails.totalPortfolioValue.toFixed(2) : parseFloat(userDetails.totalPortfolioValue || '0').toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-500">
                           Wallets + Stocks combined
                         </p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">Available Balance</Label>
+                        <Label className="text-sm font-medium text-gray-600">Buying Power</Label>
                         <p className="text-lg font-semibold text-green-600">
-                          ${typeof userDetails.portfolio.availableBalance === 'number' ? userDetails.portfolio.availableBalance.toFixed(2) : parseFloat(userDetails.portfolio.availableBalance || '0').toFixed(2)}
+                          ${typeof userDetails.portfolio.buyingPower === 'number' ? userDetails.portfolio.buyingPower.toFixed(2) : parseFloat(userDetails.portfolio.buyingPower || '0').toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-500">
                           Cash available for trading
@@ -1068,12 +1068,12 @@ User Activity Summary:
                         </p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">Total Balance</Label>
-                        <p className="text-lg font-semibold text-blue-600">
-                          ${typeof userDetails.portfolio.totalBalance === 'number' ? userDetails.portfolio.totalBalance.toFixed(2) : parseFloat(userDetails.portfolio.totalBalance || '0').toFixed(2)}
+                        <Label className="text-sm font-medium text-gray-600">Today's P&L</Label>
+                        <p className={`text-lg font-semibold ${(typeof userDetails.portfolio.todayPL === 'number' ? userDetails.portfolio.todayPL : parseFloat(userDetails.portfolio.todayPL || '0')) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          ${typeof userDetails.portfolio.todayPL === 'number' ? userDetails.portfolio.todayPL.toFixed(2) : parseFloat(userDetails.portfolio.todayPL || '0').toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Account total balance
+                          Today's profit/loss
                         </p>
                       </div>
                     </div>
