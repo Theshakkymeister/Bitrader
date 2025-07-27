@@ -133,9 +133,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Full-Width Portfolio Chart - Robinhood Style */}
-      <div className="h-64 bg-white relative overflow-hidden -mx-6">
-        <svg className="w-full h-full" viewBox="0 0 800 200" preserveAspectRatio="none">
+      {/* Portfolio Chart - Robinhood Style */}
+      <div className="h-48 bg-white relative overflow-hidden rounded-lg border border-gray-200 mx-2">
+        <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
           <defs>
             <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#059669" stopOpacity="0.08"/>
@@ -155,7 +155,7 @@ export default function Dashboard() {
             <>
               {/* Portfolio trend line with smooth curve */}
               <path 
-                d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65" 
+                d="M 20,120 C 80,110 120,100 200,95 S 320,85 400,80 S 480,75 560,70" 
                 stroke="#059669" 
                 strokeWidth="2" 
                 fill="none"
@@ -168,7 +168,7 @@ export default function Dashboard() {
               
               {/* Filled area under curve */}
               <path 
-                d="M 0,150 C 80,140 120,130 200,125 S 320,115 400,105 S 520,95 600,85 S 720,75 800,65 L 800,200 L 0,200 Z" 
+                d="M 20,120 C 80,110 120,100 200,95 S 320,85 400,80 S 480,75 560,70 L 560,160 L 20,160 Z" 
                 fill="url(#portfolioGradient)"
                 className="chart-fill"
                 style={{ opacity: 1 }}
@@ -176,28 +176,28 @@ export default function Dashboard() {
               
               {/* Live indicator */}
               <g className="live-dot" opacity="0.6">
-                <circle cx="800" cy="65" r="6" fill="#059669" opacity="0.1">
-                  <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite"/>
+                <circle cx="560" cy="70" r="4" fill="#059669" opacity="0.1">
+                  <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite"/>
                   <animate attributeName="opacity" values="0.1;0;0.1" dur="3s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="800" cy="65" r="2" fill="#059669" opacity="0.8">
+                <circle cx="560" cy="70" r="2" fill="#059669" opacity="0.8">
                   <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite"/>
                 </circle>
-                <circle cx="800" cy="65" r="1.5" fill="#ffffff"/>
+                <circle cx="560" cy="70" r="1.5" fill="#ffffff"/>
               </g>
             </>
           ) : (
             <>
               {/* Flat line for empty portfolio */}
               <path 
-                d="M 0,100 L 800,100" 
+                d="M 20,80 L 560,80" 
                 stroke="#9CA3AF" 
                 strokeWidth="2" 
                 fill="none"
                 opacity="0.5"
                 strokeDasharray="5,5"
               />
-              <text x="400" y="120" textAnchor="middle" className="fill-gray-400 text-sm">
+              <text x="300" y="100" textAnchor="middle" className="fill-gray-400 text-sm">
                 Portfolio chart will appear after your first deposit
               </text>
             </>
