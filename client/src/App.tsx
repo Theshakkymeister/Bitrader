@@ -22,6 +22,7 @@ import OrdersPage from "@/pages/orders";
 import SettingsPage from "@/pages/settings";
 import AdminLogin from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminSimple from "@/pages/admin-simple";
 import NotFound from "@/pages/not-found";
 
 function MobileNav() {
@@ -365,7 +366,8 @@ function Router() {
       {/* Admin routes - always accessible */}
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/simple" component={AdminSimple} />
+      <Route path="/admin" component={AdminSimple} />
 
       
       {/* User authentication routes */}
