@@ -157,16 +157,27 @@ export default function AdminMobile() {
         body: JSON.stringify({ profitLoss }),
         credentials: "include"
       });
-      if (!response.ok) throw new Error("Failed to update trade");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to update trade P&L");
+      }
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Trade P&L updated successfully!" });
+      toast({ 
+        title: "Success!", 
+        description: "Trade P&L updated successfully!",
+        variant: "default"
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/trades"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/user", selectedUser?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
     },
-    onError: () => {
-      toast({ title: "Failed to update trade P&L", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ 
+        title: "Update Failed", 
+        description: error.message,
+        variant: "destructive" 
+      });
     }
   });
 

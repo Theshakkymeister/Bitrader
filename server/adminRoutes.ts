@@ -925,4 +925,49 @@ export function registerAdminRoutes(app: Express) {
       res.status(500).json({ message: "Failed to update trade approval" });
     }
   });
+
+  // Direct trade P&L update endpoint
+  app.patch('/api/admin/trades/:tradeId/update', isAdminAuthenticated, async (req, res) => {
+    try {
+      const { tradeId } = req.params;
+      const { profitLoss } = req.body;
+      const adminId = req.adminUser.id;
+
+      if (profitLoss === undefined || profitLoss === null) {
+        return res.status(400).json({ message: "Profit/Loss value is required" });
+      }
+
+      // Get trade details
+      const trade = await storage.getTradeById(tradeId);
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+
+      // Update the trade with new P&L
+      const updatedTrade = await storage.updateTrade(tradeId, {
+        profitLoss: parseFloat(profitLoss).toFixed(2),
+        profitLossPercentage: trade.totalAmount ? ((parseFloat(profitLoss) / parseFloat(trade.totalAmount || '0')) * 100).toFixed(2) : '0.00',
+        lastUpdated: new Date()
+      });
+
+      // Log admin action
+      await logAdminActivity(
+        adminId, 
+        'UPDATE_TRADE_PL', 
+        'TRADE', 
+        tradeId, 
+        { 
+          oldProfitLoss: trade.profitLoss,
+          newProfitLoss: profitLoss,
+          symbol: trade.symbol
+        }, 
+        req
+      );
+
+      res.json(updatedTrade);
+    } catch (error) {
+      console.error("Trade P&L update error:", error);
+      res.status(500).json({ message: "Failed to update trade P&L" });
+    }
+  });
 }
