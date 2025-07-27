@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [showBalance, setShowBalance] = useState(true);
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
 
   // Real-time portfolio simulation - only when user has funds
   useEffect(() => {
@@ -47,6 +48,17 @@ export default function Dashboard() {
       return () => clearInterval(interval);
     }
   }, [portfolioValue]);
+
+  // Handle scroll to hide/show welcome message
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowWelcomeMessage(scrollY < 100); // Hide after 100px scroll
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const todayPLPercent = portfolioValue > 0 ? 1.48 : 0;
   const todayPL = portfolioValue * (todayPLPercent / 100);
@@ -431,7 +443,13 @@ export default function Dashboard() {
 
       {/* Welcome Message - Bottom Right */}
       {portfolioValue === 0 && (
-        <div className="fixed bottom-4 right-4 bg-blue-50 rounded-lg p-3 border border-blue-200 shadow-lg max-w-xs z-50">
+        <div 
+          className={`fixed bottom-4 right-4 bg-blue-50 rounded-lg p-3 border border-blue-200 shadow-lg max-w-xs z-50 transition-all duration-500 ease-in-out ${
+            showWelcomeMessage 
+              ? 'opacity-100 transform translate-y-0' 
+              : 'opacity-0 transform translate-y-4 pointer-events-none'
+          }`}
+        >
           <p className="text-xs text-blue-700 font-medium">Welcome to Live Trading!</p>
           <p className="text-xs text-blue-600 mt-1">
             Deposit funds via Wallets to start trading.
