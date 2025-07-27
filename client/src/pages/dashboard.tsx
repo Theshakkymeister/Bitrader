@@ -8,23 +8,18 @@ import { TrendingUp, TrendingDown, Plus, DollarSign, BarChart3, PieChart, Activi
 import { SiApple, SiBitcoin, SiTesla, SiGoogle, SiEthereum } from "react-icons/si";
 import { allAssets } from "@/lib/marketData";
 import { useLocation } from "wouter";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Portfolio performance data - starts at $0.00 for new users
-const portfolioData = [
-  { time: "9:30", value: 0 },
-  { time: "10:00", value: 0 },
-  { time: "10:30", value: 0 },
-  { time: "11:00", value: 0 },
-  { time: "11:30", value: 0 },
-  { time: "12:00", value: 0 },
-  { time: "12:30", value: 0 },
-  { time: "1:00", value: 0 },
-  { time: "1:30", value: 0 },
-  { time: "2:00", value: 0 },
-  { time: "2:30", value: 0 },
-  { time: "3:00", value: 0 },
-  { time: "3:30", value: 0 },
-  { time: "4:00", value: 0 }
+// Portfolio funding history - showing how money entered the account
+const portfolioChartData = [
+  { date: "Jul 20", value: 0 },
+  { date: "Jul 21", value: 1000 },  // First deposit
+  { date: "Jul 22", value: 2500 },  // Additional funds
+  { date: "Jul 23", value: 4200 },  // More funding
+  { date: "Jul 24", value: 6800 },  // Growing account
+  { date: "Jul 25", value: 8100 },  // Additional deposit
+  { date: "Jul 26", value: 8600 },  // Small addition
+  { date: "Jul 27", value: 8850 },  // Current balance
 ];
 
 export default function Dashboard() {
@@ -145,76 +140,53 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Portfolio Chart - Robinhood Style */}
-      <div className="h-48 bg-white relative overflow-hidden rounded-lg border border-gray-200 mx-2">
-        <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="portfolioGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#059669" stopOpacity="0.08"/>
-              <stop offset="50%" stopColor="#059669" stopOpacity="0.04"/>
-              <stop offset="100%" stopColor="#059669" stopOpacity="0"/>
-            </linearGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
-              <feMerge> 
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          
-          {portfolioValue > 0 ? (
-            <>
-              {/* Portfolio trend line with smooth curve */}
-              <path 
-                d="M 20,120 C 80,110 120,100 200,95 S 320,85 400,80 S 480,75 560,70" 
-                stroke="#059669" 
-                strokeWidth="2" 
-                fill="none"
-                filter="url(#glow)"
-                className="chart-line"
-                strokeDasharray="1000"
-                strokeDashoffset="0"
-                opacity="0.8"
+      {/* Portfolio Chart - Account Balance History */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mx-2">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Account Balance History</h3>
+          <div className="text-sm text-gray-500">
+            Last updated: {lastUpdate.toLocaleTimeString()}
+          </div>
+        </div>
+        
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={portfolioChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="date" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#6b7280' }}
               />
-              
-              {/* Filled area under curve */}
-              <path 
-                d="M 20,120 C 80,110 120,100 200,95 S 320,85 400,80 S 480,75 560,70 L 560,160 L 20,160 Z" 
-                fill="url(#portfolioGradient)"
-                className="chart-fill"
-                style={{ opacity: 1 }}
+              <YAxis 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(1)}K`}
+                domain={[0, 'dataMax']}
               />
-              
-              {/* Live indicator */}
-              <g className="live-dot" opacity="0.6">
-                <circle cx="560" cy="70" r="4" fill="#059669" opacity="0.1">
-                  <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite"/>
-                  <animate attributeName="opacity" values="0.1;0;0.1" dur="3s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="560" cy="70" r="2" fill="#059669" opacity="0.8">
-                  <animate attributeName="r" values="2;3;2" dur="2s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="560" cy="70" r="1.5" fill="#ffffff"/>
-              </g>
-            </>
-          ) : (
-            <>
-              {/* Flat line for empty portfolio */}
-              <path 
-                d="M 20,80 L 560,80" 
-                stroke="#9CA3AF" 
-                strokeWidth="2" 
-                fill="none"
-                opacity="0.5"
-                strokeDasharray="5,5"
+              <Tooltip 
+                formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Balance']}
+                labelStyle={{ color: '#374151' }}
+                contentStyle={{ 
+                  backgroundColor: 'white', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
               />
-              <text x="300" y="100" textAnchor="middle" className="fill-gray-400 text-sm">
-                Portfolio chart will appear after your first deposit
-              </text>
-            </>
-          )}
-        </svg>
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke="#10b981" 
+                strokeWidth={3}
+                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#ffffff' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Buying Power Display - Robinhood Style */}
