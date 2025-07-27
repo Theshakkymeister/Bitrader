@@ -251,14 +251,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserPositions(userId: string): Promise<Trade[]> {
-    return await db.select()
+    return await db.select({
+      id: trades.id,
+      userId: trades.userId,
+      symbol: trades.symbol,
+      assetType: trades.assetType,
+      type: trades.type,
+      quantity: trades.quantity,
+      price: trades.price,
+      totalAmount: trades.totalAmount,
+      profitLoss: trades.profitLoss,
+      status: trades.status,
+      executedAt: trades.executedAt,
+      createdAt: trades.createdAt,
+      updatedAt: trades.updatedAt
+    })
       .from(trades)
       .where(and(
         eq(trades.userId, userId),
-        eq(trades.status, 'executed'),
-        sql`closed_at IS NULL`
+        eq(trades.status, 'executed')
       ))
-      .orderBy(desc(trades.executedAt));
+      .orderBy(desc(trades.createdAt));
   }
 
   async getTradeById(id: string): Promise<Trade | undefined> {

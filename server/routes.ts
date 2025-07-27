@@ -15,6 +15,7 @@ import { externalAPI } from "./externalAPI";
 import { z } from "zod";
 import { insertTradeSchema, insertPerformanceMetricSchema } from "@shared/schema";
 import { initializeUserPortfolio, runSeedOperations } from "./seedData";
+import { updatePositionValues, getAllPrices, getCurrentPrice } from "./marketData";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize seed data
@@ -100,15 +101,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user trading positions
+  // Get user trading positions with real-time prices
   app.get('/api/positions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const positions = await storage.getUserPositions(userId);
-      res.json(positions);
+      
+      // Update positions with live market prices
+      const positionsWithLivePrices = updatePositionValues(positions);
+      
+      res.json(positionsWithLivePrices);
     } catch (error) {
       console.error("Error fetching positions:", error);
       res.status(500).json({ message: "Failed to fetch positions" });
+    }
+  });
+
+  // Get real-time market prices
+  app.get('/api/market-prices', async (req, res) => {
+    try {
+      const prices = getAllPrices();
+      res.json(prices);
+    } catch (error) {
+      console.error("Error fetching market prices:", error);
+      res.status(500).json({ message: "Failed to fetch market prices" });
+    }
+  });
+
+  // Get specific asset price
+  app.get('/api/market-prices/:symbol', async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      const price = getCurrentPrice(symbol.toUpperCase());
+      
+      if (!price) {
+        return res.status(404).json({ message: "Asset not found" });
+      }
+      
+      res.json(price);
+    } catch (error) {
+      console.error("Error fetching asset price:", error);
+      res.status(500).json({ message: "Failed to fetch asset price" });
     }
   });
 

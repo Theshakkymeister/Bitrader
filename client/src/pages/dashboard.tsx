@@ -46,6 +46,12 @@ export default function Dashboard() {
     refetchInterval: 5000,
   });
 
+  // Get real-time market prices
+  const { data: marketPrices = {} } = useQuery({
+    queryKey: ['/api/market-prices'],
+    refetchInterval: 3000, // Update every 3 seconds for live prices
+  });
+
   // Calculate portfolio value from wallet data since API isn't returning calculated values
   const totalWalletValue = wallets.reduce((sum, wallet) => {
     return sum + parseFloat(wallet.usdValue || '0');
@@ -77,26 +83,59 @@ export default function Dashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Calculate real-time metrics from positions data
-  const activeHoldings = positions.length;
-  const totalPositions = positions.length;
+  // Calculate real-time metrics using live market prices
+  const positionsWithLivePrices = positions.map(position => {
+    const marketPrice = marketPrices[position.symbol];
+    if (!marketPrice) return position;
+    
+    const quantity = parseFloat(position.quantity || '0');
+    const entryPrice = parseFloat(position.price || '0');
+    const currentPrice = marketPrice.price;
+    const currentValue = currentPrice * quantity;
+    
+    // Calculate profit/loss
+    let profitLoss = 0;
+    if (position.type === 'buy') {
+      profitLoss = (currentPrice - entryPrice) * quantity;
+    } else {
+      profitLoss = (entryPrice - currentPrice) * quantity;
+    }
+    
+    const profitLossPercent = entryPrice > 0 ? (profitLoss / (entryPrice * quantity)) * 100 : 0;
+    
+    return {
+      ...position,
+      currentPrice,
+      currentValue,
+      profitLoss,
+      profitLossPercent,
+      marketChange: marketPrice.change,
+      marketChangePercent: marketPrice.changePercent
+    };
+  });
+
+  const activeHoldings = positionsWithLivePrices.length;
+  const totalPositions = positionsWithLivePrices.length;
   
-  // Calculate day's P&L from current positions
-  const daysPL = positions.reduce((sum, position) => {
-    const profitLoss = parseFloat(position.profitLoss || '0');
-    return sum + profitLoss;
+  // Calculate day's P&L from live prices
+  const daysPL = positionsWithLivePrices.reduce((sum, position) => {
+    return sum + (position.profitLoss || 0);
   }, 0);
   
-  const daysPLPercent = portfolioValue > 0 ? (daysPL / portfolioValue) * 100 : 0;
+  const totalPositionValue = positionsWithLivePrices.reduce((sum, position) => {
+    return sum + (position.currentValue || 0);
+  }, 0);
+  
+  const daysPLPercent = totalPositionValue > 0 ? (daysPL / totalPositionValue) * 100 : 0;
   
   // Calculate total return (all time)
-  const totalReturn = positions.reduce((sum, position) => {
+  const totalReturn = positionsWithLivePrices.reduce((sum, position) => {
     const totalAmount = parseFloat(position.totalAmount || '0');
-    const currentValue = parseFloat(position.currentValue || totalAmount);
+    const currentValue = position.currentValue || totalAmount;
     return sum + (currentValue - totalAmount);
   }, 0);
   
-  const totalReturnPercent = portfolioValue > 0 ? (totalReturn / portfolioValue) * 100 : 0;
+  const totalReturnPercent = totalPositionValue > 0 ? (totalReturn / totalPositionValue) * 100 : 0;
   
   // Calculate diversity score based on different asset types and symbols
   const uniqueSymbols = new Set(positions.map(p => p.symbol)).size;
@@ -271,6 +310,9 @@ export default function Dashboard() {
                   <div>
                     <div className="font-medium text-gray-900">{holding.symbol}</div>
                     <div className="text-sm text-gray-500">{holding.shares?.toFixed(4)} coins</div>
+                    <div className="text-xs text-gray-400">
+                      ${holding.currentPrice?.toFixed(2)}/coin
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -279,6 +321,9 @@ export default function Dashboard() {
                   </div>
                   <div className={`text-sm ${(holding.change || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {(holding.change || 0) >= 0 ? '+' : ''}{holding.change?.toFixed(2)}%
+                  </div>
+                  <div className={`text-xs ${(holding.profitLossPercent || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    P&L: {(holding.profitLossPercent || 0) >= 0 ? '+' : ''}${(holding.profitLoss || 0).toFixed(2)}
                   </div>
                 </div>
               </div>
