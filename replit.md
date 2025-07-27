@@ -29,6 +29,10 @@ This is a full-stack AI-powered trading platform built with modern web technolog
 - Database schema alignment resolved - positions API now working with live price calculations
 - Portfolio chart visualization enhanced with properly aligned dots connected to trend lines
 - Real-time P&L calculations using live market prices for all stock and crypto positions
+- **LATEST: Mobile-Friendly Admin Dashboard**: Restored mobile-optimized admin interface with profit tracking
+- Admin can view real user trade data, approve trades, and adjust user balances
+- Mobile-first design with touch-friendly interface and auto-authentication
+- Complete trade management system with P&L calculations and approval workflows
 - System fully tested with authentic database integration and ready for deployment
 
 ## User Preferences
