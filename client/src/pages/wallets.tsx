@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, 
@@ -38,6 +40,12 @@ export default function Wallets() {
   const [showAddresses, setShowAddresses] = useState<{[key: string]: boolean}>({});
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [connectingWallet, setConnectingWallet] = useState<string | null>(null);
+  const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [receiveModalOpen, setReceiveModalOpen] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<WalletData | null>(null);
+  const [sendAmount, setSendAmount] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState("");
   const { toast } = useToast();
 
   // Get current prices from market data
@@ -231,6 +239,69 @@ export default function Wallets() {
   const formatAddress = (address: string, show: boolean) => {
     if (!show) return "••••••••••••••••••••••••••••••••••••••••";
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
+  };
+
+  const handleSend = (wallet: WalletData) => {
+    setSelectedWallet(wallet);
+    setSendModalOpen(true);
+  };
+
+  const handleReceive = (wallet: WalletData) => {
+    setSelectedWallet(wallet);
+    setReceiveModalOpen(true);
+  };
+
+  const handleQrCode = (wallet: WalletData) => {
+    setSelectedWallet(wallet);
+    setQrModalOpen(true);
+  };
+
+  const executeSend = () => {
+    if (!selectedWallet || !sendAmount || !recipientAddress) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate send transaction
+    toast({
+      title: "Transaction Submitted",
+      description: `Sending ${sendAmount} ${selectedWallet.symbol} to ${recipientAddress.slice(0, 8)}...`,
+      variant: "default"
+    });
+
+    // Reset form and close modal
+    setSendAmount("");
+    setRecipientAddress("");
+    setSendModalOpen(false);
+  };
+
+  const generateQRCode = (address: string) => {
+    // Simple QR code representation using characters
+    const qrPattern = [
+      "██████████████████████████████",
+      "██  ██    ████    ██  ████  ██",
+      "██  ██████  ████████  ██████████",
+      "██    ██  ██    ████    ██  ██",
+      "██████  ████████  ██████████████",
+      "██    ████    ██████    ██  ██",
+      "██████████████████████████████",
+      "        ██████████████        ",
+      "██████    ██    ████    ██████",
+      "██  ████████████  ██████  ████",
+      "██████  ██    ████    ████  ██",
+      "██    ████████  ██████████████",
+      "██████████████████████████████"
+    ];
+    
+    return qrPattern.map((row, i) => (
+      <div key={i} className="font-mono text-xs leading-none">
+        {row}
+      </div>
+    ));
   };
 
   return (
@@ -511,15 +582,30 @@ export default function Wallets() {
 
               {/* Action Buttons */}
               <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center space-x-1"
+                  onClick={() => handleSend(wallet)}
+                >
                   <Send className="h-4 w-4" />
                   <span>Send</span>
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center space-x-1"
+                  onClick={() => handleReceive(wallet)}
+                >
                   <Download className="h-4 w-4" />
                   <span>Receive</span>
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center space-x-1"
+                  onClick={() => handleQrCode(wallet)}
+                >
                   <QrCode className="h-4 w-4" />
                   <span>QR</span>
                 </Button>
@@ -528,6 +614,171 @@ export default function Wallets() {
           </Card>
         ))}
       </div>
+
+      {/* Send Modal */}
+      <Dialog open={sendModalOpen} onOpenChange={setSendModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Send className="h-5 w-5 text-blue-600" />
+              <span>Send {selectedWallet?.symbol}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Send {selectedWallet?.name} to another wallet address
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="recipient">Recipient Address</Label>
+              <Input
+                id="recipient"
+                value={recipientAddress}
+                onChange={(e) => setRecipientAddress(e.target.value)}
+                placeholder="Enter wallet address..."
+                className="font-mono text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <div className="relative">
+                <Input
+                  id="amount"
+                  type="number"
+                  value={sendAmount}
+                  onChange={(e) => setSendAmount(e.target.value)}
+                  placeholder="0.0000"
+                  step="0.0001"
+                  min="0"
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                  {selectedWallet?.symbol}
+                </div>
+              </div>
+            </div>
+            <div className="bg-yellow-50 p-3 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                <AlertCircle className="h-4 w-4 inline mr-1" />
+                Transactions cannot be reversed. Please verify the recipient address carefully.
+              </p>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setSendModalOpen(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={executeSend}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                Send {selectedWallet?.symbol}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Modal */}
+      <Dialog open={receiveModalOpen} onOpenChange={setReceiveModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Download className="h-5 w-5 text-green-600" />
+              <span>Receive {selectedWallet?.symbol}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Share this address to receive {selectedWallet?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Your {selectedWallet?.symbol} Address</Label>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <code className="text-sm font-mono break-all">
+                  {selectedWallet?.address}
+                </code>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => copyAddress(selectedWallet?.address || "")}
+                className="flex-1"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Address
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setReceiveModalOpen(false);
+                  handleQrCode(selectedWallet!);
+                }}
+                className="flex-1"
+              >
+                <QrCode className="h-4 w-4 mr-2" />
+                Show QR Code
+              </Button>
+            </div>
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <CheckCircle className="h-4 w-4 inline mr-1" />
+                Only send {selectedWallet?.symbol} to this address. Sending other currencies may result in permanent loss.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* QR Code Modal */}
+      <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <QrCode className="h-5 w-5 text-purple-600" />
+              <span>{selectedWallet?.symbol} QR Code</span>
+            </DialogTitle>
+            <DialogDescription>
+              Scan this QR code to get the wallet address
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
+                <div className="text-center space-y-2">
+                  {generateQRCode(selectedWallet?.address || "")}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Wallet Address</Label>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <code className="text-xs font-mono break-all">
+                  {selectedWallet?.address}
+                </code>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => copyAddress(selectedWallet?.address || "")}
+                className="flex-1"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Address
+              </Button>
+              <Button
+                onClick={() => setQrModalOpen(false)}
+                className="flex-1"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
