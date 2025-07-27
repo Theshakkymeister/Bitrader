@@ -152,18 +152,18 @@ export default function Dashboard() {
         <div className="h-64 relative">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={portfolioChartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="date" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+                tick={false}
+                hide={true}
               />
               <YAxis 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(1)}K`}
+                tick={false}
+                hide={true}
                 domain={[0, 'dataMax']}
               />
               <Tooltip 
