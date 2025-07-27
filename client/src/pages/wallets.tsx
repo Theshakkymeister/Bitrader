@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, 
@@ -14,7 +15,8 @@ import {
   EyeOff,
   CheckCircle,
   AlertCircle,
-  QrCode
+  QrCode,
+  X
 } from "lucide-react";
 import { SiBitcoin, SiEthereum } from "react-icons/si";
 import { allAssets } from "@/lib/marketData";
@@ -34,6 +36,8 @@ export default function Wallets() {
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
   const [showBalances, setShowBalances] = useState(true);
   const [showAddresses, setShowAddresses] = useState<{[key: string]: boolean}>({});
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [connectingWallet, setConnectingWallet] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Get current prices from market data
@@ -42,32 +46,33 @@ export default function Wallets() {
     return asset ? asset.price : 0;
   };
 
+  // Wallet data with $0.00 values for new users without deposits
   const wallets: WalletData[] = [
     {
       symbol: "BTC",
       name: "Bitcoin",
-      balance: 0.2567,
-      usdValue: 0.2567 * getAssetPrice("BTC"),
+      balance: 0.00,
+      usdValue: 0.00,
       address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
       icon: SiBitcoin,
       color: "text-orange-500",
-      change24h: 2.34
+      change24h: 0.00
     },
     {
-      symbol: "ETH",
+      symbol: "ETH", 
       name: "Ethereum",
-      balance: 1.8934,
-      usdValue: 1.8934 * getAssetPrice("ETH"),
+      balance: 0.00,
+      usdValue: 0.00,
       address: "0x742d35Cc6C4C8532DC6efB5b9e3B4a8b5d73f123",
       icon: SiEthereum,
       color: "text-blue-500",
-      change24h: 1.87
+      change24h: 0.00
     },
     {
       symbol: "USDT",
       name: "Tether USD",
-      balance: 5420.50,
-      usdValue: 5420.50,
+      balance: 0.00,
+      usdValue: 0.00,
       address: "0x742d35Cc6C4C8532DC6efB5b9e3B4a8b5d73f456",
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-green-500 rounded-full flex items-center justify-center text-white font-bold`}>
@@ -75,13 +80,13 @@ export default function Wallets() {
         </div>
       ),
       color: "text-green-500",
-      change24h: 0.01
+      change24h: 0.00
     },
     {
       symbol: "SOL",
       name: "Solana",
-      balance: 45.67,
-      usdValue: 45.67 * getAssetPrice("SOL"),
+      balance: 0.00,
+      usdValue: 0.00,
       address: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-purple-500 rounded-full flex items-center justify-center text-white font-bold`}>
@@ -89,13 +94,13 @@ export default function Wallets() {
         </div>
       ),
       color: "text-purple-500",
-      change24h: 4.23
+      change24h: 0.00
     },
     {
       symbol: "USDC",
       name: "USD Coin",
-      balance: 2130.25,
-      usdValue: 2130.25,
+      balance: 0.00,
+      usdValue: 0.00,
       address: "0x742d35Cc6C4C8532DC6efB5b9e3B4a8b5d73f789",
       icon: ({ className }: { className: string }) => (
         <div className={`${className} bg-blue-600 rounded-full flex items-center justify-center text-white font-bold`}>
@@ -103,7 +108,7 @@ export default function Wallets() {
         </div>
       ),
       color: "text-blue-600",
-      change24h: 0.02
+      change24h: 0.00
     }
   ];
 
@@ -183,6 +188,12 @@ export default function Wallets() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setConnectedWallets(prev => [...prev, walletType]);
       
+      toast({
+        title: "Wallet Connected",
+        description: `${walletType} has been successfully connected to your account`,
+        variant: "default"
+      });
+      
     } catch (error) {
       toast({
         title: "Connection Failed",
@@ -251,8 +262,8 @@ export default function Wallets() {
           <div className="text-3xl font-bold text-gray-900">
             {showBalances ? `$${totalValue.toLocaleString('en-US', {minimumFractionDigits: 2})}` : "••••••••"}
           </div>
-          <div className="text-sm text-green-600 mt-1">
-            +$234.56 (+2.87%) in the last 24h
+          <div className="text-sm text-gray-500 mt-1">
+            No deposits yet - Connect wallets to add funds
           </div>
         </CardContent>
       </Card>
@@ -304,13 +315,48 @@ export default function Wallets() {
                   Disconnect
                 </Button>
               ) : (
-                <Button 
-                  onClick={() => handleConnectWallet("Trust Wallet")}
-                  className="w-full"
-                  size="sm"
-                >
-                  Connect Trust Wallet
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full" size="sm">
+                      Connect Trust Wallet
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center space-x-2">
+                        <Wallet className="h-5 w-5 text-blue-600" />
+                        <span>Connect Trust Wallet</span>
+                      </DialogTitle>
+                      <DialogDescription>
+                        Connect your Trust Wallet to sync your cryptocurrency balances and manage your assets.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="border rounded-lg p-4 bg-blue-50">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <Wallet className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Trust Wallet</div>
+                            <div className="text-sm text-gray-600">Mobile crypto wallet with 70M+ users</div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-4">
+                          Trust Wallet is a secure mobile wallet that supports 4.5+ million assets across 100+ blockchains.
+                        </div>
+                        <Button 
+                          onClick={() => handleConnectWallet("Trust Wallet")}
+                          className="w-full"
+                          size="sm"
+                        >
+                          <LinkIcon className="h-4 w-4 mr-2" />
+                          Connect Trust Wallet
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               )}
             </div>
 
@@ -348,13 +394,50 @@ export default function Wallets() {
                   Disconnect
                 </Button>
               ) : (
-                <Button 
-                  onClick={() => handleConnectWallet("Coinbase Wallet")}
-                  className="w-full"
-                  size="sm"
-                >
-                  Connect Coinbase Wallet
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full" size="sm">
+                      Connect Coinbase Wallet
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center space-x-2">
+                        <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center">
+                          <span className="text-white font-bold text-xs">CB</span>
+                        </div>
+                        <span>Connect Coinbase Wallet</span>
+                      </DialogTitle>
+                      <DialogDescription>
+                        Connect your Coinbase Wallet to sync your cryptocurrency balances and manage your assets.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="border rounded-lg p-4 bg-blue-50">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <div className="text-white font-bold">CB</div>
+                          </div>
+                          <div>
+                            <div className="font-medium">Coinbase Wallet</div>
+                            <div className="text-sm text-gray-600">Self-custody wallet by Coinbase</div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-4">
+                          Coinbase Wallet is a self-custody wallet that gives you complete control of your crypto, NFTs, and DeFi activity.
+                        </div>
+                        <Button 
+                          onClick={() => handleConnectWallet("Coinbase Wallet")}
+                          className="w-full"
+                          size="sm"
+                        >
+                          <LinkIcon className="h-4 w-4 mr-2" />
+                          Connect Coinbase Wallet
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               )}
             </div>
           </div>
