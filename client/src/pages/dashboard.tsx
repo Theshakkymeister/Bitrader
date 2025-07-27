@@ -29,11 +29,24 @@ const portfolioData = [
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const [balance, setBalance] = useState(0.00);
   const [showBalance, setShowBalance] = useState(true);
-  const [portfolioValue, setPortfolioValue] = useState(0);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
+
+  // Get real-time portfolio data
+  const { data: portfolio } = useQuery({
+    queryKey: ['/api/portfolio'],
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
+  // Get user wallets data
+  const { data: wallets = [] } = useQuery({
+    queryKey: ['/api/wallets'],
+    refetchInterval: 5000,
+  });
+
+  const portfolioValue = portfolio?.totalValue || 0;
+  const balance = portfolio?.totalBalance || 0;
 
   // Real-time portfolio simulation - only when user has funds
   useEffect(() => {
@@ -62,17 +75,22 @@ export default function Dashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const todayPLPercent = portfolioValue > 0 ? 1.48 : 0;
+  const todayPLPercent = portfolio?.todayPL || 0;
   const todayPL = portfolioValue * (todayPLPercent / 100);
 
-  // Holdings data - $0.00 until deposits are made and approved
+  // Holdings data - Real data from portfolio
   const getHolding = (symbol: string, shares: number) => {
     const asset = allAssets.find(a => a.symbol === symbol);
     if (!asset) return null;
+    
+    // Find actual wallet balance if it's a crypto
+    const wallet = wallets.find((w: any) => w.symbol === symbol);
+    const actualValue = wallet ? parseFloat(wallet.usdValue || '0') : 0;
+    
     return {
       ...asset,
-      shares: 0, // No shares until deposits approved
-      value: 0.00 // $0.00 until deposits approved
+      shares: wallet ? parseFloat(wallet.balance || '0') : 0,
+      value: actualValue
     };
   };
 

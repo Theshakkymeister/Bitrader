@@ -225,6 +225,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User portfolio - REAL DATA with calculated total value
+  app.get('/api/portfolio', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const portfolio = await storage.getPortfolio(userId);
+      
+      // Get user wallets for total value calculation
+      const wallets = await storage.getUserWallets(userId);
+      const stockHoldings = await storage.getUserStockHoldings(userId);
+      
+      // Calculate real-time total value from wallets + stock holdings
+      const totalWalletValue = wallets.reduce((sum, wallet) => {
+        return sum + parseFloat(wallet.usdValue?.toString() || '0');
+      }, 0);
+      
+      const totalStockValue = stockHoldings.reduce((sum, holding) => {
+        return sum + parseFloat(holding.marketValue?.toString() || '0');
+      }, 0);
+      
+      const totalValue = totalWalletValue + totalStockValue;
+      
+      // Enhance portfolio with calculated values
+      const enhancedPortfolio = portfolio ? {
+        ...portfolio,
+        totalBalance: parseFloat(portfolio.totalBalance?.toString() || '0'),
+        totalProfitLoss: parseFloat(portfolio.totalProfitLoss?.toString() || '0'),
+        todayPL: parseFloat(portfolio.todayPL?.toString() || '0'),
+        winRate: parseFloat(portfolio.winRate?.toString() || '0'),
+        totalValue: totalValue,
+        walletValue: totalWalletValue,
+        stockValue: totalStockValue
+      } : {
+        totalBalance: 0,
+        totalProfitLoss: 0,
+        todayPL: 0,
+        winRate: 0,
+        totalValue: totalValue,
+        walletValue: totalWalletValue,
+        stockValue: totalStockValue,
+        activeAlgorithms: 0
+      };
+      
+      res.json(enhancedPortfolio);
+    } catch (error) {
+      console.error("Error fetching portfolio:", error);
+      res.status(500).json({ message: "Failed to fetch portfolio" });
+    }
+  });
+
   // Trading algorithms
   app.get('/api/algorithms', isAuthenticated, async (req, res) => {
     try {
