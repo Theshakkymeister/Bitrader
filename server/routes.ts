@@ -369,6 +369,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/trades', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log("Creating trade for user:", userId);
+      console.log("Request body:", req.body);
       
       // Extract only the fields that exist in the database schema
       const tradeData = {
@@ -388,11 +390,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isOpen: true
       };
       
+      console.log("Trade data to insert:", tradeData);
       const trade = await storage.createTrade(tradeData);
+      console.log("Trade created successfully:", trade);
       res.json(trade);
     } catch (error) {
-      console.error("Error creating trade:", error);
-      res.status(500).json({ message: "Failed to create trade" });
+      console.error("Error creating trade - Full error:", error);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ message: "Failed to create trade", error: error.message });
     }
   });
 
