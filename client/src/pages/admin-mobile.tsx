@@ -578,11 +578,38 @@ export default function AdminMobile() {
                           className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl shadow-md"
                         >
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-semibold">${deposit.amount}</p>
-                              <p className="text-sm text-gray-600">{deposit.cryptocurrency}</p>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-1">
+                                <p className="font-semibold text-lg">
+                                  ${parseFloat(deposit.usdValue || deposit.amount || '0').toLocaleString('en-US', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 2
+                                  })}
+                                </p>
+                                <Badge className="bg-orange-100 text-orange-800 font-semibold">
+                                  {deposit.cryptoSymbol || deposit.cryptocurrency}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600">
+                                {parseFloat(deposit.amount || '0').toFixed(
+                                  deposit.cryptoSymbol === 'BTC' ? 8 : 
+                                  deposit.cryptoSymbol === 'ETH' ? 6 : 2
+                                )} {deposit.cryptoSymbol || deposit.cryptocurrency}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {new Date(deposit.createdAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
                             </div>
-                            <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+                            <Badge variant="outline" className={`${
+                              deposit.status === 'approved' ? 'bg-green-100 text-green-800' :
+                              deposit.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
                               {deposit.status}
                             </Badge>
                           </div>
