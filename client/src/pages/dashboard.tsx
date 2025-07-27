@@ -122,21 +122,9 @@ export default function Dashboard() {
               ${portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </div>
             <div className="flex items-center text-sm space-x-4">
-              {portfolioValue > 0 ? (
-                <>
-                  <div className="flex items-center">
-                    <span className={`font-medium ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {todayPL >= 0 ? '+' : ''}${todayPL.toLocaleString('en-US', {minimumFractionDigits: 2})}
-                    </span>
-                    <span className={`ml-1 ${todayPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ({todayPL >= 0 ? '+' : ''}{todayPLPercent}%) Today
-                    </span>
-                  </div>
-                  <div className="text-gray-600">
-                    All Time: <span className="text-green-600 font-medium">+$0.00 (+0.00%)</span>
-                  </div>
-                </>
-              ) : null}
+              <div className="text-gray-600">
+                Portfolio ready for trading
+              </div>
             </div>
           </div>
           <div className="text-right">
